@@ -28,6 +28,10 @@ local.properties
 # PDT-specific
 .buildpath
 
+#####################
+## cocos2d-x project
+#####################
+[Dd]ebug*/
 
 #################
 ## Visual Studio
