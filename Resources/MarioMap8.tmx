@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="160" height="14" tilewidth="16" tileheight="16">
+ <tileset firstgid="1" name="superMarioMap" tilewidth="16" tileheight="16" spacing="1" margin="1">
+  <image source="superMarioMap.png" width="511" height="511"/>
+  <tile id="0">
+   <properties>
+    <property name="blockType" value="2"/>
+   </properties>
+  </tile>
+  <tile id="600">
+   <properties>
+    <property name="blockType" value="1"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="background" width="160" height="14">
+  <data encoding="base64" compression="zlib">
+   eJztwwEJAAAMA6DBC65/muU4KNhLqqqqqqqqqqqqTw/+Y9Zf
+  </data>
+ </layer>
+ <layer name="flagpole" width="160" height="14">
+  <data encoding="base64" compression="zlib">
+   eJztzgEJAAAIA7CDBe2fxhgqbAmWAAAAAABXdG0PAAAA4J8BGjgAVA==
+  </data>
+ </layer>
+ <layer name="land" width="160" height="14">
+  <data encoding="base64" compression="zlib">
+   eJztlksOgCAMBWHlCfT+d/FibpUYoYVaPjPJiwuNPujEEAKAHxshk0aDd2fpGnLPlNxvvYeS79S+yxL8swf/bOi5G9Qxgn8AJeAyePL3eQfgjseZu7RHD4EnZ2y7P9qZpD1K57gl15oeK0RCbt/T7FGeYwL/3rp7z7nXSJD6p2GG/x/+4d9XL/xbIxqkc7fqjX/jR0Nr/y5tQCNr
+  </data>
+ </layer>
+ <layer name="block" width="160" height="14">
+  <data encoding="base64" compression="zlib">
+   eJzt1rEJACAMBMDgIs7l/ou4QUAEiXrX5ovAp0gEAMBd+uacWlb7WslnWXfylqzP0Y6tAQBAAX59AAD40wQttAFU
+  </data>
+ </layer>
+ <layer name="trap" width="160" height="14">
+  <data encoding="base64" compression="zlib">
+   eJzt0rEJwDAMBEB7huw/pnoXiSGFU8iYqLmDbwRSIb41AAAAAAAAoFI8gQpXv5Ox6mx8zPlHbKbaTv9WO3OWvcUZ7/9nctIAM2gV5g==
+  </data>
+ </layer>
+ <layer name="cloud" width="160" height="14">
+  <data encoding="base64" compression="zlib">
+   eJztzDENAAAIA7AlGMS/GjCxrxXQpGenmAMAAAAAAAAAwDtezgBU
+  </data>
+ </layer>
+ <layer name="mountain" width="160" height="14">
+  <data encoding="base64" compression="zlib">
+   eJztzrENACAMA8FIWZD9F4EyLJCGgjR30td2xH8rB0YBAAAAAGjt25k+AQAA8KgAIokCQw==
+  </data>
+ </layer>
+ <layer name="pipe" width="160" height="14">
+  <data encoding="base64" compression="zlib">
+   eJztzkEJAAAIBLAD+9r/aQwVtgRL7ujaHgAAAAAAAAAA8M0AWRIAcg==
+  </data>
+ </layer>
+ <layer name="coin" width="160" height="14">
+  <data encoding="base64" compression="zlib">
+   eJzt0qEKACAMRdHh/1f/1yCCYTDDguEcGIybXwQAAAAAMMe+qkG3e2Pnzxp0y7b12gAA4DcL558Gfg==
+  </data>
+ </layer>
+ <objectgroup name="objects" width="160" height="14">
+  <object name="enemy" type="fire_string" x="360" y="72">
+   <properties>
+    <property name="begAngle" value="90"/>
+    <property name="time" value="4"/>
+   </properties>
+  </object>
+  <object name="enemy" type="fire_string" x="472" y="136">
+   <properties>
+    <property name="begAngle" value="0"/>
+    <property name="time" value="2"/>
+   </properties>
+  </object>
+  <object name="enemy" type="fire_string" x="584" y="56">
+   <properties>
+    <property name="begAngle" value="0"/>
+    <property name="time" value="4"/>
+   </properties>
+  </object>
+  <object name="enemy" type="fire_string" x="776" y="56">
+   <properties>
+    <property name="begAngle" value="180"/>
+    <property name="time" value="4"/>
+   </properties>
+  </object>
+  <object name="enemy" type="fire_string" x="952" y="56">
+   <properties>
+    <property name="begAngle" value="90"/>
+    <property name="time" value="2"/>
+   </properties>
+  </object>
+  <object name="enemy" type="fire_string" x="1064" y="56">
+   <properties>
+    <property name="begAngle" value="270"/>
+    <property name="time" value="4"/>
+   </properties>
+  </object>
+  <object name="enemy" type="fire_string" x="1288" y="40">
+   <properties>
+    <property name="begAngle" value="180"/>
+    <property name="time" value="6"/>
+   </properties>
+  </object>
+  <object name="enemy" type="fire_string" x="1416" y="40">
+   <properties>
+    <property name="begAngle" value="0"/>
+    <property name="time" value="5"/>
+   </properties>
+  </object>
+  <object name="others" type="BirthPoint" x="16" y="80"/>
+  <object name="mushroom" type="MushroomReward" x="464" y="80"/>
+  <object name="enemy" type="boss" x="2160" y="128"/>
+  <object name="others" type="finalpoint" x="2448" y="176"/>
+  <object name="others" type="flagpoint" x="2248" y="112"/>
+  <object name="others" type="bridgestartpos" x="2032" y="144"/>
+  <object name="enemy" type="battery" x="1760" y="176">
+   <properties>
+    <property name="delay" value="1.5"/>
+   </properties>
+  </object>
+  <object name="enemy" type="battery" x="1248" y="128">
+   <properties>
+    <property name="delay" value="1.5"/>
+   </properties>
+  </object>
+  <object name="enemy" type="battery" x="1456" y="128">
+   <properties>
+    <property name="delay" value="2"/>
+   </properties>
+  </object>
+ </objectgroup>
+</map>

@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="228" height="14" tilewidth="16" tileheight="16">
+ <tileset firstgid="1" name="superMarioMap" tilewidth="16" tileheight="16" spacing="1" margin="1">
+  <image source="superMarioMap.png" width="511" height="511"/>
+  <tile id="0">
+   <properties>
+    <property name="blockType" value="2"/>
+    <property name="collisionType" value="1"/>
+   </properties>
+  </tile>
+  <tile id="28">
+   <properties>
+    <property name="collisionType" value="2"/>
+   </properties>
+  </tile>
+  <tile id="29">
+   <properties>
+    <property name="collisionType" value="2"/>
+   </properties>
+  </tile>
+  <tile id="30">
+   <properties>
+    <property name="blockType" value="3"/>
+    <property name="collisionType" value="1"/>
+   </properties>
+  </tile>
+  <tile id="58">
+   <properties>
+    <property name="collisionType" value="2"/>
+   </properties>
+  </tile>
+  <tile id="59">
+   <properties>
+    <property name="collisionType" value="2"/>
+   </properties>
+  </tile>
+  <tile id="90">
+   <properties>
+    <property name="blockType" value="2"/>
+    <property name="collisionType" value="1"/>
+   </properties>
+  </tile>
+  <tile id="91">
+   <properties>
+    <property name="collisionType" value="1"/>
+   </properties>
+  </tile>
+  <tile id="120">
+   <properties>
+    <property name="collisionType" value="0"/>
+   </properties>
+  </tile>
+  <tile id="121">
+   <properties>
+    <property name="collisionType" value="0"/>
+   </properties>
+  </tile>
+  <tile id="150">
+   <properties>
+    <property name="collisionType" value="1"/>
+   </properties>
+  </tile>
+  <tile id="600">
+   <properties>
+    <property name="blockType" value="1"/>
+    <property name="collisionType" value="1"/>
+   </properties>
+  </tile>
+  <tile id="845">
+   <properties>
+    <property name="blockType" value="3"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="background" width="228" height="14">
+  <data encoding="base64" compression="zlib">
+   eJzt07EJwDAQwEBD5rP3HydDfMAiXHG9Gu1nrQ184gzd7oc/8SN0+BE6/AgdfoQOP0KHH6HDj9DhR+jwI3T4ETr8CB1+hI7pjy8Tu+aO
+  </data>
+ </layer>
+ <layer name="cloud" width="228" height="14">
+  <data encoding="base64" compression="zlib">
+   eJzt1NkNwjAAREFXyg1VcAUonKUBIIqTYDQjvW+vrMSlAPyefTrMPWKAGvsXaZlWg9fQgnXapt1E5/X5Ru/pMeKWsX3a/7r7TXl//8d0SudKm2q+cd/sp59r6tJtovNa/8dqupS273+O/QAAAAAAAAAAwP94ApqdE6A=
+  </data>
+ </layer>
+ <layer name="mountain" width="228" height="14">
+  <data encoding="base64" compression="zlib">
+   eJzt1ztSwgAYReGMFcguEBF2QBkVpFQXIu6D1zrwsQ4FF+Bb1+LJDIVFQsiEJBTnmzkNMHBT/AVBIEmSJEmSJEmStN96B1UvkBS55Bav6NqblCp3wx2O6DblHmtUp0NqlLBr19xfLfenG3ODE5rSjOYJN3lMbTqhDnUz/k6TjqiVY2se7nd/HmXtX3B/d3RPD/SYcI/n1KcBXdBww3e+0wd90tf6tZBO6Szm86/0lrJzG9/0Q78x77m/+P2RpGfIsj9OGJSzP0mR+/974v6eaUkrevE/pCRJW/sD0bc2Zg==
+  </data>
+ </layer>
+ <layer name="land" width="228" height="14">
+  <data encoding="base64" compression="zlib">
+   eJzt0CEOACAQA8H7Nr9HoTAkNCdgJllb0SoAAAAAAAAAAAAA6DO0lfjGx9k/9W9LYuN254X8cN4E9hDQ6w==
+  </data>
+ </layer>
+ <layer name="flagpole" width="228" height="14">
+  <data encoding="base64" compression="zlib">
+   eJzt0zENACAAwDDwbwlhnFxoYCGtgj0bAwD+s+brAuDafoQMP0KHH6HDj9DhR+jwI3T4ETr8CB1+BADgZwd8ygl/
+  </data>
+ </layer>
+ <layer name="pipe" width="228" height="14">
+  <data encoding="base64" compression="zlib">
+   eJzt1rENQCEIBUAX0UX+338u7S3EGBu5S+gIDXmBUgAAAAAAAAByq6PahV5gtsrQN+oPztrphUyit2qVIXl8z+kf4w/aF82GPOZzuid7BoA3deOWBoA=
+  </data>
+ </layer>
+ <layer name="block" width="228" height="14">
+  <data encoding="base64" compression="zlib">
+   eJzt2VsKwjAQheFU9+CyfHdlWYyb88VCCTO5jCXNwf+DoshUxzAnGEwJAIA1vberOwAAqMrfCxpet6s7mGNrXF7tL+szeq/XType6/2ZlpNuHlX7Biw56eZRtW/AUmZRaa5V+wYsVhZV5lq174jyLLOfjY6Pq3vex+rP+G7evd4577jO3vOe9x/5zJ2XxdZclzWRHBzP25H1Vt5HgFIti7W5tmpmZyG6jwAramXRm2uvZmYeovsIsKKeLFpzXauZlYnoPnKGx5/8zwcAwEwfeqhNIw==
+  </data>
+ </layer>
+ <layer name="trap" width="228" height="14">
+  <data encoding="base64" compression="zlib">
+   eJzt0DEKADAIBEEhz/X/vUg+IJgqzMC1W1wEAAAAAAAAAAAAAADQ8ty9aGw7P/DDXAEqHQMD
+  </data>
+ </layer>
+ <layer name="coin" width="228" height="14">
+  <data encoding="base64" compression="zlib">
+   eJzt2CESwCAMRUGG+9veF0lFWiIaitidifn+mbQGAGRdfV5mB2pEDb7tQJ2os+wGfCvbmR5hj1VrWoS9nprTIvzj/kv1V4Uz6BAAAADgDAOuzg4p
+  </data>
+ </layer>
+ <objectgroup name="objects" width="228" height="14">
+  <object name="enemy" type="tortoise" x="848" y="176"/>
+  <object name="enemy" type="mushroom" x="1560" y="176"/>
+  <object name="enemy" type="mushroom" x="1584" y="176"/>
+  <object name="enemy" type="mushroom" x="1832" y="176"/>
+  <object name="enemy" type="mushroom" x="1856" y="176"/>
+  <object name="enemy" type="mushroom" x="1992" y="176"/>
+  <object name="enemy" type="mushroom" x="2016" y="176"/>
+  <object name="enemy" type="mushroom" x="2056" y="176"/>
+  <object name="enemy" type="mushroom" x="2080" y="176"/>
+  <object name="enemy" type="tortoise" x="1720" y="176"/>
+  <object name="enemy" type="flower" x="752" y="112"/>
+  <object x="336" y="128"/>
+  <object x="336" y="128"/>
+  <object x="336" y="128"/>
+  <object name="mushroom" type="MushroomReward" x="336" y="128">
+   <properties>
+    <property name="isMushroomReward" value="1"/>
+   </properties>
+  </object>
+  <object name="mushroom" type="MushroomAddLife" x="1040" y="128"/>
+  <object name="others" type="BirthPoint" x="32" y="176"/>
+  <object name="mushroom" type="MushroomReward" x="1248" y="128"/>
+  <object name="others" type="flagpoint" x="3392" y="32"/>
+  <object name="others" type="finalpoint" x="3528" y="176"/>
+  <object name="enemy" type="addmushroom" x="464" y="160">
+   <properties>
+    <property name="nums" value="4"/>
+   </properties>
+  </object>
+  <object name="enemy" type="darkcloud" x="320" y="32">
+   <properties>
+    <property name="delay" value="1"/>
+    <property name="style" value="0"/>
+   </properties>
+  </object>
+  <object name="enemy" type="darkcloud" x="600" y="32">
+   <properties>
+    <property name="delay" value="1.5"/>
+    <property name="style" value="1"/>
+   </properties>
+  </object>
+  <object name="enemy" type="darkcloud" x="1216" y="40">
+   <properties>
+    <property name="delay" value="1"/>
+    <property name="style" value="2"/>
+   </properties>
+  </object>
+  <object name="enemy" type="darkcloud" x="1368" y="32">
+   <properties>
+    <property name="delay" value="1.5"/>
+    <property name="style" value="1"/>
+   </properties>
+  </object>
+  <object name="enemy" type="darkcloud" x="1680" y="48">
+   <properties>
+    <property name="delay" value="1"/>
+    <property name="style" value="0"/>
+   </properties>
+  </object>
+  <object name="enemy" type="darkcloud" x="2624" y="32">
+   <properties>
+    <property name="delay" value="1"/>
+    <property name="style" value="0"/>
+   </properties>
+  </object>
+  <object name="enemy" type="addmushroom" x="464" y="160">
+   <properties>
+    <property name="nums" value="6"/>
+   </properties>
+  </object>
+  <object name="enemy" type="addmushroom" x="2880" y="160">
+   <properties>
+    <property name="nums" value="4"/>
+   </properties>
+  </object>
+  <object name="enemy" type="darkcloud" x="3216" y="48">
+   <properties>
+    <property name="delay" value="0.8"/>
+    <property name="style" value="0"/>
+   </properties>
+  </object>
+  <object name="enemy" type="darkcloud" x="2912" y="32">
+   <properties>
+    <property name="delay" value="1"/>
+    <property name="style" value="1"/>
+   </properties>
+  </object>
+ </objectgroup>
+</map>

@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="238" height="14" tilewidth="16" tileheight="16">
+ <tileset firstgid="1" name="superMarioMap" tilewidth="16" tileheight="16" spacing="1" margin="1">
+  <image source="superMarioMap.png" width="511" height="511"/>
+  <tile id="0">
+   <properties>
+    <property name="blockType" value="2"/>
+   </properties>
+  </tile>
+  <tile id="600">
+   <properties>
+    <property name="blockType" value="1"/>
+   </properties>
+  </tile>
+  <tile id="845">
+   <properties>
+    <property name="blockType" value="3"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="background" width="238" height="14">
+  <data encoding="base64" compression="zlib">
+   eJztwwEJAAAMA6DB+61/nOU4KNhLqqqqqqqqqqqqqqqqqr44bIoegQ==
+  </data>
+ </layer>
+ <layer name="cloud" width="238" height="14">
+  <data encoding="base64" compression="zlib">
+   eJzt2LENgDAMBdFMCjQwBdDA4LikQyEOPyb3JLfxyRUiJQC9GmxGm0nc8Rb9WvRrdq82m83uGZSJfvpLRO1v4XYl6NeiHwDimW0WdUQB+rWi93v46gb3PYfNWeHdmuh/fremP/V78LyBYg/92j30t7UHAAC0Kfr/Avq1vPpVd4h6/+jf8PRrefWr7hD9/gAA9OQCLKE+MQ==
+  </data>
+ </layer>
+ <layer name="mountain" width="238" height="14">
+  <data encoding="base64" compression="zlib">
+   eJzt2EsKwjAUheGYBfpah4+uI62uo1bXEaur8gQaSGsHDoRE+T84XMgokwOXawwAAPiGlTVmrWxs7p8A+NRefT0oR3oL/ASnrtZKo5yUM90FiteqpxelU67Kjd4CxfPq6V3plYfypLdAsdywE9czCe9u6O/Sju9WW3oNZBP245huMmOCnR3frSp6C2QT9uOYPpnT3nK3AsqR9radmbG33K2AcqQ7sp/M2N+AuxVQjrkdOZ2efgJ/rVq8B0A+L745Qg8=
+  </data>
+ </layer>
+ <layer name="land" width="238" height="14">
+  <data encoding="base64" compression="zlib">
+   eJzt1UsKgCAUBVBdYrWRpm27FUSzCDMjy6Bz4A4E/z0pBAAAAAAAAABgb04EakrV2JXcnaPG+Dvnemr8m564v5rrp/qWtkvm/8p3AIBS/mvvmTJZdTGE/iBDbLRpqCRX32c1n3s7LQN/MMbybLV8mwvCHZ4x
+  </data>
+ </layer>
+ <layer name="flagpole" width="238" height="14">
+  <data encoding="base64" compression="zlib">
+   eJzt00EJACAAwEDtX8lgPs0gCDK4S7DPxgAAbqz5uwC4tX0LOb6FHt9Cj2+hx7fQ41vo8S30+BZ6fAsAAG8cAy8Jfw==
+  </data>
+ </layer>
+ <layer name="pipe" width="238" height="14">
+  <data encoding="base64" compression="zlib">
+   eJzt00EJAAAIBEHBfvaPY4Z7CTKTYD9bBQAAAH9MXxcAKd8CAAAAAAAAAGQWi2wAow==
+  </data>
+ </layer>
+ <layer name="block" width="238" height="14">
+  <data encoding="base64" compression="zlib">
+   eJzt2UEOhCAMQFHUO3gs956Mw3g5N66MaK0VSvNfMssCGfiZxaQEAACktqH1CQAAAPqyjrq5ZbI9B/Ty8YlG+zYB73KK2y0QUU50C/Tk3Czdxle6Y+6+D1fNerk7y/N8XeOP+TdrWs/X7tbj92+5h3TW4j2XmvXQrfV5PL4buvU1X7Nb7V53zbbu9o/zeHw3dKub1zTosdu3+z01K1lv7ux/FbqVzdKtTuvfuqjoVjZLtzqRu90BnMJWNQ==
+  </data>
+ </layer>
+ <layer name="trap" width="238" height="14">
+  <data encoding="base64" compression="zlib">
+   eJztz0EKACAIBMCg9/X/70S3oJOheJkBj+ruGAAAAAAAAAAAAAAAAK81uxPUOx3v6dyP/MmYDNFbP/87+2Xkr7ABMR4RMQ==
+  </data>
+ </layer>
+ <layer name="coin" width="238" height="14">
+  <data encoding="base64" compression="zlib">
+   eJzt2DEKwCAMBVDp/dfet1NxKZpUF8l74BKMZvkItgZUdl/jFT0jU4/szfQCndzCWbKZW3mvv+6TW5j7m7e3N1OPzACMreZkV253zAIVzP6lIjmSWwAAAAAAAKCqB8OXHq0=
+  </data>
+ </layer>
+ <objectgroup name="objects" width="238" height="14">
+  <object name="others" type="BirthPoint" x="32" y="176"/>
+  <object name="enemy" type="flyfish" x="288" y="208">
+   <properties>
+    <property name="duration" value="1"/>
+    <property name="offsetH" value="0"/>
+    <property name="offsetV" value="130"/>
+   </properties>
+  </object>
+  <object name="enemy" type="flyfish" x="400" y="208">
+   <properties>
+    <property name="duration" value="2"/>
+    <property name="offsetH" value="160"/>
+    <property name="offsetV" value="160"/>
+   </properties>
+  </object>
+  <object name="enemy" type="mushroom" x="752" y="128"/>
+  <object name="enemy" type="mushroom" x="784" y="128"/>
+  <object name="enemy" type="tortoise" x="912" y="128"/>
+  <object name="enemy" type="mushroom" x="816" y="128"/>
+  <object name="enemy" type="flyfish" x="1104" y="208">
+   <properties>
+    <property name="duration" value="2"/>
+    <property name="offsetH" value="192"/>
+    <property name="offsetV" value="160"/>
+   </properties>
+  </object>
+  <object name="enemy" type="mushroom" x="1456" y="128"/>
+  <object name="enemy" type="mushroom" x="1472" y="128"/>
+  <object name="enemy" type="tortoise_round" x="1664" y="112">
+   <properties>
+    <property name="roundDis" value="64"/>
+   </properties>
+  </object>
+  <object name="gadget" type="ladderLR" x="1776" y="160">
+   <properties>
+    <property name="LorR" value="0"/>
+    <property name="ladderDis" value="32"/>
+   </properties>
+  </object>
+  <object name="gadget" type="ladderLR" x="1856" y="128">
+   <properties>
+    <property name="LorR" value="1"/>
+    <property name="ladderDis" value="48"/>
+   </properties>
+  </object>
+  <object name="gadget" type="ladderLR" x="1936" y="176">
+   <properties>
+    <property name="LorR" value="0"/>
+    <property name="ladderDis" value="32"/>
+   </properties>
+  </object>
+  <object name="enemy" type="flyfish" x="2064" y="208">
+   <properties>
+    <property name="duration" value="1"/>
+    <property name="offsetH" value="100"/>
+    <property name="offsetV" value="160"/>
+   </properties>
+  </object>
+  <object name="enemy" type="flyfish" x="2288" y="208">
+   <properties>
+    <property name="duration" value="0.8"/>
+    <property name="offsetH" value="64"/>
+    <property name="offsetV" value="160"/>
+   </properties>
+  </object>
+  <object name="enemy" type="tortoise" x="2464" y="160"/>
+  <object name="enemy" type="mushroom" x="3056" y="128"/>
+  <object name="enemy" type="mushroom" x="3072" y="128"/>
+  <object name="mushroom" type="MushroomReward" x="496" y="80"/>
+  <object name="mushroom" type="MushroomReward" x="1632" y="64"/>
+  <object name="mushroom" type="MushroomAddLife" x="1856" y="64"/>
+  <object name="others" type="flagpoint" x="3600" y="32"/>
+  <object name="others" type="finalpoint" x="3720" y="80"/>
+  <object name="enemy" type="flyfish" x="352" y="48">
+   <properties>
+    <property name="duration" value="1"/>
+    <property name="offsetH" value="120"/>
+    <property name="offsetV" value="-140"/>
+   </properties>
+  </object>
+  <object name="enemy" type="flyfish" x="576" y="64">
+   <properties>
+    <property name="duration" value="1"/>
+    <property name="offsetH" value="120"/>
+    <property name="offsetV" value="-120"/>
+   </properties>
+  </object>
+  <object name="enemy" type="flyfish" x="624" y="32">
+   <properties>
+    <property name="duration" value="1"/>
+    <property name="offsetH" value="100"/>
+    <property name="offsetV" value="-160"/>
+   </properties>
+  </object>
+  <object name="enemy" type="battery" x="960" y="128">
+   <properties>
+    <property name="delay" value="1"/>
+   </properties>
+  </object>
+  <object name="enemy" type="flyfish" x="1312" y="192">
+   <properties>
+    <property name="duration" value="0.7"/>
+    <property name="offsetH" value="0"/>
+    <property name="offsetV" value="160"/>
+   </properties>
+  </object>
+  <object name="enemy" type="battery" x="3024" y="128">
+   <properties>
+    <property name="delay" value="1.5"/>
+   </properties>
+  </object>
+  <object name="enemy" type="flyfish" x="2064" y="48">
+   <properties>
+    <property name="duration" value="1"/>
+    <property name="offsetH" value="100"/>
+    <property name="offsetV" value="-160"/>
+   </properties>
+  </object>
+  <object name="enemy" type="flyfish" x="2576" y="48">
+   <properties>
+    <property name="duration" value="1.5"/>
+    <property name="offsetH" value="130"/>
+    <property name="offsetV" value="-150"/>
+   </properties>
+  </object>
+ </objectgroup>
+</map>
