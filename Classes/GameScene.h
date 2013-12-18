@@ -1,7 +1,7 @@
-#ifndef __HELLOWORLD_SCENE_H__
-#define __HELLOWORLD_SCENE_H__
+#ifndef _CM_GAME_SCENE_H_
+#define _CM_GAME_SCENE_H_
 
-#include "cocos2d.h"
+#include "CMPublicDefine.h"
 
 class HelloWorld : public cocos2d::CCLayer
 {
