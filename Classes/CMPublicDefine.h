@@ -1,9 +1,28 @@
-#ifndef _CM_PUBLIC_DEFINE_H_
+﻿#ifndef _CM_PUBLIC_DEFINE_H_
 #define _CM_PUBLIC_DEFINE_H_
 #include "cocos2d.h"
 USING_NS_CC;
 #define _SCREEN_WIDTH_ CCDirector::sharedDirector()->getWinSize().width
 #define _SCREEN_HEIGHT_ CCDirector::sharedDirector()->getWinSize().height
+
+enum 
+{
+	enZOrderBack,
+	enZOrderMiddle,
+	enZOrderFront,
+};
+
+enum TileType
+{
+	enTileTypeLand,   // 地板
+	enTileTypeBlock,  // 金币等小块块
+	enTileTypePipe,   // 管道
+	enTileTypeTrap,   // 陷阱
+	enTileTypeCoin,   // 金币
+	enTileTypeNoneH,  // 代表水平方向上未检测出碰撞物
+	enTileTypeNoneV,   // 代表垂直方向上未检测出碰撞物
+	enTileTypeFlagpole,  // 旗杆
+};
 
 class CMReceiver
 {
