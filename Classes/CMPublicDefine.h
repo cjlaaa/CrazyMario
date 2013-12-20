@@ -19,8 +19,7 @@ enum TileType
 	enTileTypePipe,   // 管道
 	enTileTypeTrap,   // 陷阱
 	enTileTypeCoin,   // 金币
-	enTileTypeNoneH,  // 代表水平方向上未检测出碰撞物
-	enTileTypeNoneV,   // 代表垂直方向上未检测出碰撞物
+	enTileTypeNone,  // 无碰撞物
 	enTileTypeFlagpole,  // 旗杆
 };
 

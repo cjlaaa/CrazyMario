@@ -22,30 +22,7 @@ bool CMGameMap::Init()
 {
 	do 
 	{
-// 		CCTMXLayer* pCloudLayer = layerNamed("cloud");
-// 		CC_BREAK_IF(pCloudLayer==NULL);
-// 		//addChild(pCloudLayer);
-// 		CCTMXLayer* pBlockLayer = layerNamed("block");
-// 		CC_BREAK_IF(pBlockLayer==NULL);
-// 		//addChild(pBlockLayer);
-// 		CCTMXLayer* pPipeLayer = layerNamed("pipe");
-// 		CC_BREAK_IF(pPipeLayer==NULL);
-// 		//addChild(pPipeLayer);
-// 		CCTMXLayer* pLandLayer = layerNamed("land");
-// 		CC_BREAK_IF(pLandLayer==NULL);
-// 		//addChild(pLandLayer);
-// 		CCTMXLayer* pTrapLayer = layerNamed("trap");
-// 		CC_BREAK_IF(pTrapLayer==NULL);
-// 		//addChild(pTrapLayer);
-// 		CCTMXLayer* pObjectLayer = layerNamed("objects");
-// 		CC_BREAK_IF(pObjectLayer==NULL);
-// 		//addChild(pObjectLayer);
-// 		CCTMXLayer* pCoinLayer = layerNamed("coin");
-// 		CC_BREAK_IF(pCoinLayer==NULL);
-// 		//addChild(pCoinLayer);
-// 		CCTMXLayer* pFlagpoleLayer = layerNamed("flagpole");
-// 		CC_BREAK_IF(pFlagpoleLayer==NULL);
-// 		//addChild(pFlagpoleLayer);
+
 
 		return true;
 	} while (false);
@@ -55,5 +32,43 @@ bool CMGameMap::Init()
 
 TileType CMGameMap::HeroPosToTileType( CCPoint HeroPos )
 {
-	return enTileTypeBlock;
+	do 
+	{
+		//将层坐标转换为地图瓦片坐标
+		int nHeroTilePosX = HeroPos.x/this->getTileSize().width;
+		int nHeroTempPosY = (HeroPos.y - 96)/this->getTileSize().height;
+		int nHeroTilePosY = 13 - nHeroTempPosY;
+
+		//获得地图的各个层
+		CCTMXLayer* pCloudLayer = layerNamed("cloud");
+		CC_BREAK_IF(pCloudLayer==NULL);
+		CCTMXLayer* pBlockLayer = layerNamed("block");
+		CC_BREAK_IF(pBlockLayer==NULL);
+		CCTMXLayer* pPipeLayer = layerNamed("pipe");
+		CC_BREAK_IF(pPipeLayer==NULL);
+		CCTMXLayer* pLandLayer = layerNamed("land");
+		CC_BREAK_IF(pLandLayer==NULL);
+		CCTMXLayer* pTrapLayer = layerNamed("trap");
+		CC_BREAK_IF(pTrapLayer==NULL);
+		CCTMXObjectGroup* pObjectLayer = objectGroupNamed("objects");
+		CC_BREAK_IF(pObjectLayer==NULL);
+		CCTMXLayer* pCoinLayer = layerNamed("coin");
+		CC_BREAK_IF(pCoinLayer==NULL);
+		CCTMXLayer* pFlagpoleLayer = layerNamed("flagpole");
+		CC_BREAK_IF(pFlagpoleLayer==NULL);
+
+		CCSprite* pLandSprite = pLandLayer->tileAt(ccp(nHeroTilePosX,nHeroTilePosY));
+		if (pLandSprite!=NULL)
+		{
+			return enTileTypeLand;
+		}
+		CCSprite* pBlockSprite = pBlockLayer->tileAt(ccp(nHeroTilePosX,nHeroTilePosY));
+		if (pBlockSprite!=NULL)
+		{
+			return enTileTypeBlock;
+		}
+		return enTileTypeNone;
+	} while (false);
+	CCLog("fun CMGameMap::HeroPosToTileType Error!");
+	return enTileTypeNone;
 }

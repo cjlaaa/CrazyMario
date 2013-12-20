@@ -40,7 +40,7 @@ bool CMGameScene::init()
 
 		CMHero* pHero = CMHero::CreateHero();
 		CC_BREAK_IF(pHero==NULL);
-		pHero->setPosition(ccp(0,0));
+		pHero->setPosition(ccp(_SCREEN_WIDTH_*0.1,_SCREEN_HEIGHT_*0.8));
 		addChild(pHero,enZOrderFront,enTagHero);
 
 		//注册Update函数
@@ -70,13 +70,21 @@ void CMGameScene::OnMsgReceive( int enMsg,void* pData,int nSize )
 
 }
 
-
+bool bMarioInSky = true;
 void CMGameScene::Update(float dt)
 {
 	do 
 	{
 		CMHero* pHero = dynamic_cast<CMHero*>(getChildByTag(enTagHero));
 		CC_BREAK_IF(pHero==NULL);
+		
+		CCPoint CurMarioPos = pHero->getPosition();
+
+		if (bMarioInSky)
+		{
+			pHero->setPosition(ccp(pHero->getPositionX(),pHero->getPositionY()-2));
+		}
+
 #if(CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)    
 		if(KEY_DOWN(KEY_KEY_K))
 		{
@@ -89,18 +97,19 @@ void CMGameScene::Update(float dt)
 
 		if(KEY_DOWN(KEY_KEY_A))
 		{
-			int nHeroPosX = pHero->getPositionX()-1;
+			int nHeroPosX = pHero->getPositionX()-3;
 			pHero->setPosition(ccp(nHeroPosX,pHero->getPositionY()));
 		}
 		if(KEY_DOWN(KEY_KEY_D))
 		{
-			int nHeroPosX = pHero->getPositionX()+1;
+			int nHeroPosX = pHero->getPositionX()+3;
 			pHero->setPosition(ccp(nHeroPosX,pHero->getPositionY()));
 		}
 		if(KEY_DOWN(KEY_KEY_W))
 		{
-			int nHeroPosY = pHero->getPositionY()+1;
+			int nHeroPosY = pHero->getPositionY()+5;
 			pHero->setPosition(ccp(pHero->getPositionX(),nHeroPosY));
+			bMarioInSky = true;
 		}
 		if(KEY_DOWN(KEY_KEY_S))
 		{
@@ -114,12 +123,27 @@ void CMGameScene::Update(float dt)
 #endif
 		CMGameMap* pMap = dynamic_cast<CMGameMap*>(getChildByTag(enTagMap));
 		CC_BREAK_IF(pMap==NULL);
-		
-		int nHeroTilePosX = pHero->getPositionX()/pMap->getTileSize().width;
-		int nHeroTempPosY = (pHero->getPositionY() - 96)/pMap->getTileSize().height;
-		int nHeroTilePosY = 13 - nHeroTempPosY;
 
-		CCLog("HeroTilePosX=%d	HeroTilePosY=%d",nHeroTilePosX,nHeroTilePosY);
+		//纵向碰撞判断
+		switch (pMap->HeroPosToTileType(pHero->getPosition()))
+		{
+		case enTileTypeLand:
+			{
+				pHero->setPosition(CurMarioPos);
+				bMarioInSky = false;
+			}
+			break;
+		case enTileTypeBlock:
+			{
+				pHero->setPosition(CurMarioPos);
+				bMarioInSky = false;
+			}
+			break;
+		}
+
+		//横向碰撞判断
+
+		CCLog("TileType = %d",pMap->HeroPosToTileType(pHero->getPosition()));
 		//CCLog("HeroPosX=%f	HeroPosY=%f",pHero->getPositionX(),pHero->getPositionY());
 		return;
 	} while (false);
