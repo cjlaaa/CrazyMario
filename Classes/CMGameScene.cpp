@@ -128,12 +128,8 @@ void CMGameScene::Update(float dt)
 		switch (pMap->HeroPosToTileType(pHero->getPosition()))
 		{
 		case enTileTypeLand:
-			{
-				pHero->setPosition(CurMarioPos);
-				bMarioInSky = false;
-			}
-			break;
 		case enTileTypeBlock:
+		case enTileTypePipe:
 			{
 				pHero->setPosition(CurMarioPos);
 				bMarioInSky = false;

@@ -67,6 +67,11 @@ TileType CMGameMap::HeroPosToTileType( CCPoint HeroPos )
 		{
 			return enTileTypeBlock;
 		}
+		CCSprite* pPipeSprite = pPipeLayer->tileAt(ccp(nHeroTilePosX,nHeroTilePosY));
+		if (pPipeSprite!=NULL)
+		{
+			return enTileTypeBlock;
+		}
 		return enTileTypeNone;
 	} while (false);
 	CCLog("fun CMGameMap::HeroPosToTileType Error!");
