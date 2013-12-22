@@ -21,9 +21,8 @@ bool CMHero::Init()
 {
 	do 
 	{
-		CCSprite* pMainBody = CCSprite::create("smallWalkRight.png", CCRectMake(0, 0, 14, 16));
-		pMainBody->setAnchorPoint(ccp(0, 0));
-		this->addChild(pMainBody);
+		CC_BREAK_IF(!CCSprite::initWithFile("smallWalkRight.png", CCRectMake(0, 0, 14, 16)));
+		setAnchorPoint(ccp(0, 0));
 
 		return true;
 	} while (false);

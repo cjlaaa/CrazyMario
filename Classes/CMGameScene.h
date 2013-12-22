@@ -27,6 +27,7 @@ private:
 		enTagHero,
 		enTagMap,
 	};
+	float m_fMapMove;
 };
 
 

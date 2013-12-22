@@ -46,6 +46,8 @@ bool CMGameScene::init()
 		//注册Update函数
 		this->schedule(schedule_selector(CMGameScene::Update,1));
 
+		m_fMapMove = 0;
+
 		return true;
 	} while (false);
 	CCLog("Fun CMGameScene::init Error!");
@@ -71,6 +73,9 @@ void CMGameScene::OnMsgReceive( int enMsg,void* pData,int nSize )
 }
 
 bool bMarioInSky = true;
+bool bIsLeftKeyDown = false;
+bool bIsRightKeyDown = false;
+bool bIsJumpKeyDown = false;
 void CMGameScene::Update(float dt)
 {
 	do 
@@ -97,35 +102,67 @@ void CMGameScene::Update(float dt)
 
 		if(KEY_DOWN(KEY_KEY_A))
 		{
-			int nHeroPosX = pHero->getPositionX()-3;
-			pHero->setPosition(ccp(nHeroPosX,pHero->getPositionY()));
+			bIsLeftKeyDown = true;
+		}
+		if(KEY_UP(KEY_KEY_A))
+		{
+			bIsLeftKeyDown = false;
 		}
 		if(KEY_DOWN(KEY_KEY_D))
 		{
-			int nHeroPosX = pHero->getPositionX()+3;
-			pHero->setPosition(ccp(nHeroPosX,pHero->getPositionY()));
+			bIsRightKeyDown = true;
+		}
+		if(KEY_UP(KEY_KEY_D))
+		{
+			bIsRightKeyDown = false;
 		}
 		if(KEY_DOWN(KEY_KEY_W))
 		{
-			int nHeroPosY = pHero->getPositionY()+5;
-			pHero->setPosition(ccp(pHero->getPositionX(),nHeroPosY));
-			bMarioInSky = true;
+			bIsJumpKeyDown = true;
+		}
+		if(KEY_UP(KEY_KEY_W))
+		{
+			bIsJumpKeyDown = false;
 		}
 		if(KEY_DOWN(KEY_KEY_S))
 		{
-			int nHeroPosY = pHero->getPositionY()-1;
-			pHero->setPosition(ccp(pHero->getPositionX(),nHeroPosY));
-		}
-		if(KEY_UP(KEY_KEY_A)&&KEY_UP(KEY_KEY_D))
-		{
-
+			
 		}
 #endif
 		CMGameMap* pMap = dynamic_cast<CMGameMap*>(getChildByTag(enTagMap));
 		CC_BREAK_IF(pMap==NULL);
 
-		//纵向碰撞判断
-		switch (pMap->HeroPosToTileType(pHero->getPosition()))
+		//根据变量控制英雄动作
+		if (bIsLeftKeyDown)
+		{
+			if (pHero->boundingBox().getMinX()>0)
+			{
+				pHero->setPositionX(pHero->getPositionX()-2);
+			}
+		}
+		if (bIsRightKeyDown)
+		{
+			if (pHero->getPositionX()>100)
+			{
+				pMap->setPositionX(pMap->getPositionX()-2);
+				m_fMapMove += 2;
+			}
+			else 
+			{
+				pHero->setPositionX(pHero->getPositionX()+2);
+			}
+		}
+		if (bIsJumpKeyDown)
+		{
+			if (pHero->boundingBox().getMaxY()<_SCREEN_HEIGHT_)
+			{
+				pHero->setPositionY(pHero->getPositionY()+5);
+			}
+			bMarioInSky = true;
+		}
+
+		//碰撞判断
+		switch (pMap->HeroPosToTileType(pHero->boundingBox(),m_fMapMove))
 		{
 		case enTileTypeLand:
 		case enTileTypeBlock:
@@ -137,9 +174,7 @@ void CMGameScene::Update(float dt)
 			break;
 		}
 
-		//横向碰撞判断
-
-		CCLog("TileType = %d",pMap->HeroPosToTileType(pHero->getPosition()));
+		//CCLog("TileType = %d",pMap->HeroPosToTileType(pHero->getPosition()));
 		//CCLog("HeroPosX=%f	HeroPosY=%f",pHero->getPositionX(),pHero->getPositionY());
 		return;
 	} while (false);

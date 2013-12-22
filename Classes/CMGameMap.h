@@ -8,7 +8,7 @@ class CMGameMap : public cocos2d::CCTMXTiledMap
 public:
 	static CMGameMap* CreateGameMap(const char* pFileName);
 	// 返回地图指定位置上的图块类型，用作碰撞检测
-	TileType HeroPosToTileType(CCPoint HeroPos);
+	TileType HeroPosToTileType(CCRect HeroPos,float fMapMove);
 	
 private:
 	virtual bool Init();

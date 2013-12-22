@@ -30,13 +30,13 @@ bool CMGameMap::Init()
 	return false;
 }
 
-TileType CMGameMap::HeroPosToTileType( CCPoint HeroPos )
+TileType CMGameMap::HeroPosToTileType( CCRect HeroRect,float fMapMove )
 {
 	do 
 	{
 		//将层坐标转换为地图瓦片坐标
-		int nHeroTilePosX = HeroPos.x/this->getTileSize().width;
-		int nHeroTempPosY = (HeroPos.y - 96)/this->getTileSize().height;
+		int nHeroTilePosX = (HeroRect.getMinX() + fMapMove)/this->getTileSize().width;
+		int nHeroTempPosY = (HeroRect.getMinY() - 96)/this->getTileSize().height;
 		int nHeroTilePosY = 13 - nHeroTempPosY;
 
 		//获得地图的各个层
@@ -57,20 +57,33 @@ TileType CMGameMap::HeroPosToTileType( CCPoint HeroPos )
 		CCTMXLayer* pFlagpoleLayer = layerNamed("flagpole");
 		CC_BREAK_IF(pFlagpoleLayer==NULL);
 
+		CCRect TMXSpriteForCollision;
 		CCSprite* pLandSprite = pLandLayer->tileAt(ccp(nHeroTilePosX,nHeroTilePosY));
 		if (pLandSprite!=NULL)
 		{
-			return enTileTypeLand;
+			TMXSpriteForCollision = CCRectMake(convertToWorldSpace(pLandSprite->getPosition()).x,convertToWorldSpace(pLandSprite->getPosition()).y,getTileSize().width,getTileSize().height);
+			if ( TMXSpriteForCollision.intersectsRect(HeroRect))
+			{
+				return enTileTypeLand;
+			}
 		}
 		CCSprite* pBlockSprite = pBlockLayer->tileAt(ccp(nHeroTilePosX,nHeroTilePosY));
 		if (pBlockSprite!=NULL)
 		{
-			return enTileTypeBlock;
+			TMXSpriteForCollision = CCRectMake(convertToWorldSpace(pBlockSprite->getPosition()).x,convertToWorldSpace(pBlockSprite->getPosition()).y,getTileSize().width,getTileSize().height);
+			if (TMXSpriteForCollision.intersectsRect(HeroRect))
+			{
+				return enTileTypeBlock;
+			}
 		}
-		CCSprite* pPipeSprite = pPipeLayer->tileAt(ccp(nHeroTilePosX,nHeroTilePosY));
+		CCSprite* pPipeSprite = pPipeLayer->tileAt(ccp(nHeroTilePosX,nHeroTilePosY));	
 		if (pPipeSprite!=NULL)
 		{
-			return enTileTypeBlock;
+			TMXSpriteForCollision = CCRectMake(convertToWorldSpace(pPipeSprite->getPosition()).x,convertToWorldSpace(pPipeSprite->getPosition()).y,getTileSize().width,getTileSize().height);
+			if (TMXSpriteForCollision.intersectsRect(HeroRect))
+			{
+				return enTileTypePipe;
+			}
 		}
 		return enTileTypeNone;
 	} while (false);

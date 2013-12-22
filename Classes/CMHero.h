@@ -3,7 +3,7 @@
 
 #include "CMPublicDefine.h"
 
-class CMHero : public CCNode,public CMSender
+class CMHero : public CCSprite,public CMSender
 {
 public:
 	static CMHero* CreateHero();
