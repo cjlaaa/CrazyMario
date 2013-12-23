@@ -27,9 +27,15 @@ private:
 		enTagHero,
 		enTagMap,
 	};
+
 	float m_fMapMove;
 	float m_fDropSpeed;
 	float m_fJumpSpeed;
+	float m_fSpeed;
+
+	bool m_bIsLeftKeyDown;
+	bool m_bIsRightKeyDown;
+	bool m_bIsJumpKeyDown;
 };
 
 

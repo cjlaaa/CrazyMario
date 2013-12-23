@@ -49,6 +49,11 @@ bool CMGameScene::init()
 		m_fMapMove = 0;
 		m_fDropSpeed = 0;
 		m_fJumpSpeed = 0;
+		m_fSpeed = 2;
+
+		m_bIsLeftKeyDown = false;
+		m_bIsRightKeyDown = false;
+		m_bIsJumpKeyDown = false;
 
 		return true;
 	} while (false);
@@ -74,10 +79,6 @@ void CMGameScene::OnMsgReceive( int enMsg,void* pData,int nSize )
 
 }
 
-bool bIsLeftKeyDown = false;
-bool bIsRightKeyDown = false;
-bool bIsJumpKeyDown = false;
-float fSpeed = 2;
 void CMGameScene::Update(float dt)
 {
 	do 
@@ -99,27 +100,27 @@ void CMGameScene::Update(float dt)
 
 		if(KEY_DOWN(KEY_KEY_A))
 		{
-			bIsLeftKeyDown = true;
+			m_bIsLeftKeyDown = true;
 		}
 		if(KEY_UP(KEY_KEY_A))
 		{
-			bIsLeftKeyDown = false;
+			m_bIsLeftKeyDown = false;
 		}
 		if(KEY_DOWN(KEY_KEY_D))
 		{
-			bIsRightKeyDown = true;
+			m_bIsRightKeyDown = true;
 		}
 		if(KEY_UP(KEY_KEY_D))
 		{
-			bIsRightKeyDown = false;
+			m_bIsRightKeyDown = false;
 		}
 		if(KEY_DOWN(KEY_KEY_W))
 		{
-			bIsJumpKeyDown = true;
+			m_bIsJumpKeyDown = true;
 		}
 		if(KEY_UP(KEY_KEY_W))
 		{
-			bIsJumpKeyDown = false;
+			m_bIsJumpKeyDown = false;
 		}
 		if(KEY_DOWN(KEY_KEY_S))
 		{
@@ -133,9 +134,9 @@ void CMGameScene::Update(float dt)
 		CCSprite* pTileSprite2 = NULL;
 		CCSprite* pTileSprite3 = NULL;
 		//根据变量控制英雄移动及动作
-		if (bIsLeftKeyDown)
+		if (m_bIsLeftKeyDown)
 		{
-			//用英雄左方的两个瓦片来判断后退碰撞
+			//用英雄左方的三个瓦片来判断后退碰撞
 			pTileSprite1 = pMap->MarioPosToTileSprite(ccp(pMario->getPositionX(),pMario->getPositionY()+pMario->boundingBox().size.height),m_fMapMove);
 			pTileSprite2 = pMap->MarioPosToTileSprite(ccp(pMario->getPositionX(),pMario->getPositionY()+pMario->boundingBox().size.height/2),m_fMapMove);
 			pTileSprite3 = pMap->MarioPosToTileSprite(ccp(pMario->getPositionX(),pMario->getPositionY()),m_fMapMove);
@@ -148,7 +149,7 @@ void CMGameScene::Update(float dt)
 			{
 				if (pMario->boundingBox().getMinX()>0)
 				{
-					pMario->setPositionX(pMario->getPositionX()-fSpeed);
+					pMario->setPositionX(pMario->getPositionX()-m_fSpeed);
 				}
 			}
 		}
@@ -156,9 +157,9 @@ void CMGameScene::Update(float dt)
 		pTileSprite1 = NULL;
 		pTileSprite2 = NULL;
 		pTileSprite3 = NULL;
-		if (bIsRightKeyDown)
+		if (m_bIsRightKeyDown)
 		{
-			//用英雄右方的两个瓦片来判断前进碰撞
+			//用英雄右方的三个瓦片来判断前进碰撞
 			pTileSprite1 = pMap->MarioPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width,pMario->getPositionY()+pMario->boundingBox().size.height),m_fMapMove);
 			pTileSprite2 = pMap->MarioPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width,pMario->getPositionY()+pMario->boundingBox().size.height/2),m_fMapMove);
 			pTileSprite3 = pMap->MarioPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width,pMario->getPositionY()),m_fMapMove);
@@ -171,12 +172,12 @@ void CMGameScene::Update(float dt)
 			{
 				if (pMario->getPositionX()>100)
 				{
-					pMap->setPositionX(pMap->getPositionX()-fSpeed);
-					m_fMapMove += fSpeed;
+					pMap->setPositionX(pMap->getPositionX()-m_fSpeed);
+					m_fMapMove += m_fSpeed;
 				}
 				else 
 				{
-					pMario->setPositionX(pMario->getPositionX()+fSpeed);
+					pMario->setPositionX(pMario->getPositionX()+m_fSpeed);
 				}
 			}
 		}
@@ -191,6 +192,7 @@ void CMGameScene::Update(float dt)
 		if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
 		{
 			pMario->setPosition(CurMarioPos);
+			pMario->setPositionY(pMario->getPositionY()+1/*pMario->boundingBox().size.height*0.1*/);
 			m_fDropSpeed = 0;
 			m_fJumpSpeed = 8;
 		}
@@ -210,22 +212,19 @@ void CMGameScene::Update(float dt)
 		if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
 		{
 			pMario->setPosition(CurMarioPos);
+			pMario->setPositionY(pMario->getPositionY()-1);
 			m_fJumpSpeed = 0;
 		}
 		else
 		{
 			//跳跃
-			if (bIsJumpKeyDown)
+			if (m_bIsJumpKeyDown)
 			{
 				pMario->setPositionY(pMario->getPositionY()+m_fJumpSpeed);
 				m_fJumpSpeed -= 0.3;
 			}
 		}
 		
-		
-
-		
-
 		//CCLog("TileType = %d",pMap->HeroPosToTileType(pHero->getPosition()));
 		//CCLog("HeroPosX=%f	HeroPosY=%f",pHero->getPositionX(),pHero->getPositionY());
 		return;
