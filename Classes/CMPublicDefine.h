@@ -2,8 +2,8 @@
 #define _CM_PUBLIC_DEFINE_H_
 #include "cocos2d.h"
 USING_NS_CC;
-#define _SCREEN_WIDTH_ CCDirector::sharedDirector()->getWinSize().width
-#define _SCREEN_HEIGHT_ CCDirector::sharedDirector()->getWinSize().height
+#define SCREEN_WIDTH CCDirector::sharedDirector()->getWinSize().width
+#define SCREEN_HEIGHT CCDirector::sharedDirector()->getWinSize().height
 
 enum 
 {

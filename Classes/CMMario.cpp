@@ -1,10 +1,10 @@
-﻿#include "CMHero.h"
+﻿#include "CMMario.h"
 
-CMHero* CMHero::CreateHero()
+CMMario* CMMario::CreateHero()
 {
 	do 
 	{
-		CMHero *pHero = new CMHero();
+		CMMario *pHero = new CMMario();
 		if (pHero && pHero->Init())
 		{
 			pHero->autorelease();
@@ -17,7 +17,7 @@ CMHero* CMHero::CreateHero()
 	return NULL;
 }
 
-bool CMHero::Init()
+bool CMMario::Init()
 {
 	do 
 	{

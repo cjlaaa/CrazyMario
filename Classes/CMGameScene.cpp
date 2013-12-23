@@ -1,6 +1,6 @@
 ﻿#include "CMGameScene.h"
 #include "CMGameMap.h"
-#include "CMHero.h"
+#include "CMMario.h"
 
 CCScene* CMGameScene::CreateGameScene()
 {
@@ -38,15 +38,17 @@ bool CMGameScene::init()
 		pGameMap->setPosition(ccp(0,96));
 		addChild(pGameMap,enZOrderBack,enTagMap);
 
-		CMHero* pHero = CMHero::CreateHero();
+		CMMario* pHero = CMMario::CreateHero();
 		CC_BREAK_IF(pHero==NULL);
-		pHero->setPosition(ccp(_SCREEN_WIDTH_*0.1,_SCREEN_HEIGHT_*0.8));
+		pHero->setPosition(ccp(SCREEN_WIDTH*0.1,SCREEN_HEIGHT*0.8));
 		addChild(pHero,enZOrderFront,enTagHero);
 
 		//注册Update函数
 		this->schedule(schedule_selector(CMGameScene::Update,1));
 
 		m_fMapMove = 0;
+		m_fDropSpeed = 0;
+		m_fJumpSpeed = 0;
 
 		return true;
 	} while (false);
@@ -60,9 +62,9 @@ void CMGameScene::menuCloseCallback(CCObject* pSender)
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WINRT) || (CC_TARGET_PLATFORM == CC_PLATFORM_WP8)
 	CCMessageBox("You pressed the close button. Windows Store Apps do not implement a close button.","Alert");
 #else
-    CCDirector::sharedDirector()->end();
+	CCDirector::sharedDirector()->end();
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-    exit(0);
+	exit(0);
 #endif
 #endif
 }
@@ -75,20 +77,20 @@ void CMGameScene::OnMsgReceive( int enMsg,void* pData,int nSize )
 bool bIsLeftKeyDown = false;
 bool bIsRightKeyDown = false;
 bool bIsJumpKeyDown = false;
-bool bIsJumping = false;
+float fSpeed = 2;
 void CMGameScene::Update(float dt)
 {
 	do 
 	{
-		CMHero* pHero = dynamic_cast<CMHero*>(getChildByTag(enTagHero));
-		CC_BREAK_IF(pHero==NULL);
-		
-		CCPoint CurMarioPos = pHero->getPosition();
+		CMMario* pMario = dynamic_cast<CMMario*>(getChildByTag(enTagHero));
+		CC_BREAK_IF(pMario==NULL);
+
+		CCPoint CurMarioPos = pMario->getPosition();
 
 #if(CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)    
 		if(KEY_DOWN(KEY_KEY_K))
 		{
-			
+
 		}
 		if (KEY_DOWN(KEY_KEY_J))
 		{
@@ -121,7 +123,7 @@ void CMGameScene::Update(float dt)
 		}
 		if(KEY_DOWN(KEY_KEY_S))
 		{
-			
+
 		}
 #endif
 		CMGameMap* pMap = dynamic_cast<CMGameMap*>(getChildByTag(enTagMap));
@@ -130,87 +132,103 @@ void CMGameScene::Update(float dt)
 		CCSprite* pTileSprite1 = NULL;
 		CCSprite* pTileSprite2 = NULL;
 		CCSprite* pTileSprite3 = NULL;
-		//用英雄下方的三个瓦片来判断掉落碰撞
-		pTileSprite1 = pMap->HeroPosToTileSprite(ccp(pHero->getPositionX()+pHero->boundingBox().size.width/2,pHero->getPositionY()),m_fMapMove);
-		pTileSprite2 = pMap->HeroPosToTileSprite(ccp(pHero->getPositionX()+5,pHero->getPositionY()),m_fMapMove);
-		pTileSprite3 = pMap->HeroPosToTileSprite(ccp(pHero->getPositionX()+pHero->boundingBox().size.width-5,pHero->getPositionY()),m_fMapMove);
-		if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
-		{
-			pHero->setPosition(CurMarioPos);
-		}
-		else
-		{
-			pHero->setPositionY(pHero->getPositionY()-2);
-		}
-		
-		pTileSprite1 = NULL;
-		pTileSprite2 = NULL;
-		pTileSprite3 = NULL;
 		//根据变量控制英雄移动及动作
 		if (bIsLeftKeyDown)
 		{
 			//用英雄左方的两个瓦片来判断后退碰撞
-			pTileSprite1 = pMap->HeroPosToTileSprite(ccp(pHero->getPositionX(),pHero->getPositionY()+pHero->boundingBox().size.height),m_fMapMove);
-			pTileSprite2 = pMap->HeroPosToTileSprite(ccp(pHero->getPositionX(),pHero->getPositionY()+pHero->boundingBox().size.height*0.15),m_fMapMove);
+			pTileSprite1 = pMap->MarioPosToTileSprite(ccp(pMario->getPositionX(),pMario->getPositionY()+pMario->boundingBox().size.height),m_fMapMove);
+			pTileSprite2 = pMap->MarioPosToTileSprite(ccp(pMario->getPositionX(),pMario->getPositionY()+pMario->boundingBox().size.height/2),m_fMapMove);
+			pTileSprite3 = pMap->MarioPosToTileSprite(ccp(pMario->getPositionX(),pMario->getPositionY()),m_fMapMove);
 			if (pTileSprite1!=NULL || pTileSprite2!=NULL)
 			{
-				pHero->setPosition(CurMarioPos);
+				pMario->setPosition(CurMarioPos);
+				//pHero->setPositionX(pHero->getPositionX()-2);
 			}
 			else
 			{
-				if (pHero->boundingBox().getMinX()>0)
+				if (pMario->boundingBox().getMinX()>0)
 				{
-					pHero->setPositionX(pHero->getPositionX()-2);
+					pMario->setPositionX(pMario->getPositionX()-fSpeed);
 				}
 			}
 		}
+
 		pTileSprite1 = NULL;
 		pTileSprite2 = NULL;
 		pTileSprite3 = NULL;
 		if (bIsRightKeyDown)
 		{
 			//用英雄右方的两个瓦片来判断前进碰撞
-			pTileSprite1 = pMap->HeroPosToTileSprite(ccp(pHero->getPositionX()+pHero->boundingBox().size.width,pHero->getPositionY()+pHero->boundingBox().size.height),m_fMapMove);
-			pTileSprite2 = pMap->HeroPosToTileSprite(ccp(pHero->getPositionX()+pHero->boundingBox().size.width,pHero->getPositionY()+pHero->boundingBox().size.height*0.15),m_fMapMove);
+			pTileSprite1 = pMap->MarioPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width,pMario->getPositionY()+pMario->boundingBox().size.height),m_fMapMove);
+			pTileSprite2 = pMap->MarioPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width,pMario->getPositionY()+pMario->boundingBox().size.height/2),m_fMapMove);
+			pTileSprite3 = pMap->MarioPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width,pMario->getPositionY()),m_fMapMove);
 			if (pTileSprite1!=NULL || pTileSprite2!=NULL)
 			{
-				pHero->setPosition(CurMarioPos);
+				pMario->setPosition(CurMarioPos);
+				//pHero->setPositionX(pHero->getPositionX()+2);
 			}
 			else
 			{
-				if (pHero->getPositionX()>100)
+				if (pMario->getPositionX()>100)
 				{
-					pMap->setPositionX(pMap->getPositionX()-2);
-					m_fMapMove += 2;
+					pMap->setPositionX(pMap->getPositionX()-fSpeed);
+					m_fMapMove += fSpeed;
 				}
 				else 
 				{
-					pHero->setPositionX(pHero->getPositionX()+2);
+					pMario->setPositionX(pMario->getPositionX()+fSpeed);
 				}
 			}
 		}
+
 		pTileSprite1 = NULL;
 		pTileSprite2 = NULL;
 		pTileSprite3 = NULL;
-		if (bIsJumpKeyDown)
+		//用英雄下方的三个瓦片来判断掉落碰撞
+		pTileSprite1 = pMap->MarioPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width/2,pMario->getPositionY()),m_fMapMove);
+		pTileSprite2 = pMap->MarioPosToTileSprite(ccp(pMario->getPositionX()+5,pMario->getPositionY()),m_fMapMove);
+		pTileSprite3 = pMap->MarioPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width-5,pMario->getPositionY()),m_fMapMove);
+		if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
 		{
-			//if (pHero->boundingBox().getMaxY()<_SCREEN_HEIGHT_)
-			if (bIsJumping==false)
+			pMario->setPosition(CurMarioPos);
+			m_fDropSpeed = 0;
+			m_fJumpSpeed = 8;
+		}
+		else
+		{
+			pMario->setPositionY(pMario->getPositionY()-m_fDropSpeed);
+			m_fDropSpeed += 0.098;
+		}
+
+		pTileSprite1 = NULL;
+		pTileSprite2 = NULL;
+		pTileSprite3 = NULL;
+		//用英雄上方的三个瓦片来判断头顶碰撞
+		pTileSprite1 = pMap->MarioPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width/2,pMario->getPositionY()+pMario->boundingBox().size.height),m_fMapMove);
+		pTileSprite2 = pMap->MarioPosToTileSprite(ccp(pMario->getPositionX()+5,pMario->getPositionY()+pMario->boundingBox().size.height),m_fMapMove);
+		pTileSprite3 = pMap->MarioPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width-5,pMario->getPositionY()+pMario->boundingBox().size.height),m_fMapMove);
+		if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
+		{
+			pMario->setPosition(CurMarioPos);
+			m_fJumpSpeed = 0;
+		}
+		else
+		{
+			//跳跃
+			if (bIsJumpKeyDown)
 			{
-				CCMoveBy* pJump = CCMoveBy::create(0.3,ccp(0,80));
-				pHero->runAction(CCSequence::create(pJump,CCCallFunc::create(this, callfunc_selector(CMGameScene::OnJumpCallBack)),NULL));
-				bIsJumping = true;
+				pMario->setPositionY(pMario->getPositionY()+m_fJumpSpeed);
+				m_fJumpSpeed -= 0.3;
 			}
 		}
 		
+		
+
+		
+
 		//CCLog("TileType = %d",pMap->HeroPosToTileType(pHero->getPosition()));
 		//CCLog("HeroPosX=%f	HeroPosY=%f",pHero->getPositionX(),pHero->getPositionY());
 		return;
 	} while (false);
 	CCLog("fun CMGameScene::Update Error!");
-}
-
-void CMGameScene::OnJumpCallBack()
-{
-	bIsJumping = false; 
 }

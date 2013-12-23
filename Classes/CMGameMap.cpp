@@ -30,7 +30,7 @@ bool CMGameMap::Init()
 	return false;
 }
 
-CCSprite* CMGameMap::HeroPosToTileSprite( CCPoint HeroPos,float fMapMove )
+CCSprite* CMGameMap::MarioPosToTileSprite( CCPoint HeroPos,float fMapMove )
 {
 	do 
 	{

@@ -21,8 +21,6 @@ private:
 
 	void OnMsgReceive( int enMsg,void* pData,int nSize );
 	void Update(float dt);
-	
-	void OnJumpCallBack();
 
 	enum 
 	{
@@ -30,6 +28,8 @@ private:
 		enTagMap,
 	};
 	float m_fMapMove;
+	float m_fDropSpeed;
+	float m_fJumpSpeed;
 };
 
 
