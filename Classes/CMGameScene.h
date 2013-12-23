@@ -21,6 +21,8 @@ private:
 
 	void OnMsgReceive( int enMsg,void* pData,int nSize );
 	void Update(float dt);
+	
+	void OnJumpCallBack();
 
 	enum 
 	{

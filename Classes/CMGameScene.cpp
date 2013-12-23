@@ -72,10 +72,10 @@ void CMGameScene::OnMsgReceive( int enMsg,void* pData,int nSize )
 
 }
 
-bool bMarioInSky = true;
 bool bIsLeftKeyDown = false;
 bool bIsRightKeyDown = false;
 bool bIsJumpKeyDown = false;
+bool bIsJumping = false;
 void CMGameScene::Update(float dt)
 {
 	do 
@@ -84,11 +84,6 @@ void CMGameScene::Update(float dt)
 		CC_BREAK_IF(pHero==NULL);
 		
 		CCPoint CurMarioPos = pHero->getPosition();
-
-		if (bMarioInSky)
-		{
-			pHero->setPosition(ccp(pHero->getPositionX(),pHero->getPositionY()-2));
-		}
 
 #if(CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)    
 		if(KEY_DOWN(KEY_KEY_K))
@@ -132,51 +127,90 @@ void CMGameScene::Update(float dt)
 		CMGameMap* pMap = dynamic_cast<CMGameMap*>(getChildByTag(enTagMap));
 		CC_BREAK_IF(pMap==NULL);
 
-		//根据变量控制英雄动作
+		CCSprite* pTileSprite1 = NULL;
+		CCSprite* pTileSprite2 = NULL;
+		CCSprite* pTileSprite3 = NULL;
+		//用英雄下方的三个瓦片来判断掉落碰撞
+		pTileSprite1 = pMap->HeroPosToTileSprite(ccp(pHero->getPositionX()+pHero->boundingBox().size.width/2,pHero->getPositionY()),m_fMapMove);
+		pTileSprite2 = pMap->HeroPosToTileSprite(ccp(pHero->getPositionX()+5,pHero->getPositionY()),m_fMapMove);
+		pTileSprite3 = pMap->HeroPosToTileSprite(ccp(pHero->getPositionX()+pHero->boundingBox().size.width-5,pHero->getPositionY()),m_fMapMove);
+		if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
+		{
+			pHero->setPosition(CurMarioPos);
+		}
+		else
+		{
+			pHero->setPositionY(pHero->getPositionY()-2);
+		}
+		
+		pTileSprite1 = NULL;
+		pTileSprite2 = NULL;
+		pTileSprite3 = NULL;
+		//根据变量控制英雄移动及动作
 		if (bIsLeftKeyDown)
 		{
-			if (pHero->boundingBox().getMinX()>0)
-			{
-				pHero->setPositionX(pHero->getPositionX()-2);
-			}
-		}
-		if (bIsRightKeyDown)
-		{
-			if (pHero->getPositionX()>100)
-			{
-				pMap->setPositionX(pMap->getPositionX()-2);
-				m_fMapMove += 2;
-			}
-			else 
-			{
-				pHero->setPositionX(pHero->getPositionX()+2);
-			}
-		}
-		if (bIsJumpKeyDown)
-		{
-			if (pHero->boundingBox().getMaxY()<_SCREEN_HEIGHT_)
-			{
-				pHero->setPositionY(pHero->getPositionY()+5);
-			}
-			bMarioInSky = true;
-		}
-
-		//碰撞判断
-		switch (pMap->HeroPosToTileType(pHero->boundingBox(),m_fMapMove))
-		{
-		case enTileTypeLand:
-		case enTileTypeBlock:
-		case enTileTypePipe:
+			//用英雄左方的两个瓦片来判断后退碰撞
+			pTileSprite1 = pMap->HeroPosToTileSprite(ccp(pHero->getPositionX(),pHero->getPositionY()+pHero->boundingBox().size.height),m_fMapMove);
+			pTileSprite2 = pMap->HeroPosToTileSprite(ccp(pHero->getPositionX(),pHero->getPositionY()+pHero->boundingBox().size.height*0.15),m_fMapMove);
+			if (pTileSprite1!=NULL || pTileSprite2!=NULL)
 			{
 				pHero->setPosition(CurMarioPos);
-				bMarioInSky = false;
 			}
-			break;
+			else
+			{
+				if (pHero->boundingBox().getMinX()>0)
+				{
+					pHero->setPositionX(pHero->getPositionX()-2);
+				}
+			}
 		}
-
+		pTileSprite1 = NULL;
+		pTileSprite2 = NULL;
+		pTileSprite3 = NULL;
+		if (bIsRightKeyDown)
+		{
+			//用英雄右方的两个瓦片来判断前进碰撞
+			pTileSprite1 = pMap->HeroPosToTileSprite(ccp(pHero->getPositionX()+pHero->boundingBox().size.width,pHero->getPositionY()+pHero->boundingBox().size.height),m_fMapMove);
+			pTileSprite2 = pMap->HeroPosToTileSprite(ccp(pHero->getPositionX()+pHero->boundingBox().size.width,pHero->getPositionY()+pHero->boundingBox().size.height*0.15),m_fMapMove);
+			if (pTileSprite1!=NULL || pTileSprite2!=NULL)
+			{
+				pHero->setPosition(CurMarioPos);
+			}
+			else
+			{
+				if (pHero->getPositionX()>100)
+				{
+					pMap->setPositionX(pMap->getPositionX()-2);
+					m_fMapMove += 2;
+				}
+				else 
+				{
+					pHero->setPositionX(pHero->getPositionX()+2);
+				}
+			}
+		}
+		pTileSprite1 = NULL;
+		pTileSprite2 = NULL;
+		pTileSprite3 = NULL;
+		if (bIsJumpKeyDown)
+		{
+			//if (pHero->boundingBox().getMaxY()<_SCREEN_HEIGHT_)
+			if (bIsJumping==false)
+			{
+				CCMoveBy* pJump = CCMoveBy::create(0.3,ccp(0,80));
+				pHero->runAction(CCSequence::create(pJump,CCCallFunc::create(this, callfunc_selector(CMGameScene::OnJumpCallBack)),NULL));
+				bIsJumping = true;
+			}
+		}
+		
 		//CCLog("TileType = %d",pMap->HeroPosToTileType(pHero->getPosition()));
 		//CCLog("HeroPosX=%f	HeroPosY=%f",pHero->getPositionX(),pHero->getPositionY());
 		return;
 	} while (false);
 	CCLog("fun CMGameScene::Update Error!");
+}
+
+void CMGameScene::OnJumpCallBack()
+{
+	bIsJumping = false; 
 }
