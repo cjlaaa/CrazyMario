@@ -1,48 +1,78 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="win32">
-      <UniqueIdentifier>{84a8ebd7-7cf0-47f6-b75e-d441df67da40}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Classes">
       <UniqueIdentifier>{bb6c862e-70e9-49d9-81b7-3829a6f50471}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\框架">
+      <UniqueIdentifier>{c731c2a1-7c87-44bc-9815-09986a2a3d11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\游戏场景">
+      <UniqueIdentifier>{9fa5cd9d-f908-44f1-9daf-f9fb1165d934}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\马里奥">
+      <UniqueIdentifier>{1f60c82d-4b71-4600-9ad9-9bfad7aeb858}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\瓦片地图">
+      <UniqueIdentifier>{95012c72-3e82-4d8b-8d19-ec7ac1d03d87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\公共定义">
+      <UniqueIdentifier>{99e2b62a-80b6-4337-9303-9273e6beb162}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\怪物与宝箱类">
+      <UniqueIdentifier>{4399b819-2b03-438f-97d7-ec57ff45ebcb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\物品道具">
+      <UniqueIdentifier>{0caa36e9-1b4b-4e7e-9108-1d095e011e73}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>win32</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\AppDelegate.cpp">
-      <Filter>Classes</Filter>
+      <Filter>Classes\框架</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Classes\框架</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\CMGameScene.cpp">
-      <Filter>Classes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Classes\CMGameMap.cpp">
-      <Filter>Classes</Filter>
+      <Filter>Classes\游戏场景</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\CMMario.cpp">
-      <Filter>Classes</Filter>
+      <Filter>Classes\马里奥</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\CMGameMap.cpp">
+      <Filter>Classes\瓦片地图</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\CMMonster.cpp">
+      <Filter>Classes\怪物与宝箱类</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\CMItem.cpp">
+      <Filter>Classes\物品道具</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="main.h">
-      <Filter>win32</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\AppDelegate.h">
-      <Filter>Classes</Filter>
+      <Filter>Classes\框架</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\CMPublicDefine.h">
-      <Filter>Classes</Filter>
+    <ClInclude Include="main.h">
+      <Filter>Classes\框架</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\CMGameScene.h">
-      <Filter>Classes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Classes\CMGameMap.h">
-      <Filter>Classes</Filter>
+      <Filter>Classes\游戏场景</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\CMMario.h">
-      <Filter>Classes</Filter>
+      <Filter>Classes\马里奥</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\CMGameMap.h">
+      <Filter>Classes\瓦片地图</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\CMPublicDefine.h">
+      <Filter>Classes\公共定义</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\CMMonster.h">
+      <Filter>Classes\怪物与宝箱类</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\CMItem.h">
+      <Filter>Classes\物品道具</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -12,7 +12,7 @@ enum
 	enZOrderFront,
 };
 
-enum TileType
+enum enTileType
 {
 	enTileTypeLand,   // 地板
 	enTileTypeBlock,  // 金币等小块块
@@ -42,6 +42,18 @@ public:
 	{
 		m_pReceiver->OnMsgReceive(enMsg,pData,nSize);
 	}
+};
+
+enum 
+{
+	enMsgCoinCollision,	//金币碰撞
+};
+
+//金币碰撞消息
+class CMItemCoin;
+struct MsgForCoinCollision
+{
+	CMItemCoin* pCoin;
 };
 
 #endif

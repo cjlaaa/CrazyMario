@@ -3,21 +3,29 @@
 
 #include "CMPublicDefine.h"
 #include "CMMario.h"
+#include "CMItem.h"
+#include "CMMonster.h"
 
-class CMGameMap : public cocos2d::CCTMXTiledMap , public CMSender
+class CMGameMap : public cocos2d::CCTMXTiledMap , public CMSender,public CMReceiver
 {
 public:
 	static CMGameMap* CreateGameMap(const char* pFileName,CMMario* pMario);
 	// 返回地图指定位置上的图块类型，用作碰撞检测
-	CCSprite* MarioPosToTileSprite(CCPoint HeroPos,float fMapMove ,bool &bIsHeroDead);
-	
+	CCSprite* TileMapLayerPosToTileSpriteForCollision(CCPoint HeroPos,float fMapMove ,bool &bIsHeroDead);
+	enTileType TileMapPosToTileType(CCPoint HeroPos,float fMapMove);
+	CCPoint TileMapPosToTileMapLayerPos(CCPoint TilePos);
+	CCPoint TileMapLayerPosToWorldPos(CCPoint TileMapLayerPos,float m_fMapMove);
 
 private:
 	CMMario* m_pMario;
 	virtual bool Init(CMMario* pMario);
 	virtual void OnCallPerFrame(float dt);
+	void OnMsgReceive( int enMsg,void* pData,int nSize );
+	void onExit();
+	
 
-	CREATE_FUNC(CMGameMap);
+	CCArray	*m_pArrayOfCoin;		//金币数组
+	CCArray *m_pArrayMonsters;			//怪物数组
 
 	float m_fMapMove;
 	float m_fDropSpeed;
@@ -27,9 +35,9 @@ private:
 	bool m_bIsLeftKeyDown;
 	bool m_bIsRightKeyDown;
 	bool m_bIsJumpKeyDown;
+	bool m_bIsHeroDead;
 };
 
-#endif
 
 //win32平台按键控制部分
 #if(CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
@@ -187,3 +195,4 @@ enum EKEY_CODE
 	KEY_KEY_CODES_COUNT  = 0xFF // this is not a key, but the amount of keycodes there are.
 };
 
+#endif
