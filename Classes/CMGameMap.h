@@ -11,9 +11,12 @@ class CMGameMap : public cocos2d::CCTMXTiledMap , public CMSender,public CMRecei
 public:
 	static CMGameMap* CreateGameMap(const char* pFileName,CMMario* pMario);
 	// 返回地图指定位置上的图块类型，用作碰撞检测
-	CCSprite* TileMapLayerPosToTileSpriteForCollision(CCPoint HeroPos,float fMapMove ,bool &bIsHeroDead);
+	CCSprite* TileMapLayerPosToTileSprite(CCPoint HeroPos,float fMapMove ,bool &bIsHeroDead);
+	//通过地图块坐标返回地图块类型
 	enTileType TileMapPosToTileType(CCPoint HeroPos,float fMapMove);
+	//地图块坐标转换为地图层坐标
 	CCPoint TileMapPosToTileMapLayerPos(CCPoint TilePos);
+	//地图层坐标转换为世界坐标
 	CCPoint TileMapLayerPosToWorldPos(CCPoint TileMapLayerPos,float m_fMapMove);
 
 private:

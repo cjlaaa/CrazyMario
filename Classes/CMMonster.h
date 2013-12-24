@@ -1,19 +1,19 @@
-#ifndef _CM_MONSTER_HEAD_FILE_
+ï»¿#ifndef _CM_MONSTER_HEAD_FILE_
 #define _CM_MONSTER_HEAD_FILE_
 #include "CMPublicDefine.h"
 #include "CMMario.h"
 #include "CMGameMap.h"
  
 /************************************************************************/
-/* ¹ÖÎï»ùÀà                                                         
- * 1,Ô¼¶¨½Ó¿Ú
- * 2,×ö»ù±¾Éè¶¨															*/
+/* æ€ªç‰©åŸºç±»                                                         
+ * 1,çº¦å®šæ¥å£
+ * 2,åšåŸºæœ¬è®¾å®š															*/
 /************************************************************************/
 enum enumMonsterDeadType
 {
-	enMonsterDeadTypeFall,		//µô¿Ó
-	enMonsterDeadTypeStamp,		//²ÈÌ¤
-	enMonsterDeadTypeFire,		//»ğÇò
+	enMonsterDeadTypeFall,		//æ‰å‘
+	enMonsterDeadTypeStamp,		//è¸©è¸
+	enMonsterDeadTypeFire,		//ç«çƒ
 };
 class CMMonsterBasic: public CCNode,public CMSender
 {
@@ -23,16 +23,16 @@ protected:
 protected:
 	virtual bool init(CCPoint ptMonsterPos,CMMario *pMario,CMReceiver *pMsgRecver);
 
-	virtual bool OnCollisionMario() = 0;//ÓëMarioÅö×²µÄÊÂ¼ş
+	virtual bool OnCollisionMario() = 0;//ä¸Marioç¢°æ’çš„äº‹ä»¶
 
 	virtual void Dead(enumMonsterDeadType DeadType);
 public:
-	//¼ì²éÓëMarioµÄÅö×² ²¢°ÑÏûÏ¢·¢ËÍ¸øMsgRecver
-	virtual void OnCallPerFrame();
+	//æ£€æŸ¥ä¸Marioçš„ç¢°æ’ å¹¶æŠŠæ¶ˆæ¯å‘é€ç»™MsgRecver
+	virtual void OnCallPerFrame(float fT);
 };
 
 /************************************************************************/
-/* Ä¢¹½¹Ö                                                                     */
+/* è˜‘è‡æ€ª                                                                     */
 /************************************************************************/
 class CMMonsterMushrooms:public CMMonsterBasic
 {
@@ -45,15 +45,15 @@ protected:
 
 };
 /************************************************************************/
-/* ÎÚ¹ê                                                               */
+/* ä¹Œé¾Ÿ                                                               */
 /************************************************************************/
 
 /************************************************************************/
-/* ·ÉÓã                                                                    */
+/* é£é±¼                                                                    */
 /************************************************************************/
 
 /************************************************************************/
-/* »¨                                                                    */
+/* èŠ±                                                                    */
 /************************************************************************/
 
 #endif

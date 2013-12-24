@@ -1,32 +1,32 @@
-#ifndef _CM_ITEM_H_
+ï»¿#ifndef _CM_ITEM_H_
 #define _CM_ITEM_H_
 #include "CMPublicDefine.h"
 #include "CMMario.h"
 #include "CMGameMap.h"
 /************************************************************************/
-/* ÎïÆ·µÀ¾ß»ùÀà                                                         
- * 1,Ô¼¶¨½Ó¿Ú
- * 2,×ö»ù±¾Éè¶¨															*/
+/* ç‰©å“é“å…·åŸºç±»                                                         
+ * 1,çº¦å®šæ¥å£
+ * 2,åšåŸºæœ¬è®¾å®š															*/
 /************************************************************************/
 class CMItemBasic: public CCNode,public CMSender
 {
 protected:
 	CMMario		*m_pMario;
-	//MarioµÄµØÍ¼²ã×ø±ê
+	//Marioçš„åœ°å›¾å±‚åæ ‡ï¼Œç”¨ä»¥å’Œé‡‘å¸åšç¢°æ’æ£€æµ‹
 	CCPoint		m_MarioTileMapLayerPos;
 protected:
 	virtual bool init(CCPoint ptItemPos,CCSize szItemSize,CMMario *pMario,CMReceiver *pMsgRecver);
 
-	virtual bool OnCollisionMario() = 0;//ÓëMarioÅö×²µÄÊÂ¼ş
-	//¼ì²éÓëMarioµÄÅö×² ²¢°ÑÏûÏ¢·¢ËÍ¸øMsgRecver
+	virtual bool OnCollisionMario() = 0;//ä¸Marioç¢°æ’çš„äº‹ä»¶
+	//æ£€æŸ¥ä¸Marioçš„ç¢°æ’ å¹¶æŠŠæ¶ˆæ¯å‘é€ç»™MsgRecver
 	virtual void OnCallPerFrame(float fT);
 public:
-	//Ë¢ĞÂ½ğ±ÒµÄÊÀ½ç×ø±ê
+	//åˆ·æ–°é‡‘å¸çš„ä¸–ç•Œåæ ‡
 	void RefreshCoinWorldPosition(CCPoint MarioPos);
 };
 /************************************************************************/
-/* ½ğ±ÒÀà                                               
- * 1£¬½ğ±ÒµÄÊıÖµ²»Í¬(ÔÚTileMapÖĞ±à¼­)*/
+/* é‡‘å¸ç±»                                               
+ * 1ï¼Œé‡‘å¸çš„æ•°å€¼ä¸åŒ(åœ¨TileMapä¸­ç¼–è¾‘)*/
 /************************************************************************/
 class CMItemCoin:public CMItemBasic
 {
@@ -42,11 +42,11 @@ protected:
 	virtual bool init(CCPoint ptItemPos,CCSize szItemSize,CMMario *pMario,CMReceiver *pMsgRecver);
 
 	virtual bool OnCollisionMario();
-	//¼ì²éÓëMarioµÄÅö×² ²¢°ÑÏûÏ¢·¢ËÍ¸øMsgRecver
+	//æ£€æŸ¥ä¸Marioçš„ç¢°æ’ å¹¶æŠŠæ¶ˆæ¯å‘é€ç»™MsgRecver
 	virtual void OnCallPerFrame(float fT);
 };
 /************************************************************************/
-/* ±äÉíÄ¢¹½                                               
+/* å˜èº«è˜‘è‡                                               
 /************************************************************************/
 class CMItemMashrooms:public CMItemBasic
 {		

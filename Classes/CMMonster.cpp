@@ -1,13 +1,19 @@
-#include "CMMonster.h"
+ï»¿#include "CMMonster.h"
 
 /************************************************************************/
-/* ¹ÖÎï»ùÀà
+/* æ€ªç‰©åŸºç±»
 /************************************************************************/
 
 bool CMMonsterBasic::init( CCPoint ptMonsterPos,CMMario *pMario,CMReceiver *pMsgRecver )
 {
 	do 
 	{
+		CC_BREAK_IF(!CCNode::init());
+
+		m_pMario = pMario;
+
+		//æ³¨å†ŒUpdateå‡½æ•°
+		this->schedule(schedule_selector(CMMonsterBasic::OnCallPerFrame));
 
 		return true;
 	} while (false);
@@ -36,18 +42,18 @@ void CMMonsterBasic::Dead( enumMonsterDeadType DeadType )
 	CCLog("fun CMMonsterBasic::Dead Error!");
 }
 
-void CMMonsterBasic::OnCallPerFrame()
+void CMMonsterBasic::OnCallPerFrame(float fT)
 {
 	do 
 	{
-
+		OnCollisionMario();
 		return;
 	} while (false);
 	CCLog("fun CMMonsterBasic::OnCallPerFrame Error!");
 }
 
 /************************************************************************/
-/* Ä¢¹½¹Ö                                                                     */
+/* è˜‘è‡æ€ª                                                                     */
 /************************************************************************/
 CMMonsterMushrooms * CMMonsterMushrooms::CreateMonsterMushrooms( CCPoint ptMonsterPos,CMMario *pMario,CMReceiver *pMsgRecver )
 {
@@ -70,6 +76,8 @@ bool CMMonsterMushrooms::init( CCPoint ptMonsterPos,CMMario *pMario,CMReceiver *
 {
 	do 
 	{
+		CC_BREAK_IF(!CMMonsterBasic::init(ptMonsterPos,pMario,pMsgRecver));
+
 		CCSprite* pMushrooms = CCSprite::create("Mushroom0.png", CCRectMake(32, 0, 16, 16));
 		CC_BREAK_IF(pMushrooms==NULL);
 		pMushrooms->setPosition(ccp(0,0));

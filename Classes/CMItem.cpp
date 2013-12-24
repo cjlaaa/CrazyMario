@@ -1,7 +1,7 @@
-#include "CMItem.h"
+Ôªø#include "CMItem.h"
 
 /************************************************************************/
-/* ŒÔ∆∑µ¿æﬂª˘¿‡  
+/* Áâ©ÂìÅÈÅìÂÖ∑Âü∫Á±ª  
 /************************************************************************/
 bool CMItemBasic::init( CCPoint ptItemPos,CCSize szItemSize,CMMario *pMario,CMReceiver *pMsgRecver )
 {
@@ -11,7 +11,7 @@ bool CMItemBasic::init( CCPoint ptItemPos,CCSize szItemSize,CMMario *pMario,CMRe
 
 		m_pMario = pMario;
 
-		//◊¢≤·Update∫Ø ˝
+		//Ê≥®ÂÜåUpdateÂáΩÊï∞
 		this->schedule(schedule_selector(CMItemBasic::OnCallPerFrame));
 
 		return true;
@@ -47,7 +47,7 @@ void CMItemBasic::RefreshCoinWorldPosition( CCPoint WorldPos )
 }
 
 /************************************************************************/
-/* Ω±“¿‡                               
+/* ÈáëÂ∏ÅÁ±ª                               
 /************************************************************************/
 CMItemCoin * CMItemCoin::CreateItemIcon( CCPoint ptItemPos,CCSize szItemSize,CMMario *pMario,CMReceiver *pMsgRecver )
 {
@@ -93,7 +93,7 @@ bool CMItemCoin::OnCollisionMario()
 		CCSprite* pCoin = dynamic_cast<CCSprite*>(getChildByTag(enTagCoin));
 		CC_BREAK_IF(pCoin==NULL);
 		
-		//≈–∂œ¬Ì¿Ô∞¬”ÎΩ±“µƒ≈ˆ◊≤£®Œ¥≥…π¶£©
+		//Âà§Êñ≠È©¨ÈáåÂ••‰∏éÈáëÂ∏ÅÁöÑÁ¢∞ÊíûÔºàÊú™ÊàêÂäüÔºâ
 		if (m_pMario->BoundingBox().intersectsRect(CCRectMake(m_MarioTileMapLayerPos.x,m_MarioTileMapLayerPos.y,pCoin->boundingBox().size.width,pCoin->boundingBox().size.height)))
 		{
 			CCLog("%f	%f",pCoin->getPositionX(),pCoin->getPositionY());
@@ -117,7 +117,7 @@ void CMItemCoin::OnCallPerFrame( float fT )
 }
 
 /************************************************************************/
-/* ±‰…Ìƒ¢πΩ                                               
+/* ÂèòË∫´ËòëËèá                                               
 /************************************************************************/
 CMItemMashrooms * CMItemMashrooms::CreateItemCMItemMashrooms( CCPoint ptItemPos,CCSize szItemSize,CMMario *pMario,CMReceiver *pMsgRecver )
 {

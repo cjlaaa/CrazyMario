@@ -108,7 +108,7 @@ bool CMGameMap::Init(CMMario* pMario)
 	return false;
 }
 
-CCSprite* CMGameMap::TileMapLayerPosToTileSpriteForCollision( CCPoint HeroPos,float fMapMove, bool &bIsHeroDead)
+CCSprite* CMGameMap::TileMapLayerPosToTileSprite( CCPoint HeroPos,float fMapMove, bool &bIsHeroDead)
 {
 	do 
 	{
@@ -237,7 +237,7 @@ void CMGameMap::OnCallPerFrame(float dt)
 
 		//判断马里奥是否 [落坑] 死亡
 		bool bIsHeroDead = false;
-		pMap->TileMapLayerPosToTileSpriteForCollision(m_pMario->getPosition(),m_fMapMove,bIsHeroDead);
+		pMap->TileMapLayerPosToTileSprite(m_pMario->getPosition(),m_fMapMove,bIsHeroDead);
 		if(bIsHeroDead)
 		{
 			CCLog("@GameOver!");
@@ -252,9 +252,9 @@ void CMGameMap::OnCallPerFrame(float dt)
 		if (m_bIsLeftKeyDown)
 		{
 			//用英雄左方的三个瓦片来判断后退碰撞
-			pTileSprite1 = pMap->TileMapLayerPosToTileSpriteForCollision(ccp(m_pMario->getPositionX(),m_pMario->getPositionY()+m_pMario->BoundingBox().size.height),m_fMapMove,bIsHeroDead);
-			pTileSprite2 = pMap->TileMapLayerPosToTileSpriteForCollision(ccp(m_pMario->getPositionX(),m_pMario->getPositionY()+m_pMario->BoundingBox().size.height/2),m_fMapMove,bIsHeroDead);
-			pTileSprite3 = pMap->TileMapLayerPosToTileSpriteForCollision(ccp(m_pMario->getPositionX(),m_pMario->getPositionY()),m_fMapMove,bIsHeroDead);
+			pTileSprite1 = pMap->TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX(),m_pMario->getPositionY()+m_pMario->BoundingBox().size.height),m_fMapMove,bIsHeroDead);
+			pTileSprite2 = pMap->TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX(),m_pMario->getPositionY()+m_pMario->BoundingBox().size.height/2),m_fMapMove,bIsHeroDead);
+			pTileSprite3 = pMap->TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX(),m_pMario->getPositionY()),m_fMapMove,bIsHeroDead);
 			if (pTileSprite1!=NULL || pTileSprite2!=NULL)
 			{
 				m_pMario->setPosition(CurMarioPos);
@@ -275,9 +275,9 @@ void CMGameMap::OnCallPerFrame(float dt)
 		if (m_bIsRightKeyDown)
 		{
 			//用英雄右方的三个瓦片来判断前进碰撞
-			pTileSprite1 = pMap->TileMapLayerPosToTileSpriteForCollision(ccp(m_pMario->getPositionX()+m_pMario->BoundingBox().size.width,m_pMario->getPositionY()+m_pMario->BoundingBox().size.height),m_fMapMove,bIsHeroDead);
-			pTileSprite2 = pMap->TileMapLayerPosToTileSpriteForCollision(ccp(m_pMario->getPositionX()+m_pMario->BoundingBox().size.width,m_pMario->getPositionY()+m_pMario->BoundingBox().size.height/2),m_fMapMove,bIsHeroDead);
-			pTileSprite3 = pMap->TileMapLayerPosToTileSpriteForCollision(ccp(m_pMario->getPositionX()+m_pMario->BoundingBox().size.width,m_pMario->getPositionY()),m_fMapMove,bIsHeroDead);
+			pTileSprite1 = pMap->TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX()+m_pMario->BoundingBox().size.width,m_pMario->getPositionY()+m_pMario->BoundingBox().size.height),m_fMapMove,bIsHeroDead);
+			pTileSprite2 = pMap->TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX()+m_pMario->BoundingBox().size.width,m_pMario->getPositionY()+m_pMario->BoundingBox().size.height/2),m_fMapMove,bIsHeroDead);
+			pTileSprite3 = pMap->TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX()+m_pMario->BoundingBox().size.width,m_pMario->getPositionY()),m_fMapMove,bIsHeroDead);
 			if (pTileSprite1!=NULL || pTileSprite2!=NULL)
 			{
 				m_pMario->setPosition(CurMarioPos);
@@ -301,9 +301,9 @@ void CMGameMap::OnCallPerFrame(float dt)
 		pTileSprite2 = NULL;
 		pTileSprite3 = NULL;
 		//用英雄下方的三个瓦片来判断掉落碰撞
-		pTileSprite1 = pMap->TileMapLayerPosToTileSpriteForCollision(ccp(m_pMario->getPositionX()+m_pMario->BoundingBox().size.width/2,m_pMario->getPositionY()),m_fMapMove,bIsHeroDead);
-		pTileSprite2 = pMap->TileMapLayerPosToTileSpriteForCollision(ccp(m_pMario->getPositionX()+5,m_pMario->getPositionY()),m_fMapMove,bIsHeroDead);
-		pTileSprite3 = pMap->TileMapLayerPosToTileSpriteForCollision(ccp(m_pMario->getPositionX()+m_pMario->BoundingBox().size.width-5,m_pMario->getPositionY()),m_fMapMove,bIsHeroDead);
+		pTileSprite1 = pMap->TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX()+m_pMario->BoundingBox().size.width/2,m_pMario->getPositionY()),m_fMapMove,bIsHeroDead);
+		pTileSprite2 = pMap->TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX()+5,m_pMario->getPositionY()),m_fMapMove,bIsHeroDead);
+		pTileSprite3 = pMap->TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX()+m_pMario->BoundingBox().size.width-5,m_pMario->getPositionY()),m_fMapMove,bIsHeroDead);
 		if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
 		{
 			m_pMario->setPosition(CurMarioPos);
@@ -324,9 +324,9 @@ void CMGameMap::OnCallPerFrame(float dt)
 		pTileSprite2 = NULL;
 		pTileSprite3 = NULL;
 		//用英雄上方的三个瓦片来判断头顶碰撞
-		pTileSprite1 = pMap->TileMapLayerPosToTileSpriteForCollision(ccp(m_pMario->getPositionX()+m_pMario->BoundingBox().size.width/2,m_pMario->getPositionY()+m_pMario->BoundingBox().size.height),m_fMapMove,bIsHeroDead);
-		pTileSprite2 = pMap->TileMapLayerPosToTileSpriteForCollision(ccp(m_pMario->getPositionX()+5,m_pMario->getPositionY()+m_pMario->BoundingBox().size.height),m_fMapMove,bIsHeroDead);
-		pTileSprite3 = pMap->TileMapLayerPosToTileSpriteForCollision(ccp(m_pMario->getPositionX()+m_pMario->BoundingBox().size.width-5,m_pMario->getPositionY()+m_pMario->BoundingBox().size.height),m_fMapMove,bIsHeroDead);
+		pTileSprite1 = pMap->TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX()+m_pMario->BoundingBox().size.width/2,m_pMario->getPositionY()+m_pMario->BoundingBox().size.height),m_fMapMove,bIsHeroDead);
+		pTileSprite2 = pMap->TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX()+5,m_pMario->getPositionY()+m_pMario->BoundingBox().size.height),m_fMapMove,bIsHeroDead);
+		pTileSprite3 = pMap->TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX()+m_pMario->BoundingBox().size.width-5,m_pMario->getPositionY()+m_pMario->BoundingBox().size.height),m_fMapMove,bIsHeroDead);
 		if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
 		{
 			m_pMario->setPosition(CurMarioPos);
