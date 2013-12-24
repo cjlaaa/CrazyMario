@@ -22,11 +22,31 @@ private:
 	void OnMsgReceive( int enMsg,void* pData,int nSize );
 	void Update(float dt);
 
+	void InitControlUI();
+	void OnMenuLeftKeyCallBack(CCObject *pSender);
+	void OnMenuRightKeyCallBack(CCObject *pSender);
+	void OnMenuJumpKeyCallBack(CCObject *pSender);
+	void OnMenuFireKeyCallBack(CCObject *pSender);
+
 	enum 
 	{
 		enTagHero,
 		enTagMap,
+		enTagMenu,
 	};
+
+	enum 
+	{
+		enTagLeftKey,
+		enTagRightKey,
+		enTagJumpKey,
+		enTagFireKey,
+	};
+
+	void ccTouchesBegan(CCSet *pTouches, CCEvent *pEvent);
+	void ccTouchesEnded(CCSet *pTouches, CCEvent *pEvent);
+	void ccTouchesMoved(CCSet *pTouches, CCEvent *pEvent);
+	void ccTouchesCancelled(CCSet *pTouches, CCEvent *pEvent);
 
 	float m_fMapMove;
 	float m_fDropSpeed;

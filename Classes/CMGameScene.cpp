@@ -55,6 +55,8 @@ bool CMGameScene::init()
 		m_bIsRightKeyDown = false;
 		m_bIsJumpKeyDown = false;
 
+		InitControlUI();
+
 		return true;
 	} while (false);
 	CCLog("Fun CMGameScene::init Error!");
@@ -89,6 +91,18 @@ void CMGameScene::Update(float dt)
 		CCPoint CurMarioPos = pMario->getPosition();
 
 #if(CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)    
+
+		CCMenu* pMenu = dynamic_cast<CCMenu*>(getChildByTag(enTagMenu));
+		CC_BREAK_IF(pMenu==NULL);
+		CCMenuItemImage* pLeftKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagLeftKey));
+		CC_BREAK_IF(pLeftKey==NULL);
+		CCMenuItemImage* pRightKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagLeftKey));
+		CC_BREAK_IF(pRightKey==NULL);
+		CCMenuItemImage* pJumpKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagLeftKey));
+		CC_BREAK_IF(pJumpKey==NULL);
+		CCMenuItemImage* pFireKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagLeftKey));
+		CC_BREAK_IF(pFireKey==NULL);
+
 		if(KEY_DOWN(KEY_KEY_K))
 		{
 
@@ -230,4 +244,96 @@ void CMGameScene::Update(float dt)
 		return;
 	} while (false);
 	CCLog("fun CMGameScene::Update Error!");
+}
+
+void CMGameScene::ccTouchesBegan( CCSet *pTouches, CCEvent *pEvent )
+{
+
+}
+
+void CMGameScene::ccTouchesEnded( CCSet *pTouches, CCEvent *pEvent )
+{
+
+}
+
+void CMGameScene::ccTouchesMoved( CCSet *pTouches, CCEvent *pEvent )
+{
+
+}
+
+void CMGameScene::ccTouchesCancelled( CCSet *pTouches, CCEvent *pEvent )
+{
+
+}
+
+void CMGameScene::InitControlUI()
+{
+	do 
+	{
+		CCSprite* pControlUIBg = CCSprite::create("controlUI.png");
+		CC_BREAK_IF(pControlUIBg==NULL);
+		pControlUIBg->setAnchorPoint(ccp(0, 0));
+		pControlUIBg->setPosition(ccp(0,0));
+		this->addChild(pControlUIBg);
+
+		CCMenu* pMenu = CCMenu::create();
+		CC_BREAK_IF(pMenu==NULL);
+		pMenu->setPosition(ccp(0,0));
+		addChild(pMenu,enZOrderFront,enTagMenu);
+
+		CCMenuItemImage *pLeftKey = CCMenuItemImage::create(
+			"AB_normal.png",
+			"AB_select.png",
+			this, 
+			menu_selector(CMGameScene::OnMenuLeftKeyCallBack));
+		pLeftKey->setPosition(ccp(40,48));
+		pMenu->addChild(pLeftKey,enZOrderFront,enTagLeftKey);
+
+		CCMenuItemImage *pRightKey = CCMenuItemImage::create(
+			"AB_normal.png",
+			"AB_select.png",
+			this, 
+			menu_selector(CMGameScene::OnMenuRightKeyCallBack));
+		pRightKey->setPosition(ccp(128,48));
+		pMenu->addChild(pRightKey,enZOrderFront,enTagLeftKey);
+
+		CCMenuItemImage *pJumpKey = CCMenuItemImage::create(
+			"AB_normal.png",
+			"AB_select.png",
+			this, 
+			menu_selector(CMGameScene::OnMenuJumpKeyCallBack));
+		pJumpKey->setPosition(ccp(432,35));
+		pMenu->addChild(pJumpKey,enZOrderFront,enTagLeftKey);
+
+		CCMenuItemImage *pFireKey = CCMenuItemImage::create(
+			"AB_normal.png",
+			"AB_select.png",
+			this, 
+			menu_selector(CMGameScene::OnMenuFireKeyCallBack));
+		pFireKey->setPosition(ccp(353,35));
+		pMenu->addChild(pFireKey,enZOrderFront,enTagLeftKey);
+
+		return;
+	} while (false);
+	CCLog("Fun CMGameScene::InitControlUI Error!");
+}
+
+void CMGameScene::OnMenuLeftKeyCallBack( CCObject *pSender )
+{
+	CCLog("Left");
+}
+
+void CMGameScene::OnMenuRightKeyCallBack( CCObject *pSender )
+{
+	CCLog("Right");
+}
+
+void CMGameScene::OnMenuJumpKeyCallBack( CCObject *pSender )
+{
+	CCLog("Jump");
+}
+
+void CMGameScene::OnMenuFireKeyCallBack( CCObject *pSender )
+{
+	CCLog("Fire");
 }
