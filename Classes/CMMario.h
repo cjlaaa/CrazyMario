@@ -3,11 +3,13 @@
 
 #include "CMPublicDefine.h"
 
-class CMMario : public CCSprite,public CMSender
+class CMMario : public CCNode,public CMSender
 {
 public:
 	static CMMario* CreateHero();
+	CCRect BoundingBox();
 private:
+	CCRect RectForCollision;
 	bool Init();
 };
 
