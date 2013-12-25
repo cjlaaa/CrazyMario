@@ -30,7 +30,6 @@ private:
 
 	enum 
 	{
-		enTagHero,
 		enTagMap,
 		enTagMenu,
 	};

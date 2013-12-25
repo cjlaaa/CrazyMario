@@ -9,6 +9,7 @@
  * 1,约定接口
  * 2,做基本设定															*/
 /************************************************************************/
+class CMGameMap;
 enum enumMonsterDeadType
 {
 	enMonsterDeadTypeFall,		//掉坑
@@ -19,9 +20,9 @@ class CMMonsterBasic: public CCNode,public CMSender
 {
 protected:
 	CMMario		*m_pMario;
-	//CMGameMap	*m_pGameMap;
+	CMGameMap	*m_pGameMap;
 protected:
-	virtual bool init(CCPoint ptMonsterPos,CMMario *pMario,CMReceiver *pMsgRecver);
+	virtual bool init(CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pMsgRecver);
 
 	virtual bool OnCollisionMario() = 0;//与Mario碰撞的事件
 
@@ -29,6 +30,11 @@ protected:
 public:
 	//检查与Mario的碰撞 并把消息发送给MsgRecver
 	virtual void OnCallPerFrame(float fT);
+protected:
+	enum 
+	{
+		enTagMainImage,
+	};
 };
 
 /************************************************************************/
@@ -37,12 +43,11 @@ public:
 class CMMonsterMushrooms:public CMMonsterBasic
 {
 public:
-	static CMMonsterMushrooms *CreateMonsterMushrooms(CCPoint ptMonsterPos,CMMario *pMario,CMReceiver *pMsgRecver);
+	static CMMonsterMushrooms *CreateMonsterMushrooms(CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pMsgRecver);
 protected:
-	virtual bool init(CCPoint ptMonsterPos,CMMario *pMario,CMReceiver *pMsgRecver);
+	virtual bool init(CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pMsgRecver);
 
 	virtual bool OnCollisionMario();
-
 };
 /************************************************************************/
 /* 乌龟                                                               */

@@ -7,11 +7,9 @@
 #include "CMMonster.h"
 #include "CMGameScene.h"
 
-class CMGameMap : public cocos2d::CCTMXTiledMap , public CMSender,public CMReceiver
+class CMGameMap : public cocos2d::CCTMXTiledMap ,public CMReceiver
 {
 protected:
-	CMMario* m_pMario;					//Mario指针，用于碰撞检测
-
 	CCArray	*m_pArrayOfCoin;			//金币数组
 	CCArray *m_pArrayOfDisappearCoin;	//碰撞后待删除的金币数组
 	CCArray *m_pArrayMonsters;			//怪物数组
@@ -26,19 +24,23 @@ protected:
 	bool m_bIsJumpKeyDown;				//跳跃键是否按下
 	bool m_bIsHeroDead;					//是否死亡
 public:
-	static CMGameMap* CreateGameMap(const char* pFileName,CMMario* pMario);
+	static CMGameMap* CreateGameMap(const char* pFileName);
 
-	CCSprite*	TileMapLayerPosToTileSprite(CCPoint HeroPos,float fMapMove);			// 返回地图指定位置上的图块类型，用作碰撞检测
+	CCSprite*	TileMapLayerPosToTileSprite(CCPoint HeroPos);			// 返回地图指定位置上的图块类型，用作碰撞检测
 	enTileType	TileMapPosToTileType(CCPoint HeroPos,float fMapMove);					//通过地图块坐标返回地图块类型
 	CCPoint		TileMapPosToTileMapLayerPos(CCPoint TilePos);							//地图块坐标转换为地图层坐标
 	CCPoint		TileMapLayerPosToWorldPos(CCPoint TileMapLayerPos,float m_fMapMove);	//地图层坐标转换为世界坐标
 protected:
-	virtual bool Init(CMMario* pMario);
+	virtual bool Init();
 	virtual void OnCallPerFrame(float dt);
 	void		 OnMsgReceive( int enMsg,void* pData,int nSize );
 	void		 onExit();
 
 	void		 CoinDisppear(MsgForCoinCollision* pData);
+	enum 
+	{
+		enTagMario = 998,
+	};
 };
 
 

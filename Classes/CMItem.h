@@ -11,9 +11,12 @@
 class CMItemBasic: public CCNode,public CMSender
 {
 protected:
+	enum 
+	{
+		enTagMainImage,
+	};
+protected:
 	CMMario		*m_pMario;
-	//金币的世界坐标，用以和金币做碰撞检测
-	CCPoint		m_CoinWorldPos;
 protected:
 	virtual bool init(CCPoint ptItemPos,CCSize szItemSize,CMMario *pMario,CMReceiver *pMsgRecver);
 
@@ -21,8 +24,6 @@ protected:
 	//检查与Mario的碰撞 并把消息发送给MsgRecver
 	virtual void OnCallPerFrame(float fT);
 public:
-	//刷新金币的世界坐标
-	void RefreshCoinWorldPosition(CCPoint MarioPos);
 };
 /************************************************************************/
 /* 金币类                                               
@@ -30,11 +31,6 @@ public:
 /************************************************************************/
 class CMItemCoin:public CMItemBasic
 {
-protected:
-	enum 
-	{
-		enTagCoin,
-	};
 public:
 	static CMItemCoin *CreateItemIcon(CCPoint ptItemPos,CCSize szItemSize,CMMario *pMario,CMReceiver *pMsgRecver);
 protected:

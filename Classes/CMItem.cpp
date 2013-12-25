@@ -41,11 +41,6 @@ void CMItemBasic::OnCallPerFrame(float fT)
 	CCLog("fun CMItemBasic::OnCallPerFrame Error!");
 }
 
-void CMItemBasic::RefreshCoinWorldPosition( CCPoint WorldPos )
-{
-	m_CoinWorldPos = WorldPos;
-}
-
 /************************************************************************/
 /* 金币类                               
 /************************************************************************/
@@ -75,10 +70,9 @@ bool CMItemCoin::init( CCPoint ptItemPos,CCSize szItemSize,CMMario *pMario,CMRec
 		CCSprite* pCoin = CCSprite::create("coin.png");
 		pCoin->setAnchorPoint(ccp(0,0));
 		CC_BREAK_IF(pCoin==NULL);
-		addChild(pCoin,enZOrderFront,enTagCoin);
+		addChild(pCoin,enZOrderFront,enTagMainImage);
 
 		m_pReceiver = pMsgRecver;
-		m_CoinWorldPos = ptItemPos;
 		
 		return true;
 	} while (false);
@@ -90,11 +84,11 @@ bool CMItemCoin::OnCollisionMario()
 {
 	do 
 	{
-		CCSprite* pCoin = dynamic_cast<CCSprite*>(getChildByTag(enTagCoin));
+		CCSprite* pCoin = dynamic_cast<CCSprite*>(getChildByTag(enTagMainImage));
 		CC_BREAK_IF(pCoin==NULL);
 		
 		//判断马里奥与金币的碰撞
-		if (m_pMario->boundingBox().intersectsRect(CCRectMake(m_CoinWorldPos.x,m_CoinWorldPos.y,getContentSize().width,getContentSize().height)))
+		if (m_pMario->boundingBox().intersectsRect(boundingBox()))
 		{
 			MsgForCoinCollision* pData = new MsgForCoinCollision;
 			pData->pCoin = this;

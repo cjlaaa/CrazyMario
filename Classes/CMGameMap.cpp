@@ -7,14 +7,14 @@
 #define DROP_SPEED_PLUS		0.098	//掉落加速度
 #define MOVE_SPEED			2		//移动速度
 
-CMGameMap* CMGameMap::CreateGameMap(const char* pFileName,CMMario* pMario)
+CMGameMap* CMGameMap::CreateGameMap(const char* pFileName)
 {
 	do 
 	{
 		CMGameMap* pPlayer = new CMGameMap;
 		if (pPlayer && pPlayer->initWithTMXFile(pFileName))
 		{
-			pPlayer->Init(pMario);
+			pPlayer->Init();
 			pPlayer->autorelease();
 			return pPlayer;
 		}
@@ -24,14 +24,13 @@ CMGameMap* CMGameMap::CreateGameMap(const char* pFileName,CMMario* pMario)
 	return NULL;
 }
 
-bool CMGameMap::Init(CMMario* pMario)
+bool CMGameMap::Init()
 {
 	do 
 	{
 		//注册Update函数
 		this->schedule(schedule_selector(CMGameMap::OnCallPerFrame));
 
-		m_pMario = pMario;
 		m_fMapMove = 0;
 		m_fDropSpeedPlus = 0;
 		m_fJumpSpeed = 0;
@@ -49,7 +48,13 @@ bool CMGameMap::Init(CMMario* pMario)
 		m_pArrayOfDisappearCoin = CCArray::create();
 		m_pArrayOfDisappearCoin->retain();
 
-		//初始化金币显示
+		//初始化Mario
+		CMMario* pMario = CMMario::CreateHero();
+		CC_BREAK_IF(pMario==NULL);
+		pMario->setPosition(TileMapPosToTileMapLayerPos(ccp(2,10)));
+		addChild(pMario,enZOrderFront,enTagMario);
+
+		//初始化显示金币
 		CCTMXLayer* pCoinLayer = layerNamed("coin");
 		CC_BREAK_IF(pCoinLayer==NULL);
 		//获得地图的瓦片数量
@@ -97,7 +102,7 @@ bool CMGameMap::Init(CMMario* pMario)
 			{
 				if (strType->m_sString == "mushroom")
 				{
-					CMMonsterMushrooms *pMonster = CMMonsterMushrooms::CreateMonsterMushrooms(TileXY,pMario,this);
+					CMMonsterMushrooms *pMonster = CMMonsterMushrooms::CreateMonsterMushrooms(TileXY,pMario,this,this);
 					if (pMonster==NULL)
 					{
 						CCLog("pMonster==NULL!");
@@ -116,13 +121,13 @@ bool CMGameMap::Init(CMMario* pMario)
 	return false;
 }
 
-CCSprite* CMGameMap::TileMapLayerPosToTileSprite( CCPoint HeroPos,float fMapMove)
+CCSprite* CMGameMap::TileMapLayerPosToTileSprite( CCPoint HeroPos)
 {
 	do 
 	{
 		//将层坐标转换为地图瓦片坐标
-		int nHeroTilePosX = (HeroPos.x + fMapMove)/this->getTileSize().width;
-		int nHeroTempPosY = (HeroPos.y - CONTROL_UI_HEIGHT)/this->getTileSize().height;
+		int nHeroTilePosX = (HeroPos.x)/this->getTileSize().width;
+		int nHeroTempPosY = (HeroPos.y)/this->getTileSize().height;
 		int nHeroTilePosY = TILE_MAP_VERTICAL - nHeroTempPosY;
 
 		//获得地图的各个层
@@ -172,19 +177,14 @@ void CMGameMap::OnCallPerFrame(float dt)
 {
 	do 
 	{
-		CCPoint CurMarioPos = m_pMario->getPosition();
+		CMMario* pMario = dynamic_cast<CMMario*>(getChildByTag(enTagMario));
+		CC_BREAK_IF(pMario==NULL);
 
-		//遍历金币数组，分别将金币的世界坐标更新，用以和Mario碰撞
-		CCObject* pObj = NULL;
-		CCARRAY_FOREACH(m_pArrayOfCoin,pObj)
-		{
-			CMItemCoin* pCoin = dynamic_cast<CMItemCoin*>(pObj);
-			pCoin->RefreshCoinWorldPosition(ccp(pCoin->getPositionX() - m_fMapMove,pCoin->getPositionY() + CONTROL_UI_HEIGHT));
-		}
+		CCPoint CurMarioPos = pMario->getPosition();
 
 		//删除需要被删除的金币
 		m_pArrayOfCoin->removeObjectsInArray(m_pArrayOfDisappearCoin);
-		pObj = NULL;
+		CCObject *pObj = NULL;
 		CCARRAY_FOREACH(m_pArrayOfDisappearCoin,pObj)
 		{
 			CMItemCoin* pCoin = dynamic_cast<CMItemCoin*>(pObj);
@@ -249,7 +249,8 @@ void CMGameMap::OnCallPerFrame(float dt)
 #endif
 
 		//判断马里奥是否落坑死亡
-		if((m_pMario->getPositionY() - CONTROL_UI_HEIGHT)/getTileSize().height<0)
+		float temp = pMario->getPositionY();
+		if(pMario->getPositionY()/getTileSize().height<0)
 		{
 			CCDirector* pDirector = CCDirector::sharedDirector();
 			CCScene *pScene = CMGameScene::CreateGameScene();
@@ -264,18 +265,18 @@ void CMGameMap::OnCallPerFrame(float dt)
 		if (m_bIsLeftKeyDown)
 		{
 			//用英雄左方的三个瓦片来判断后退碰撞
-			pTileSprite1 = TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX(),m_pMario->getPositionY()+m_pMario->boundingBox().size.height),m_fMapMove);
-			pTileSprite2 = TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX(),m_pMario->getPositionY()+m_pMario->boundingBox().size.height/2),m_fMapMove);
-			pTileSprite3 = TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX(),m_pMario->getPositionY()),m_fMapMove);
+			pTileSprite1 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX(),pMario->getPositionY()+pMario->boundingBox().size.height));
+			pTileSprite2 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX(),pMario->getPositionY()+pMario->boundingBox().size.height/2));
+			pTileSprite3 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX(),pMario->getPositionY()));
 			if (pTileSprite1!=NULL || pTileSprite2!=NULL)
 			{
-				m_pMario->setPosition(CurMarioPos);
+				pMario->setPosition(CurMarioPos);
 			}
 			else
 			{
-				if (m_pMario->boundingBox().getMinX()>0)
+				if (pMario->getPositionX()>m_fMapMove)
 				{
-					m_pMario->setPositionX(m_pMario->getPositionX()-m_fSpeed);
+					pMario->setPositionX(pMario->getPositionX()-m_fSpeed);
 				}
 			}
 		}
@@ -286,23 +287,24 @@ void CMGameMap::OnCallPerFrame(float dt)
 		if (m_bIsRightKeyDown)
 		{
 			//用英雄右方的三个瓦片来判断前进碰撞
-			pTileSprite1 = TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX()+m_pMario->boundingBox().size.width,m_pMario->getPositionY()+m_pMario->boundingBox().size.height),m_fMapMove);
-			pTileSprite2 = TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX()+m_pMario->boundingBox().size.width,m_pMario->getPositionY()+m_pMario->boundingBox().size.height/2),m_fMapMove);
-			pTileSprite3 = TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX()+m_pMario->boundingBox().size.width,m_pMario->getPositionY()),m_fMapMove);
+			pTileSprite1 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width,pMario->getPositionY()+pMario->boundingBox().size.height));
+			pTileSprite2 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width,pMario->getPositionY()+pMario->boundingBox().size.height/2));
+			pTileSprite3 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width,pMario->getPositionY()));
 			if (pTileSprite1!=NULL || pTileSprite2!=NULL)
 			{
-				m_pMario->setPosition(CurMarioPos);
+				pMario->setPosition(CurMarioPos);
 			}
 			else
 			{
-				if (m_pMario->getPositionX()>100)
+				if (pMario->getPositionX() - m_fMapMove>100)
 				{
 					setPositionX(getPositionX()-m_fSpeed);
+					pMario->setPositionX(pMario->getPositionX()+m_fSpeed);
 					m_fMapMove += m_fSpeed;
 				}
 				else 
 				{
-					m_pMario->setPositionX(m_pMario->getPositionX()+m_fSpeed);
+					pMario->setPositionX(pMario->getPositionX()+m_fSpeed);
 				}
 			}
 		}
@@ -311,13 +313,13 @@ void CMGameMap::OnCallPerFrame(float dt)
 		pTileSprite2 = NULL;
 		pTileSprite3 = NULL;
 		//用英雄下方的三个瓦片来判断掉落碰撞
-		pTileSprite1 = TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX()+m_pMario->boundingBox().size.width/2,m_pMario->getPositionY()),m_fMapMove);
-		pTileSprite2 = TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX()+5,m_pMario->getPositionY()),m_fMapMove);
-		pTileSprite3 = TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX()+m_pMario->boundingBox().size.width-5,m_pMario->getPositionY()),m_fMapMove);
+		pTileSprite1 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width/2,pMario->getPositionY()));
+		pTileSprite2 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+5,pMario->getPositionY()));
+		pTileSprite3 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width-5,pMario->getPositionY()));
 		if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
 		{
-			m_pMario->setPosition(CurMarioPos);
-			m_pMario->setPositionY(m_pMario->getPositionY()+1/*pMario->boundingBox().size.height*0.1*/);
+			pMario->setPosition(CurMarioPos);
+			pMario->setPositionY(pMario->getPositionY()+1/*pMario->boundingBox().size.height*0.1*/);
 			//掉落速度归零
 			m_fDropSpeedPlus = 0;
 			//跳跃起始速度
@@ -325,7 +327,7 @@ void CMGameMap::OnCallPerFrame(float dt)
 		}
 		else
 		{
-			m_pMario->setPositionY(m_pMario->getPositionY()-m_fDropSpeedPlus);
+			pMario->setPositionY(pMario->getPositionY()-m_fDropSpeedPlus);
 			//掉落加速度
 			m_fDropSpeedPlus += DROP_SPEED_PLUS;
 		}
@@ -334,13 +336,13 @@ void CMGameMap::OnCallPerFrame(float dt)
 		pTileSprite2 = NULL;
 		pTileSprite3 = NULL;
 		//用英雄上方的三个瓦片来判断头顶碰撞
-		pTileSprite1 = TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX()+m_pMario->boundingBox().size.width/2,m_pMario->getPositionY()+m_pMario->boundingBox().size.height),m_fMapMove);
-		pTileSprite2 = TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX()+5,m_pMario->getPositionY()+m_pMario->boundingBox().size.height),m_fMapMove);
-		pTileSprite3 = TileMapLayerPosToTileSprite(ccp(m_pMario->getPositionX()+m_pMario->boundingBox().size.width-5,m_pMario->getPositionY()+m_pMario->boundingBox().size.height),m_fMapMove);
+		pTileSprite1 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width/2,pMario->getPositionY()+pMario->boundingBox().size.height));
+		pTileSprite2 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+5,pMario->getPositionY()+pMario->boundingBox().size.height));
+		pTileSprite3 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width-5,pMario->getPositionY()+pMario->boundingBox().size.height));
 		if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
 		{
-			m_pMario->setPosition(CurMarioPos);
-			m_pMario->setPositionY(m_pMario->getPositionY()-1);
+			pMario->setPosition(CurMarioPos);
+			pMario->setPositionY(pMario->getPositionY()-1);
 			//跳跃速度归零
 			m_fJumpSpeed = 0;
 		}
@@ -349,7 +351,7 @@ void CMGameMap::OnCallPerFrame(float dt)
 			//跳跃
 			if (m_bIsJumpKeyDown)
 			{
-				m_pMario->setPositionY(m_pMario->getPositionY()+m_fJumpSpeed);
+				pMario->setPositionY(pMario->getPositionY()+m_fJumpSpeed);
 				//跳跃递减速度
 				m_fJumpSpeed -= JUMP_SPEED_MINUS;
 			}

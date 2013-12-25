@@ -33,12 +33,7 @@ bool CMGameScene::init()
 			return false;
 		}
 
-		CMMario* pMario = CMMario::CreateHero();
-		CC_BREAK_IF(pMario==NULL);
-		pMario->setPosition(ccp(SCREEN_WIDTH*0.1,SCREEN_HEIGHT*0.8));
-		addChild(pMario,enZOrderFront,enTagHero);
-
-		CMGameMap* pGameMap = CMGameMap::CreateGameMap("MarioMap1.tmx",pMario);
+		CMGameMap* pGameMap = CMGameMap::CreateGameMap("MarioMap1.tmx");
 		CC_BREAK_IF(pGameMap==NULL);
 		pGameMap->setPosition(ccp(0,96));
 		addChild(pGameMap,enZOrderBack,enTagMap);

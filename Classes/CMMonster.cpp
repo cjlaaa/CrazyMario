@@ -4,14 +4,14 @@
 /* 怪物基类
 /************************************************************************/
 
-bool CMMonsterBasic::init( CCPoint ptMonsterPos,CMMario *pMario,CMReceiver *pMsgRecver )
+bool CMMonsterBasic::init( CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pMsgRecver )
 {
 	do 
 	{
 		CC_BREAK_IF(!CCNode::init());
 
 		m_pMario = pMario;
-
+		//m_pGameMap = pGameMap;
 		//注册Update函数
 		this->schedule(schedule_selector(CMMonsterBasic::OnCallPerFrame));
 
@@ -55,12 +55,12 @@ void CMMonsterBasic::OnCallPerFrame(float fT)
 /************************************************************************/
 /* 蘑菇怪                                                                     */
 /************************************************************************/
-CMMonsterMushrooms * CMMonsterMushrooms::CreateMonsterMushrooms( CCPoint ptMonsterPos,CMMario *pMario,CMReceiver *pMsgRecver )
+CMMonsterMushrooms * CMMonsterMushrooms::CreateMonsterMushrooms( CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pReceiver )
 {
 	do 
 	{
 		CMMonsterMushrooms *pMonsterMushrooms = new CMMonsterMushrooms();
-		if (pMonsterMushrooms && pMonsterMushrooms->init(ptMonsterPos,pMario,pMsgRecver))
+		if (pMonsterMushrooms && pMonsterMushrooms->init(ptMonsterPos,pMario,pGameMap,pReceiver))
 		{
 			pMonsterMushrooms->autorelease();
 			return pMonsterMushrooms;
@@ -72,16 +72,16 @@ CMMonsterMushrooms * CMMonsterMushrooms::CreateMonsterMushrooms( CCPoint ptMonst
 	return NULL;
 }
 
-bool CMMonsterMushrooms::init( CCPoint ptMonsterPos,CMMario *pMario,CMReceiver *pReceiver )
+bool CMMonsterMushrooms::init( CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pReceiver )
 {
 	do 
 	{
-		CC_BREAK_IF(!CMMonsterBasic::init(ptMonsterPos,pMario,pReceiver));
+		CC_BREAK_IF(!CMMonsterBasic::init(ptMonsterPos,pMario,pGameMap,pReceiver));
 
-		CCSprite* pMushrooms = CCSprite::create("rewardMushroomSet.png");
+		CCSprite* pMushrooms = CCSprite::create("Mushroom0.png");
 		CC_BREAK_IF(pMushrooms==NULL);
 		pMushrooms->setPosition(ccp(0,0));
-		addChild(pMushrooms);
+		addChild(pMushrooms,enZOrderFront,enTagMainImage);
 
 		setContentSize(pMushrooms->boundingBox().size);
 
@@ -97,6 +97,17 @@ bool CMMonsterMushrooms::OnCollisionMario()
 {
 	do 
 	{
+		CCSprite* pMushrooms = dynamic_cast<CCSprite*>(getChildByTag(enTagMainImage));
+		CC_BREAK_IF(pMushrooms==NULL);
+
+		//判断马里奥与蘑菇怪的碰撞
+		if (m_pMario->boundingBox().intersectsRect(boundingBox()))
+		{
+			CCLog("Mashrooms bound");
+// 			MsgForCoinCollision* pData = new MsgForCoinCollision;
+// 			pData->pCoin = this;
+// 			SendMsg(enMsgCoinCollision,pData,sizeof(pCoin));
+		}
 
 		return true;
 	} while (false);
