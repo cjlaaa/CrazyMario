@@ -38,7 +38,7 @@ public:
 	{
 		m_pReceiver=pReceiver;
 	}
-	void SendMsg(int enMsg,void* pData,int nSize)
+	void SendMsg(int enMsg,void* pData = NULL,int nSize = 0)
 	{
 		m_pReceiver->OnMsgReceive(enMsg,pData,nSize);
 	}
@@ -47,6 +47,7 @@ public:
 enum 
 {
 	enMsgCoinCollision,	//金币碰撞
+	enMsgDead,
 };
 
 //金币碰撞消息

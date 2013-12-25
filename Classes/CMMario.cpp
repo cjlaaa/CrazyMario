@@ -26,15 +26,10 @@ bool CMMario::Init()
 		pMainBody->setAnchorPoint(ccp(0, 0));
 		addChild(pMainBody);
 
-		RectForCollision = CCRectMake(getPositionX(),getPositionY(),pMainBody->boundingBox().size.width,pMainBody->boundingBox().size.height);
+		setContentSize(pMainBody->getContentSize());
 
 		return true;
 	} while (false);
 	CCLog("fun CMHero::Init Error!");
 	return false;
-}
-
-cocos2d::CCRect CMMario::BoundingBox()
-{
-	return RectForCollision;
 }

@@ -5,40 +5,40 @@
 #include "CMMario.h"
 #include "CMItem.h"
 #include "CMMonster.h"
+#include "CMGameScene.h"
 
 class CMGameMap : public cocos2d::CCTMXTiledMap , public CMSender,public CMReceiver
 {
-public:
-	static CMGameMap* CreateGameMap(const char* pFileName,CMMario* pMario);
-	// 返回地图指定位置上的图块类型，用作碰撞检测
-	CCSprite* TileMapLayerPosToTileSprite(CCPoint HeroPos,float fMapMove ,bool &bIsHeroDead);
-	//通过地图块坐标返回地图块类型
-	enTileType TileMapPosToTileType(CCPoint HeroPos,float fMapMove);
-	//地图块坐标转换为地图层坐标
-	CCPoint TileMapPosToTileMapLayerPos(CCPoint TilePos);
-	//地图层坐标转换为世界坐标
-	CCPoint TileMapLayerPosToWorldPos(CCPoint TileMapLayerPos,float m_fMapMove);
+protected:
+	CMMario* m_pMario;					//Mario指针，用于碰撞检测
 
-private:
-	CMMario* m_pMario;
-	virtual bool Init(CMMario* pMario);
-	virtual void OnCallPerFrame(float dt);
-	void OnMsgReceive( int enMsg,void* pData,int nSize );
-	void onExit();
-	
-
-	CCArray	*m_pArrayOfCoin;		//金币数组
+	CCArray	*m_pArrayOfCoin;			//金币数组
+	CCArray *m_pArrayOfDisappearCoin;	//碰撞后待删除的金币数组
 	CCArray *m_pArrayMonsters;			//怪物数组
 
-	float m_fMapMove;
-	float m_fDropSpeed;
-	float m_fJumpSpeed;
-	float m_fSpeed;
+	float m_fMapMove;					//地图偏移量
+	float m_fDropSpeedPlus;					//掉落速度
+	float m_fJumpSpeed;					//跳跃速度
+	float m_fSpeed;						//移动速度
 
-	bool m_bIsLeftKeyDown;
-	bool m_bIsRightKeyDown;
-	bool m_bIsJumpKeyDown;
-	bool m_bIsHeroDead;
+	bool m_bIsLeftKeyDown;				//左键是否按下
+	bool m_bIsRightKeyDown;				//右键是否按下
+	bool m_bIsJumpKeyDown;				//跳跃键是否按下
+	bool m_bIsHeroDead;					//是否死亡
+public:
+	static CMGameMap* CreateGameMap(const char* pFileName,CMMario* pMario);
+
+	CCSprite*	TileMapLayerPosToTileSprite(CCPoint HeroPos,float fMapMove);			// 返回地图指定位置上的图块类型，用作碰撞检测
+	enTileType	TileMapPosToTileType(CCPoint HeroPos,float fMapMove);					//通过地图块坐标返回地图块类型
+	CCPoint		TileMapPosToTileMapLayerPos(CCPoint TilePos);							//地图块坐标转换为地图层坐标
+	CCPoint		TileMapLayerPosToWorldPos(CCPoint TileMapLayerPos,float m_fMapMove);	//地图层坐标转换为世界坐标
+protected:
+	virtual bool Init(CMMario* pMario);
+	virtual void OnCallPerFrame(float dt);
+	void		 OnMsgReceive( int enMsg,void* pData,int nSize );
+	void		 onExit();
+
+	void		 CoinDisppear(MsgForCoinCollision* pData);
 };
 
 

@@ -43,7 +43,7 @@ void CMItemBasic::OnCallPerFrame(float fT)
 
 void CMItemBasic::RefreshCoinWorldPosition( CCPoint WorldPos )
 {
-	m_MarioTileMapLayerPos = WorldPos;
+	m_CoinWorldPos = WorldPos;
 }
 
 /************************************************************************/
@@ -78,7 +78,7 @@ bool CMItemCoin::init( CCPoint ptItemPos,CCSize szItemSize,CMMario *pMario,CMRec
 		addChild(pCoin,enZOrderFront,enTagCoin);
 
 		m_pReceiver = pMsgRecver;
-		m_MarioTileMapLayerPos = ptItemPos;
+		m_CoinWorldPos = ptItemPos;
 		
 		return true;
 	} while (false);
@@ -93,11 +93,12 @@ bool CMItemCoin::OnCollisionMario()
 		CCSprite* pCoin = dynamic_cast<CCSprite*>(getChildByTag(enTagCoin));
 		CC_BREAK_IF(pCoin==NULL);
 		
-		//判断马里奥与金币的碰撞（未成功）
-		if (m_pMario->BoundingBox().intersectsRect(CCRectMake(m_MarioTileMapLayerPos.x,m_MarioTileMapLayerPos.y,pCoin->boundingBox().size.width,pCoin->boundingBox().size.height)))
+		//判断马里奥与金币的碰撞
+		if (m_pMario->boundingBox().intersectsRect(CCRectMake(m_CoinWorldPos.x,m_CoinWorldPos.y,getContentSize().width,getContentSize().height)))
 		{
-			CCLog("%f	%f",pCoin->getPositionX(),pCoin->getPositionY());
-			SendMsg(enMsgCoinCollision,&pCoin,sizeof(pCoin));
+			MsgForCoinCollision* pData = new MsgForCoinCollision;
+			pData->pCoin = this;
+			SendMsg(enMsgCoinCollision,pData,sizeof(pCoin));
 		}
 
 		return true;

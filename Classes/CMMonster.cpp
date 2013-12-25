@@ -72,18 +72,20 @@ CMMonsterMushrooms * CMMonsterMushrooms::CreateMonsterMushrooms( CCPoint ptMonst
 	return NULL;
 }
 
-bool CMMonsterMushrooms::init( CCPoint ptMonsterPos,CMMario *pMario,CMReceiver *pMsgRecver )
+bool CMMonsterMushrooms::init( CCPoint ptMonsterPos,CMMario *pMario,CMReceiver *pReceiver )
 {
 	do 
 	{
-		CC_BREAK_IF(!CMMonsterBasic::init(ptMonsterPos,pMario,pMsgRecver));
+		CC_BREAK_IF(!CMMonsterBasic::init(ptMonsterPos,pMario,pReceiver));
 
-		CCSprite* pMushrooms = CCSprite::create("Mushroom0.png", CCRectMake(32, 0, 16, 16));
+		CCSprite* pMushrooms = CCSprite::create("rewardMushroomSet.png");
 		CC_BREAK_IF(pMushrooms==NULL);
 		pMushrooms->setPosition(ccp(0,0));
 		addChild(pMushrooms);
 
-		m_pReceiver = pMsgRecver;
+		setContentSize(pMushrooms->boundingBox().size);
+
+		m_pReceiver = pReceiver;
 
 		return true;
 	} while (false);

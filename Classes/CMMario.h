@@ -7,9 +7,7 @@ class CMMario : public CCNode,public CMSender
 {
 public:
 	static CMMario* CreateHero();
-	CCRect BoundingBox();
 private:
-	CCRect RectForCollision;
 	bool Init();
 };
 

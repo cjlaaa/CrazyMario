@@ -12,8 +12,8 @@ class CMItemBasic: public CCNode,public CMSender
 {
 protected:
 	CMMario		*m_pMario;
-	//Mario的地图层坐标，用以和金币做碰撞检测
-	CCPoint		m_MarioTileMapLayerPos;
+	//金币的世界坐标，用以和金币做碰撞检测
+	CCPoint		m_CoinWorldPos;
 protected:
 	virtual bool init(CCPoint ptItemPos,CCSize szItemSize,CMMario *pMario,CMReceiver *pMsgRecver);
 
@@ -31,7 +31,6 @@ public:
 class CMItemCoin:public CMItemBasic
 {
 protected:
-	CCArray* CoinPosArray;
 	enum 
 	{
 		enTagCoin,
