@@ -123,7 +123,7 @@ bool CMMonsterMushrooms::OnCollisionMario()
 		if (m_pMario->boundingBox().intersectsRect(boundingBox()))
 		{
 			//被踩死
-			if (getPositionY()<m_pMario->getPositionY() && abs(m_pMario->getPositionY()-getPositionY())>boundingBox().size.height*0.7)
+			if (getPositionY()<m_pMario->getPositionY() && abs(m_pMario->getPositionY()-getPositionY())>boundingBox().size.height*0.8)
 			{
 				MsgForMonsterDisappear* pData = new MsgForMonsterDisappear;
 				pData->pMonster = this;

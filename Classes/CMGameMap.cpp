@@ -49,7 +49,7 @@ bool CMGameMap::Init()
 		//初始化Mario
 		CMMario* pMario = CMMario::CreateHero();
 		CC_BREAK_IF(pMario==NULL);
-		pMario->setPosition(TileMapPosToTileMapLayerPos(ccp(2,10)));
+		pMario->setPosition(TileMapPosToTileMapLayerPos(ccp(2,11)));
 		addChild(pMario,enZOrderFront,enTagMario);
 
 		CCTMXLayer* pTrapLayer = layerNamed("trap");
@@ -314,7 +314,11 @@ void CMGameMap::OnCallPerFrame(float dt)
 			}
 			else
 			{
-				if (pMario->getPositionX() - m_fMapMove>100)
+				if (getContentSize().width - m_fMapMove<=SCREEN_WIDTH)
+				{
+					pMario->setPositionX(pMario->getPositionX()+m_fSpeed);
+				}
+				else if (pMario->getPositionX() - m_fMapMove>100)
 				{
 					setPositionX(getPositionX()-m_fSpeed);
 					pMario->setPositionX(pMario->getPositionX()+m_fSpeed);
