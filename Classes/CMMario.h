@@ -13,6 +13,7 @@ public:
 	enumMarioStatus GetStatus();
 private:
 	bool Init();
+	//Mario状态
 	enumMarioStatus m_eMarioStatus;
 	void OnCallPerFrame(float fT);
 	enum 

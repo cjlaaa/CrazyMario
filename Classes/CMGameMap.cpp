@@ -534,7 +534,7 @@ void CMGameMap::HitBlock(CCPoint TileMapLayerPos)
 		CC_BREAK_IF(pBlockForHit==NULL);
 		switch (nBlockType)
 		{
-		case enBlockTypeNormal:
+		case enBlockTypeNormal:		//普通砖块
 			{
 				switch (pMario->GetStatus())
 				{
@@ -555,7 +555,7 @@ void CMGameMap::HitBlock(CCPoint TileMapLayerPos)
 				}
 			}
 			break;
-		case enBlockTypeBox:
+		case enBlockTypeBox:		//宝箱
 			{
 				pBlockForHit->stopAllActions();
 				CCActionInterval *pJumpBy = CCJumpBy::create(0.2f, CCPointZero, 
@@ -572,7 +572,7 @@ void CMGameMap::HitBlock(CCPoint TileMapLayerPos)
 				pTempCoin->runAction(pJumpCoin);
 			}
 			break;
-		case enBlockTypeAddLife:
+		case enBlockTypeAddLife:	//隐藏砖块
 			{
 
 			}

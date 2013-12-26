@@ -21,7 +21,6 @@ protected:
 	virtual bool init(CCPoint ptItemPos,CCSize szItemSize,CMMario *pMario,CMReceiver *pMsgRecver);
 
 	virtual bool OnCollisionMario() = 0;//与Mario碰撞的事件
-	//检查与Mario的碰撞 并把消息发送给MsgRecver
 	virtual void OnCallPerFrame(float fT);
 public:
 };
@@ -36,7 +35,6 @@ protected:
 	virtual bool init(CCPoint ptItemPos,CCSize szItemSize,CMMario *pMario,CMReceiver *pMsgRecver);
 
 	virtual bool OnCollisionMario();
-	//检查与Mario的碰撞 并把消息发送给MsgRecver
 	virtual void OnCallPerFrame(float fT);
 };
 /************************************************************************/
