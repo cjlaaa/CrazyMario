@@ -10,9 +10,10 @@
 class CMGameMap : public cocos2d::CCTMXTiledMap ,public CMReceiver
 {
 protected:
-	CCArray	*m_pArrayOfCoin;			//金币数组
-	CCArray *m_pArrayOfDisappearCoin;	//碰撞后待删除的金币数组
+	CCArray	*m_pArrayCoin;				//金币数组
+	CCArray *m_pArrayCoinForDelete;		//碰撞后待删除的金币数组
 	CCArray *m_pArrayMonsters;			//怪物数组
+	CCArray *m_pArrayMonstersForDelete;	//待删除的怪物数组
 
 	float m_fMapMove;					//地图偏移量
 	float m_fDropSpeedPlus;					//掉落速度
@@ -26,10 +27,16 @@ protected:
 public:
 	static CMGameMap* CreateGameMap(const char* pFileName);
 
-	CCSprite*	TileMapLayerPosToTileSprite(CCPoint HeroPos);			// 返回地图指定位置上的图块类型，用作碰撞检测
-	enTileType	TileMapPosToTileType(CCPoint HeroPos,float fMapMove);					//通过地图块坐标返回地图块类型
-	CCPoint		TileMapPosToTileMapLayerPos(CCPoint TilePos);							//地图块坐标转换为地图层坐标
-	CCPoint		TileMapLayerPosToWorldPos(CCPoint TileMapLayerPos,float m_fMapMove);	//地图层坐标转换为世界坐标
+	// 返回地图指定位置上的图块类型，用作碰撞检测
+	CCSprite*	TileMapLayerPosToTileSprite(CCPoint HeroPos);			
+	//通过地图块坐标返回地图块类型
+	enTileType	TileMapPosToTileType(CCPoint HeroPos,float fMapMove);					
+	//地图块坐标转换为地图层坐标
+	CCPoint		TileMapPosToTileMapLayerPos(CCPoint TilePos);							
+	//地图层坐标转换为世界坐标
+	CCPoint		TileMapLayerPosToWorldPos(CCPoint TileMapLayerPos,float m_fMapMove);	
+	//返回地图偏移量
+	float		GetMapMove();
 protected:
 	virtual bool Init();
 	virtual void OnCallPerFrame(float dt);

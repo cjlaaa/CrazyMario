@@ -21,6 +21,7 @@ bool CMMario::Init()
 {
 	do 
 	{
+		CCLog("initing Mario...");
 		CCSprite* pMainBody = CCSprite::create("smallWalkRight.png", CCRectMake(0, 0, 14, 16));
 		CC_BREAK_IF(pMainBody==NULL);
 		pMainBody->setAnchorPoint(ccp(0, 0));

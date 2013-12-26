@@ -73,6 +73,8 @@ bool CMItemCoin::init( CCPoint ptItemPos,CCSize szItemSize,CMMario *pMario,CMRec
 		addChild(pCoin,enZOrderFront,enTagMainImage);
 
 		m_pReceiver = pMsgRecver;
+
+		setContentSize(szItemSize);
 		
 		return true;
 	} while (false);
@@ -105,6 +107,8 @@ void CMItemCoin::OnCallPerFrame( float fT )
 {
 	do 
 	{
+		CMItemBasic::OnCallPerFrame(fT);
+
 		OnCollisionMario();
 		return;
 	} while (false);

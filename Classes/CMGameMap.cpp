@@ -1,12 +1,5 @@
 ﻿#include "CMGameMap.h"
 
-#define CONTROL_UI_HEIGHT	96		//控制UI高度
-#define TILE_MAP_VERTICAL	13		//地图瓦片竖直块数
-#define JUMP_START_SPEED	8		//跳跃起始速度
-#define JUMP_SPEED_MINUS	0.3		//跳跃递减速度
-#define DROP_SPEED_PLUS		0.098	//掉落加速度
-#define MOVE_SPEED			2		//移动速度
-
 CMGameMap* CMGameMap::CreateGameMap(const char* pFileName)
 {
 	do 
@@ -28,25 +21,30 @@ bool CMGameMap::Init()
 {
 	do 
 	{
+		CCLog("initing Game Map...");
+		
 		//注册Update函数
 		this->schedule(schedule_selector(CMGameMap::OnCallPerFrame));
 
+		//初始化成员变量
 		m_fMapMove = 0;
 		m_fDropSpeedPlus = 0;
 		m_fJumpSpeed = 0;
 		m_fSpeed = MOVE_SPEED;
-
 		m_bIsLeftKeyDown = false;
 		m_bIsRightKeyDown = false;
 		m_bIsJumpKeyDown = false;
 		m_bIsHeroDead = false;
 
-		m_pArrayOfCoin = CCArray::create();
-		m_pArrayOfCoin->retain();
+		//初始化游戏对象数组
+		m_pArrayCoin = CCArray::create();
+		m_pArrayCoin->retain();
+		m_pArrayCoinForDelete = CCArray::create();
+		m_pArrayCoinForDelete->retain();
 		m_pArrayMonsters = CCArray::create();
 		m_pArrayMonsters->retain();
-		m_pArrayOfDisappearCoin = CCArray::create();
-		m_pArrayOfDisappearCoin->retain();
+		m_pArrayMonstersForDelete = CCArray::create();
+		m_pArrayMonstersForDelete->retain();
 
 		//初始化Mario
 		CMMario* pMario = CMMario::CreateHero();
@@ -75,7 +73,8 @@ bool CMGameMap::Init()
 						CCLog("Coin init Error!");
 					}
 					pCoin->setPosition(CoinTileMapLayerPos);
-					m_pArrayOfCoin->addObject(pCoin);
+					pCoin->setAnchorPoint(ccp(0,0));
+					m_pArrayCoin->addObject(pCoin);
 					addChild(pCoin);
 				}
 			}
@@ -107,7 +106,8 @@ bool CMGameMap::Init()
 					{
 						CCLog("pMonster==NULL!");
 					}
-					pMonster->setPosition(ccp(TileXY.x,TileXY.y+pMonster->getContentSize().height/2));
+					pMonster->setPosition(ccp(TileXY.x,TileXY.y));
+					pMonster->setAnchorPoint(ccp(0,0));
 					m_pArrayMonsters->addObject(pMonster);
 					addChild(pMonster,enZOrderFront);
 				}
@@ -126,9 +126,8 @@ CCSprite* CMGameMap::TileMapLayerPosToTileSprite( CCPoint HeroPos)
 	do 
 	{
 		//将层坐标转换为地图瓦片坐标
-		int nHeroTilePosX = (HeroPos.x)/this->getTileSize().width;
-		int nHeroTempPosY = (HeroPos.y)/this->getTileSize().height;
-		int nHeroTilePosY = TILE_MAP_VERTICAL - nHeroTempPosY;
+		int nHeroTilePosX = (HeroPos.x)/getTileSize().width;
+		int nHeroTilePosY = TILE_MAP_VERTICAL - (int)((HeroPos.y)/getTileSize().height);
 
 		//获得地图的各个层
 		CCTMXLayer* pCloudLayer = layerNamed("cloud");
@@ -183,9 +182,10 @@ void CMGameMap::OnCallPerFrame(float dt)
 		CCPoint CurMarioPos = pMario->getPosition();
 
 		//删除需要被删除的金币
-		m_pArrayOfCoin->removeObjectsInArray(m_pArrayOfDisappearCoin);
+		m_pArrayCoin->removeObjectsInArray(m_pArrayCoinForDelete);
 		CCObject *pObj = NULL;
-		CCARRAY_FOREACH(m_pArrayOfDisappearCoin,pObj)
+		//因为集合只是保存指针，还需要在父节点移除，所以需要遍历移除。
+		CCARRAY_FOREACH(m_pArrayCoinForDelete,pObj)
 		{
 			CMItemCoin* pCoin = dynamic_cast<CMItemCoin*>(pObj);
 			if (pCoin==NULL)
@@ -194,7 +194,21 @@ void CMGameMap::OnCallPerFrame(float dt)
 			}
 			pCoin->removeFromParent();
 		}
-		m_pArrayOfDisappearCoin->removeAllObjects();
+		m_pArrayCoinForDelete->removeAllObjects();
+
+		//删除需要被删除的怪物
+		m_pArrayCoin->removeObjectsInArray(m_pArrayMonstersForDelete);
+		pObj = NULL;
+		CCARRAY_FOREACH(m_pArrayMonstersForDelete,pObj)
+		{
+			CMMonsterBasic* pMonster = dynamic_cast<CMMonsterBasic*>(pObj);
+			if (pMonster==NULL)
+			{
+				CCLog("pMonster==NULL");
+			}
+			pMonster->removeFromParent();
+		}
+		m_pArrayMonstersForDelete->removeAllObjects();
 
 #if(CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)    
 
@@ -268,7 +282,7 @@ void CMGameMap::OnCallPerFrame(float dt)
 			pTileSprite1 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX(),pMario->getPositionY()+pMario->boundingBox().size.height));
 			pTileSprite2 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX(),pMario->getPositionY()+pMario->boundingBox().size.height/2));
 			pTileSprite3 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX(),pMario->getPositionY()));
-			if (pTileSprite1!=NULL || pTileSprite2!=NULL)
+			if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
 			{
 				pMario->setPosition(CurMarioPos);
 			}
@@ -290,7 +304,7 @@ void CMGameMap::OnCallPerFrame(float dt)
 			pTileSprite1 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width,pMario->getPositionY()+pMario->boundingBox().size.height));
 			pTileSprite2 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width,pMario->getPositionY()+pMario->boundingBox().size.height/2));
 			pTileSprite3 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width,pMario->getPositionY()));
-			if (pTileSprite1!=NULL || pTileSprite2!=NULL)
+			if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
 			{
 				pMario->setPosition(CurMarioPos);
 			}
@@ -414,12 +428,14 @@ enTileType CMGameMap::TileMapPosToTileType( CCPoint HeroPos,float fMapMove )
 
 void CMGameMap::onExit()
 {
-	m_pArrayOfCoin->removeAllObjects();
-	CC_SAFE_RELEASE(m_pArrayOfCoin);
+	m_pArrayCoin->removeAllObjects();
+	CC_SAFE_RELEASE(m_pArrayCoin);
 	m_pArrayMonsters->removeAllObjects();
 	CC_SAFE_RELEASE(m_pArrayMonsters);
-	m_pArrayOfDisappearCoin->removeAllObjects();
-	CC_SAFE_RELEASE(m_pArrayOfDisappearCoin);
+	m_pArrayCoinForDelete->removeAllObjects();
+	CC_SAFE_RELEASE(m_pArrayCoinForDelete);
+	m_pArrayMonstersForDelete->removeAllObjects();
+	CC_SAFE_RELEASE(m_pArrayMonstersForDelete);
 	CCTMXTiledMap::onExit();
 }
 
@@ -440,10 +456,18 @@ void CMGameMap::OnMsgReceive( int enMsg,void* pData,int nSize )
 			{
 				CCAssert(false,"sizeof(MsgForCoinCollision)!=nSize");
 			}
-			this->CoinDisppear((MsgForCoinCollision*)pData);
+			CoinDisppear((MsgForCoinCollision*)pData);
 		}
 		break;
-
+	case enMsgMonsterDisappear:
+		{
+			if (sizeof(MsgForMonsterDisappear)!=nSize)
+			{
+				CCAssert(false,"sizeof(MsgForMonsterDisappear)!=nSize");
+			}
+			m_pArrayMonstersForDelete->addObject(((MsgForMonsterDisappear*)pData)->pMonster);
+		}
+		break;
 	}
 }
 
@@ -456,5 +480,10 @@ cocos2d::CCPoint CMGameMap::TileMapLayerPosToWorldPos( CCPoint TileMapLayerPos,f
 
 void CMGameMap::CoinDisppear(MsgForCoinCollision* pData )
 {
-	m_pArrayOfDisappearCoin->addObject(pData->pCoin);
+	m_pArrayCoinForDelete->addObject(pData->pCoin);
+}
+
+float CMGameMap::GetMapMove()
+{
+	return m_fMapMove;
 }

@@ -3,15 +3,18 @@
 /************************************************************************/
 /* 怪物基类
 /************************************************************************/
-
 bool CMMonsterBasic::init( CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pMsgRecver )
 {
 	do 
 	{
 		CC_BREAK_IF(!CCNode::init());
 
+		//初始化成员变量
 		m_pMario = pMario;
-		//m_pGameMap = pGameMap;
+		m_pGameMap = pGameMap;
+		m_bIsActivation = false;
+		m_MoveDirection = enMoveLeft;
+
 		//注册Update函数
 		this->schedule(schedule_selector(CMMonsterBasic::OnCallPerFrame));
 
@@ -32,7 +35,7 @@ bool CMMonsterBasic::OnCollisionMario()
 	return false;
 }
 
-void CMMonsterBasic::Dead( enumMonsterDeadType DeadType )
+void CMMonsterBasic::Dead( enMonsterDeadType DeadType )
 {
 	do 
 	{
@@ -47,6 +50,21 @@ void CMMonsterBasic::OnCallPerFrame(float fT)
 	do 
 	{
 		OnCollisionMario();
+
+		//判断当怪物离开地图则发消息删除自己
+		if (getPositionX()<0 || getPositionY()<0)
+		{
+			MsgForMonsterDisappear* pData = new MsgForMonsterDisappear;
+			pData->pMonster = this;
+			SendMsg(enMsgMonsterDisappear,pData,sizeof(pData));
+		}
+
+		//判断马里奥与当前怪物的距离，用以激活。
+		if (abs(m_pMario->getPositionX() - getPositionX())<MONSTER_ACTIVE_DISTANCE)
+		{
+			m_bIsActivation = true;
+		}
+
 		return;
 	} while (false);
 	CCLog("fun CMMonsterBasic::OnCallPerFrame Error!");
@@ -80,7 +98,7 @@ bool CMMonsterMushrooms::init( CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *p
 
 		CCSprite* pMushrooms = CCSprite::create("Mushroom0.png");
 		CC_BREAK_IF(pMushrooms==NULL);
-		pMushrooms->setPosition(ccp(0,0));
+		pMushrooms->setAnchorPoint(ccp(0,0));
 		addChild(pMushrooms,enZOrderFront,enTagMainImage);
 
 		setContentSize(pMushrooms->boundingBox().size);
@@ -100,17 +118,72 @@ bool CMMonsterMushrooms::OnCollisionMario()
 		CCSprite* pMushrooms = dynamic_cast<CCSprite*>(getChildByTag(enTagMainImage));
 		CC_BREAK_IF(pMushrooms==NULL);
 
-		//判断马里奥与蘑菇怪的碰撞
+		//马里奥与蘑菇怪的碰撞
 		if (m_pMario->boundingBox().intersectsRect(boundingBox()))
 		{
 			CCLog("Mashrooms bound");
-// 			MsgForCoinCollision* pData = new MsgForCoinCollision;
-// 			pData->pCoin = this;
-// 			SendMsg(enMsgCoinCollision,pData,sizeof(pCoin));
+			//MsgForCoinCollision* pData = new MsgForCoinCollision;
+			//pData->pCoin = this;
+			//SendMsg(enMsgCoinCollision,pData,sizeof(pCoin));
 		}
 
 		return true;
 	} while (false);
 	CCLog("fun CMMonsterMushrooms::OnCollisionMario Error!");
 	return false;
+}
+
+void CMMonsterMushrooms::OnCallPerFrame( float fT )
+{
+	do 
+	{
+		CMMonsterBasic::OnCallPerFrame(fT);
+
+		OnCollisionMario();
+
+		//是否激活
+		if (m_bIsActivation==false)
+		{
+			return;
+		}
+
+		//移动碰撞
+		CCSprite* pTileSprite1 = NULL;
+		CCSprite* pTileSprite2 = NULL;
+		CCSprite* pTileSprite3 = NULL;
+
+		if (m_MoveDirection == enMoveLeft)
+		{
+			//用怪物左方的三个瓦片来判断移动碰撞
+			pTileSprite1 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX(),getPositionY()+getContentSize().height));
+			pTileSprite2 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX(),getPositionY()+getContentSize().height/2));
+			pTileSprite3 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX(),getPositionY()));
+			if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
+			{
+				m_MoveDirection = enMoveRight;
+			}
+			else
+			{
+				setPositionX(getPositionX()-1);
+			}
+		}
+		else if(m_MoveDirection == enMoveRight)
+		{
+			//用怪物左方的三个瓦片来判断移动碰撞
+			pTileSprite1 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+getContentSize().width,getPositionY()+getContentSize().height));
+			pTileSprite2 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+getContentSize().width,getPositionY()+getContentSize().height/2));
+			pTileSprite3 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+getContentSize().width,getPositionY()));
+			if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
+			{
+				m_MoveDirection = enMoveLeft;
+			}
+			else
+			{
+				setPositionX(getPositionX()+1);
+			}
+		}
+
+		return;
+	} while (false);
+	CCLog("fun CMMonsterMushrooms::OnCallPerFrame Error!");
 }
