@@ -25,12 +25,77 @@ bool CMMario::Init()
 		CCSprite* pMainBody = CCSprite::create("smallWalkRight.png", CCRectMake(0, 0, 14, 16));
 		CC_BREAK_IF(pMainBody==NULL);
 		pMainBody->setAnchorPoint(ccp(0, 0));
-		addChild(pMainBody);
+		addChild(pMainBody,enZOrderFront,enTagMario);
 
 		setContentSize(pMainBody->getContentSize());
+
+		m_eMarioStatus = enMarioStatusSmall;
+
+		//注册Update函数
+		this->schedule(schedule_selector(CMMario::OnCallPerFrame));
 
 		return true;
 	} while (false);
 	CCLog("fun CMHero::Init Error!");
 	return false;
+}
+
+void CMMario::SetStatus(enumMarioStatus eMarioStatus)
+{
+	m_eMarioStatus = eMarioStatus;
+}
+
+void CMMario::OnCallPerFrame( float fT )
+{
+	do 
+	{
+		CCSprite* pMario = dynamic_cast<CCSprite*>(getChildByTag(enTagMario));
+		CC_BREAK_IF(pMario==NULL);
+
+		CCTexture2D *pTextureBig = CCTextureCache::sharedTextureCache()->addImage("walkRight.png");
+		CCTexture2D *pTextureSuper = CCTextureCache::sharedTextureCache()->addImage("WalkRight_fire.png");
+		CCTexture2D *pTextureSmall = CCTextureCache::sharedTextureCache()->addImage("smallWalkRight.png");	
+
+		switch (m_eMarioStatus)
+		{
+		case enMarioStatusSmall:
+			{
+				if (pMario->getTexture()==pTextureSmall)
+				{
+					return;
+				}
+				pMario->setTexture(pTextureSmall);
+				pMario->setTextureRect(CCRectMake(0, 0, 14, 16));
+			}
+			break;
+		case enMarioStatusBig:
+			{
+				if (pMario->getTexture()==pTextureBig)
+				{
+					return;
+				}
+				pMario->setTexture(pTextureBig);
+				pMario->setTextureRect(CCRectMake(0, 0, 18, 32));
+			}
+			break;
+		case enMarioStatusSuper:
+			{
+				if (pMario->getTexture()==pTextureSuper)
+				{
+					return;
+				}
+				pMario->setTexture(pTextureSuper);
+				pMario->setTextureRect(CCRectMake(0, 0, 18, 32));
+			}
+			break;
+		}
+
+		return;
+	} while (false);
+	CCLog("fun CMMario::OnCallPerFrame Error!");
+}
+
+enumMarioStatus CMMario::GetStatus()
+{
+	return m_eMarioStatus;
 }

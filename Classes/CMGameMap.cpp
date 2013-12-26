@@ -51,7 +51,9 @@ bool CMGameMap::Init()
 		CC_BREAK_IF(pMario==NULL);
 		pMario->setPosition(TileMapPosToTileMapLayerPos(ccp(2,11)));
 		addChild(pMario,enZOrderFront,enTagMario);
+		//pMario->SetStatus(enMarioStatusBig);
 
+		//隐藏原落坑判断层
 		CCTMXLayer* pTrapLayer = layerNamed("trap");
 		CC_BREAK_IF(pTrapLayer==NULL);
 		pTrapLayer->setVisible(false);
@@ -84,7 +86,7 @@ bool CMGameMap::Init()
 				}
 			}
 		}
-		
+
 		//初始化怪物显示
 		CCTMXObjectGroup* pObjectLayer = objectGroupNamed("objects");
 		CC_BREAK_IF(pObjectLayer==NULL);
@@ -126,13 +128,11 @@ bool CMGameMap::Init()
 	return false;
 }
 
-CCSprite* CMGameMap::TileMapLayerPosToTileSprite( CCPoint HeroPos)
+CCSprite* CMGameMap::TileMapLayerPosToTileSprite( CCPoint TileMapLayerPos)
 {
 	do 
 	{
-		//将层坐标转换为地图瓦片坐标
-		int nHeroTilePosX = (HeroPos.x)/getTileSize().width;
-		int nHeroTilePosY = TILE_MAP_VERTICAL - (int)((HeroPos.y)/getTileSize().height);
+		CCPoint TileMapPos = TileMapLayerPosToTileMapPos(TileMapLayerPos);
 
 		//获得地图的各个层
 		CCTMXLayer* pCloudLayer = layerNamed("cloud");
@@ -153,19 +153,19 @@ CCSprite* CMGameMap::TileMapLayerPosToTileSprite( CCPoint HeroPos)
 		CC_BREAK_IF(pFlagpoleLayer==NULL);
 
 		//若马里奥超过上边界
-		if(nHeroTilePosY<0)return NULL;
+		if(TileMapPos.y<0)return NULL;
 
-		CCSprite* pLandSprite = pLandLayer->tileAt(ccp(nHeroTilePosX,nHeroTilePosY));
+		CCSprite* pLandSprite = pLandLayer->tileAt(ccp(TileMapPos.x,TileMapPos.y));
 		if (pLandSprite!=NULL)
 		{
 			return pLandSprite;
 		}
-		CCSprite* pBlockSprite = pBlockLayer->tileAt(ccp(nHeroTilePosX,nHeroTilePosY));
+		CCSprite* pBlockSprite = pBlockLayer->tileAt(ccp(TileMapPos.x,TileMapPos.y));
 		if (pBlockSprite!=NULL)
 		{
 			return pBlockSprite;
 		}
-		CCSprite* pPipeSprite = pPipeLayer->tileAt(ccp(nHeroTilePosX,nHeroTilePosY));	
+		CCSprite* pPipeSprite = pPipeLayer->tileAt(ccp(TileMapPos.x,TileMapPos.y));	
 		if (pPipeSprite!=NULL)
 		{
 			return pPipeSprite;
@@ -180,11 +180,6 @@ void CMGameMap::OnCallPerFrame(float dt)
 {
 	do 
 	{
-		CMMario* pMario = dynamic_cast<CMMario*>(getChildByTag(enTagMario));
-		CC_BREAK_IF(pMario==NULL);
-
-		CCPoint CurMarioPos = pMario->getPosition();
-
 		//删除需要被删除的金币
 		m_pArrayCoin->removeObjectsInArray(m_pArrayCoinForDelete);
 		CCObject *pObj = NULL;
@@ -214,177 +209,13 @@ void CMGameMap::OnCallPerFrame(float dt)
 		}
 		m_pArrayMonstersForDelete->removeAllObjects();
 
-#if(CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)    
-
-// 		CCMenu* pMenu = dynamic_cast<CCMenu*>(getChildByTag(enTagMenu));
-// 		CC_BREAK_IF(pMenu==NULL);
-// 		CCMenuItemImage* pLeftKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagLeftKey));
-// 		CC_BREAK_IF(pLeftKey==NULL);
-// 		CCMenuItemImage* pRightKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagLeftKey));
-// 		CC_BREAK_IF(pRightKey==NULL);
-// 		CCMenuItemImage* pJumpKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagLeftKey));
-// 		CC_BREAK_IF(pJumpKey==NULL);
-// 		CCMenuItemImage* pFireKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagLeftKey));
-// 		CC_BREAK_IF(pFireKey==NULL);
-
-		if(KEY_DOWN(KEY_KEY_K))
-		{
-
-		}
-		if (KEY_DOWN(KEY_KEY_J))
-		{
-
-		}
-
-		if(KEY_DOWN(KEY_KEY_A))
-		{
-			m_bIsLeftKeyDown = true;
-		}
-		if(KEY_UP(KEY_KEY_A))
-		{
-			m_bIsLeftKeyDown = false;
-		}
-		if(KEY_DOWN(KEY_KEY_D))
-		{
-			m_bIsRightKeyDown = true;
-		}
-		if(KEY_UP(KEY_KEY_D))
-		{
-			m_bIsRightKeyDown = false;
-		}
-		if(KEY_DOWN(KEY_KEY_W))
-		{
-			m_bIsJumpKeyDown = true;
-		}
-		if(KEY_UP(KEY_KEY_W))
-		{
-			m_bIsJumpKeyDown = false;
-		}
-		if(KEY_DOWN(KEY_KEY_S))
-		{
-
-		}
-#endif
-
-		//判断马里奥是否落坑死亡
-		float temp = pMario->getPositionY();
-		if(pMario->getPositionY()/getTileSize().height<0)
-		{
-			CCDirector* pDirector = CCDirector::sharedDirector();
-			CCScene *pScene = CMGameScene::CreateGameScene();
-			pDirector->replaceScene(pScene);
-			return;
-		}
-
-		CCSprite* pTileSprite1 = NULL;
-		CCSprite* pTileSprite2 = NULL;
-		CCSprite* pTileSprite3 = NULL;
-		//根据变量控制英雄移动及动作
-		if (m_bIsLeftKeyDown)
-		{
-			//用英雄左方的三个瓦片来判断后退碰撞
-			pTileSprite1 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX(),pMario->getPositionY()+pMario->boundingBox().size.height));
-			pTileSprite2 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX(),pMario->getPositionY()+pMario->boundingBox().size.height/2));
-			pTileSprite3 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX(),pMario->getPositionY()));
-			if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
-			{
-				pMario->setPosition(CurMarioPos);
-			}
-			else
-			{
-				if (pMario->getPositionX()>m_fMapMove)
-				{
-					pMario->setPositionX(pMario->getPositionX()-m_fSpeed);
-				}
-			}
-		}
-
-		pTileSprite1 = NULL;
-		pTileSprite2 = NULL;
-		pTileSprite3 = NULL;
-		if (m_bIsRightKeyDown)
-		{
-			//用英雄右方的三个瓦片来判断前进碰撞
-			pTileSprite1 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width,pMario->getPositionY()+pMario->boundingBox().size.height));
-			pTileSprite2 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width,pMario->getPositionY()+pMario->boundingBox().size.height/2));
-			pTileSprite3 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width,pMario->getPositionY()));
-			if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
-			{
-				pMario->setPosition(CurMarioPos);
-			}
-			else
-			{
-				if (getContentSize().width - m_fMapMove<=SCREEN_WIDTH)
-				{
-					pMario->setPositionX(pMario->getPositionX()+m_fSpeed);
-				}
-				else if (pMario->getPositionX() - m_fMapMove>100)
-				{
-					setPositionX(getPositionX()-m_fSpeed);
-					pMario->setPositionX(pMario->getPositionX()+m_fSpeed);
-					m_fMapMove += m_fSpeed;
-				}
-				else 
-				{
-					pMario->setPositionX(pMario->getPositionX()+m_fSpeed);
-				}
-			}
-		}
-
-		pTileSprite1 = NULL;
-		pTileSprite2 = NULL;
-		pTileSprite3 = NULL;
-		//用英雄下方的三个瓦片来判断掉落碰撞
-		pTileSprite1 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width/2,pMario->getPositionY()));
-		pTileSprite2 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+COLLISION_POS_ADJUSTMENT,pMario->getPositionY()));
-		pTileSprite3 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width-COLLISION_POS_ADJUSTMENT,pMario->getPositionY()));
-		if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
-		{
-			pMario->setPosition(CurMarioPos);
-			pMario->setPositionY(pMario->getPositionY()+1);
-			//掉落速度归零
-			m_fDropSpeedPlus = 0;
-			//跳跃起始速度
-			m_fJumpSpeed = JUMP_START_SPEED;
-		}
-		else
-		{
-			pMario->setPositionY(pMario->getPositionY()-m_fDropSpeedPlus);
-			//掉落加速度
-			m_fDropSpeedPlus += DROP_SPEED_PLUS;
-		}
-
-		pTileSprite1 = NULL;
-		pTileSprite2 = NULL;
-		pTileSprite3 = NULL;
-		//用英雄上方的三个瓦片来判断头顶碰撞
-		pTileSprite1 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width/2,pMario->getPositionY()+pMario->boundingBox().size.height));
-		pTileSprite2 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+COLLISION_POS_ADJUSTMENT,pMario->getPositionY()+pMario->boundingBox().size.height));
-		pTileSprite3 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width-COLLISION_POS_ADJUSTMENT,pMario->getPositionY()+pMario->boundingBox().size.height));
-		if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
-		{
-			pMario->setPosition(CurMarioPos);
-			pMario->setPositionY(pMario->getPositionY()-1);
-			//跳跃速度归零
-			m_fJumpSpeed = 0;
-		}
-		else
-		{
-			//跳跃
-			if (m_bIsJumpKeyDown)
-			{
-				pMario->setPositionY(pMario->getPositionY()+m_fJumpSpeed);
-				//跳跃递减速度
-				m_fJumpSpeed -= JUMP_SPEED_MINUS;
-			}
-		}
-
+		MarioMove();
 		return;
 	} while (false);
 	CCLog("fun CMGameMap::OnCallPerFrame Error!");
 }
 
-enTileType CMGameMap::TileMapPosToTileType( CCPoint HeroPos,float fMapMove )
+enumTileType CMGameMap::TileMapPosToTileType( CCPoint HeroPos,float fMapMove )
 {
 	do 
 	{
@@ -499,4 +330,267 @@ void CMGameMap::CoinDisppear(MsgForCoinCollision* pData )
 float CMGameMap::GetMapMove()
 {
 	return m_fMapMove;
+}
+
+void CMGameMap::MarioMove()
+{
+	do 
+	{
+		CMMario* pMario = dynamic_cast<CMMario*>(getChildByTag(enTagMario));
+		CC_BREAK_IF(pMario==NULL);
+		CCPoint CurMarioPos = pMario->getPosition();
+
+#if(CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)    
+
+		// 		CCMenu* pMenu = dynamic_cast<CCMenu*>(getChildByTag(enTagMenu));
+		// 		CC_BREAK_IF(pMenu==NULL);
+		// 		CCMenuItemImage* pLeftKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagLeftKey));
+		// 		CC_BREAK_IF(pLeftKey==NULL);
+		// 		CCMenuItemImage* pRightKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagLeftKey));
+		// 		CC_BREAK_IF(pRightKey==NULL);
+		// 		CCMenuItemImage* pJumpKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagLeftKey));
+		// 		CC_BREAK_IF(pJumpKey==NULL);
+		// 		CCMenuItemImage* pFireKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagLeftKey));
+		// 		CC_BREAK_IF(pFireKey==NULL);
+
+		if(KEY_DOWN(KEY_KEY_K))
+		{
+
+		}
+		if (KEY_DOWN(KEY_KEY_J))
+		{
+
+		}
+
+		if(KEY_DOWN(KEY_KEY_A))
+		{
+			m_bIsLeftKeyDown = true;
+		}
+		if(KEY_UP(KEY_KEY_A))
+		{
+			m_bIsLeftKeyDown = false;
+		}
+		if(KEY_DOWN(KEY_KEY_D))
+		{
+			m_bIsRightKeyDown = true;
+		}
+		if(KEY_UP(KEY_KEY_D))
+		{
+			m_bIsRightKeyDown = false;
+		}
+		if(KEY_DOWN(KEY_KEY_W))
+		{
+			m_bIsJumpKeyDown = true;
+		}
+		if(KEY_UP(KEY_KEY_W))
+		{
+			m_bIsJumpKeyDown = false;
+		}
+		if(KEY_DOWN(KEY_KEY_S))
+		{
+
+		}
+#endif
+
+		//判断马里奥是否落坑死亡
+		float temp = pMario->getPositionY();
+		if(pMario->getPositionY()/getTileSize().height<0)
+		{
+			CCDirector* pDirector = CCDirector::sharedDirector();
+			CCScene *pScene = CMGameScene::CreateGameScene();
+			pDirector->replaceScene(pScene);
+			return;
+		}
+
+		//Mario的移动及碰撞
+		CCSprite* pTileSprite1 = NULL;
+		CCSprite* pTileSprite2 = NULL;
+		CCSprite* pTileSprite3 = NULL;
+		//根据变量控制Mario移动及动作
+		if (m_bIsLeftKeyDown)
+		{
+			//用Mario左方的三个瓦片来判断后退碰撞
+			pTileSprite1 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX(),pMario->getPositionY()+pMario->boundingBox().size.height));
+			pTileSprite2 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX(),pMario->getPositionY()+pMario->boundingBox().size.height/2));
+			pTileSprite3 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX(),pMario->getPositionY()));
+			if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
+			{
+				pMario->setPosition(CurMarioPos);
+			}
+			else
+			{
+				if (pMario->getPositionX()>m_fMapMove)
+				{
+					pMario->setPositionX(pMario->getPositionX()-m_fSpeed);
+				}
+			}
+		}
+
+		pTileSprite1 = NULL;
+		pTileSprite2 = NULL;
+		pTileSprite3 = NULL;
+		if (m_bIsRightKeyDown)
+		{
+			//用Mario右方的三个瓦片来判断前进碰撞
+			pTileSprite1 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width,pMario->getPositionY()+pMario->boundingBox().size.height));
+			pTileSprite2 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width,pMario->getPositionY()+pMario->boundingBox().size.height/2));
+			pTileSprite3 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width,pMario->getPositionY()));
+			if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
+			{
+				pMario->setPosition(CurMarioPos);
+			}
+			else
+			{
+				if (getContentSize().width - m_fMapMove<=SCREEN_WIDTH)
+				{
+					pMario->setPositionX(pMario->getPositionX()+m_fSpeed);
+				}
+				else if (pMario->getPositionX() - m_fMapMove>100)
+				{
+					setPositionX(getPositionX()-m_fSpeed);
+					pMario->setPositionX(pMario->getPositionX()+m_fSpeed);
+					m_fMapMove += m_fSpeed;
+				}
+				else 
+				{
+					pMario->setPositionX(pMario->getPositionX()+m_fSpeed);
+				}
+			}
+		}
+
+		pTileSprite1 = NULL;
+		pTileSprite2 = NULL;
+		pTileSprite3 = NULL;
+		//用Mario下方的三个瓦片来判断掉落碰撞
+		pTileSprite1 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width/2,pMario->getPositionY()));
+		pTileSprite2 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+COLLISION_POS_ADJUSTMENT,pMario->getPositionY()));
+		pTileSprite3 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width-COLLISION_POS_ADJUSTMENT,pMario->getPositionY()));
+		if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
+		{
+			pMario->setPosition(CurMarioPos);
+			pMario->setPositionY(pMario->getPositionY()+1);
+			//掉落速度归零
+			m_fDropSpeedPlus = 0;
+			//跳跃起始速度
+			m_fJumpSpeed = JUMP_START_SPEED;
+		}
+		else
+		{
+			pMario->setPositionY(pMario->getPositionY()-m_fDropSpeedPlus);
+			//掉落加速度
+			m_fDropSpeedPlus += DROP_SPEED_PLUS;
+		}
+
+		pTileSprite1 = NULL;
+		pTileSprite2 = NULL;
+		pTileSprite3 = NULL;
+		//用Mario上方的三个瓦片来判断头顶碰撞
+		pTileSprite1 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width/2,pMario->getPositionY()+pMario->boundingBox().size.height));
+		pTileSprite2 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+COLLISION_POS_ADJUSTMENT,pMario->getPositionY()+pMario->boundingBox().size.height));
+		pTileSprite3 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width-COLLISION_POS_ADJUSTMENT,pMario->getPositionY()+pMario->boundingBox().size.height));
+		if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
+		{
+			pMario->setPosition(CurMarioPos);
+			pMario->setPositionY(pMario->getPositionY()-1);
+			//跳跃速度归零
+			m_fJumpSpeed = 0;
+			HitBlock(ccp(pMario->getPositionX()+pMario->boundingBox().size.width/2,pMario->getPositionY()+pMario->boundingBox().size.height));
+		}
+		else
+		{
+			//跳跃
+			if (m_bIsJumpKeyDown)
+			{
+				pMario->setPositionY(pMario->getPositionY()+m_fJumpSpeed);
+				//跳跃递减速度
+				m_fJumpSpeed -= JUMP_SPEED_MINUS;
+			}
+		}
+
+		return;
+	} while (false);
+	CCLog("fun CMGameMap::MarioMove Error!");
+	return;
+}
+
+void CMGameMap::HitBlock(CCPoint TileMapLayerPos)
+{
+	do 
+	{
+		CMMario* pMario = dynamic_cast<CMMario*>(getChildByTag(enTagMario));
+		CC_BREAK_IF(pMario==NULL);
+
+		//解析得到当前砖块的属性
+		CCTMXLayer* pBlockLayer = layerNamed("block");
+		CC_BREAK_IF(pBlockLayer==NULL);
+		int GID = pBlockLayer->tileGIDAt(TileMapLayerPosToTileMapPos(TileMapLayerPos));
+		CCDictionary *pDic = propertiesForGID(GID);
+		CC_BREAK_IF(pDic==NULL);
+		CCString *strBlockType = (CCString*)pDic->objectForKey("blockType");
+		int nBlockType = strBlockType->intValue();
+
+		//对不同形态的砖块进行不同的反馈
+		CCSprite* pBlockForHit = TileMapLayerPosToTileSprite(TileMapLayerPos);
+		CC_BREAK_IF(pBlockForHit==NULL);
+		switch (nBlockType)
+		{
+		case enBlockTypeNormal:
+			{
+				switch (pMario->GetStatus())
+				{
+				case enMarioStatusSmall:
+					{
+						pBlockForHit->stopAllActions();
+						CCActionInterval *pJumpBy = CCJumpBy::create(0.2f, CCPointZero, 
+						this->getTileSize().height*0.5, 1);
+						pBlockForHit->runAction(pJumpBy);
+					}
+					break;
+				case enMarioStatusBig:
+				case enMarioStatusSuper:
+					{
+						pBlockLayer->removeTileAt(TileMapLayerPosToTileMapPos(TileMapLayerPos));
+					}
+					break;
+				}
+			}
+			break;
+		case enBlockTypeBox:
+			{
+				pBlockForHit->stopAllActions();
+				CCActionInterval *pJumpBy = CCJumpBy::create(0.2f, CCPointZero, 
+					this->getTileSize().height*0.5, 1);
+				pBlockForHit->runAction(pJumpBy);
+				
+				CCSprite* pTempCoin = CCSprite::create("coin.png");
+				CC_BREAK_IF(pTempCoin==NULL);
+				pTempCoin->setPosition(pBlockForHit->getPosition());
+				pTempCoin->setAnchorPoint(ccp(0,0));
+				addChild(pTempCoin);
+				CCActionInterval *pJumpCoin = CCJumpBy::create(0.16f, ccp(0, this->getTileSize().height),
+					this->getTileSize().height*1.5, 1);
+				pTempCoin->runAction(pJumpCoin);
+			}
+			break;
+		case enBlockTypeAddLife:
+			{
+
+			}
+			break;
+		}
+		
+		//pBlockLayer->removeTileAt(TilePos);
+
+		return;
+	} while (false);
+	CCLog("fun CMGameMap::HitBlock Error!");
+}
+
+cocos2d::CCPoint CMGameMap::TileMapLayerPosToTileMapPos( CCPoint TileMapLayerPos )
+{
+	//将层坐标转换为地图瓦片坐标
+	int nTileMapPosX = (TileMapLayerPos.x)/getTileSize().width;
+	int nTileMapPosY = TILE_MAP_VERTICAL - (int)((TileMapLayerPos.y)/getTileSize().height);
+
+	return ccp(nTileMapPosX,nTileMapPosY);
 }

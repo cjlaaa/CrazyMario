@@ -16,7 +16,7 @@ protected:
 	CCArray *m_pArrayMonstersForDelete;	//待删除的怪物数组
 
 	float m_fMapMove;					//地图偏移量
-	float m_fDropSpeedPlus;					//掉落速度
+	float m_fDropSpeedPlus;				//掉落速度
 	float m_fJumpSpeed;					//跳跃速度
 	float m_fSpeed;						//移动速度
 
@@ -27,14 +27,16 @@ protected:
 public:
 	static CMGameMap* CreateGameMap(const char* pFileName);
 
-	// 返回地图指定位置上的图块类型，用作碰撞检测
-	CCSprite*	TileMapLayerPosToTileSprite(CCPoint HeroPos);			
+	// 返回地图指定位置上的图块
+	CCSprite*	TileMapLayerPosToTileSprite(CCPoint TileMapLayerPos);			
 	//通过地图块坐标返回地图块类型
-	enTileType	TileMapPosToTileType(CCPoint HeroPos,float fMapMove);					
+	enumTileType	TileMapPosToTileType(CCPoint HeroPos,float fMapMove);					
 	//地图块坐标转换为地图层坐标
-	CCPoint		TileMapPosToTileMapLayerPos(CCPoint TilePos);							
+	CCPoint		TileMapPosToTileMapLayerPos(CCPoint TileMapPos);							
 	//地图层坐标转换为世界坐标
-	CCPoint		TileMapLayerPosToWorldPos(CCPoint TileMapLayerPos,float m_fMapMove);	
+	CCPoint		TileMapLayerPosToWorldPos(CCPoint TileMapLayerPos,float m_fMapMove);
+	//地图层坐标转换为地图块坐标
+	CCPoint		TileMapLayerPosToTileMapPos(CCPoint TileMapLayerPos);
 	//返回地图偏移量
 	float		GetMapMove();
 protected:
@@ -43,7 +45,14 @@ protected:
 	void		 OnMsgReceive( int enMsg,void* pData,int nSize );
 	void		 onExit();
 
-	void		 CoinDisppear(MsgForCoinCollision* pData);
+	//金币消失
+	void	CoinDisppear(MsgForCoinCollision* pData);
+	//Mario碰撞
+	void	MarioMove();
+	//顶砖块
+	void	HitBlock(CCPoint TileMapLayerPos);
+	//删除砖块
+	void	DeleteBlock();
 	enum 
 	{
 		enTagMario = 998,
