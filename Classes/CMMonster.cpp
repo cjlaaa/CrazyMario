@@ -14,6 +14,7 @@ bool CMMonsterBasic::init( CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGame
 		m_pGameMap = pGameMap;
 		m_bIsActivation = false;
 		m_MoveDirection = enMoveLeft;
+		m_fDropSpeedPlus = 0;
 
 		//注册Update函数
 		this->schedule(schedule_selector(CMMonsterBasic::OnCallPerFrame));
@@ -121,10 +122,13 @@ bool CMMonsterMushrooms::OnCollisionMario()
 		//马里奥与蘑菇怪的碰撞
 		if (m_pMario->boundingBox().intersectsRect(boundingBox()))
 		{
-			CCLog("Mashrooms bound");
-			//MsgForCoinCollision* pData = new MsgForCoinCollision;
-			//pData->pCoin = this;
-			//SendMsg(enMsgCoinCollision,pData,sizeof(pCoin));
+			//被踩死
+			if (getPositionY()<m_pMario->getPositionY() && abs(m_pMario->getPositionY()-getPositionY())>boundingBox().size.height*0.7)
+			{
+				MsgForMonsterDisappear* pData = new MsgForMonsterDisappear;
+				pData->pMonster = this;
+				SendMsg(enMsgStamp,pData,sizeof(pData));
+			}
 		}
 
 		return true;
@@ -147,18 +151,16 @@ void CMMonsterMushrooms::OnCallPerFrame( float fT )
 			return;
 		}
 
-		//移动碰撞
 		CCSprite* pTileSprite1 = NULL;
 		CCSprite* pTileSprite2 = NULL;
 		CCSprite* pTileSprite3 = NULL;
-
+		//移动与碰撞
 		if (m_MoveDirection == enMoveLeft)
 		{
-			//用怪物左方的三个瓦片来判断移动碰撞
+			//用怪物左方的2个瓦片来判断移动碰撞
 			pTileSprite1 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX(),getPositionY()+getContentSize().height));
 			pTileSprite2 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX(),getPositionY()+getContentSize().height/2));
-			pTileSprite3 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX(),getPositionY()));
-			if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
+			if (pTileSprite1!=NULL || pTileSprite2!=NULL)
 			{
 				m_MoveDirection = enMoveRight;
 			}
@@ -169,11 +171,10 @@ void CMMonsterMushrooms::OnCallPerFrame( float fT )
 		}
 		else if(m_MoveDirection == enMoveRight)
 		{
-			//用怪物左方的三个瓦片来判断移动碰撞
+			//用怪物右方的2个瓦片来判断移动碰撞
 			pTileSprite1 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+getContentSize().width,getPositionY()+getContentSize().height));
 			pTileSprite2 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+getContentSize().width,getPositionY()+getContentSize().height/2));
-			pTileSprite3 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+getContentSize().width,getPositionY()));
-			if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
+			if (pTileSprite1!=NULL || pTileSprite2!=NULL)
 			{
 				m_MoveDirection = enMoveLeft;
 			}
@@ -181,6 +182,25 @@ void CMMonsterMushrooms::OnCallPerFrame( float fT )
 			{
 				setPositionX(getPositionX()+1);
 			}
+		}
+
+		pTileSprite1 = NULL;
+		pTileSprite2 = NULL;
+		pTileSprite3 = NULL;
+		//用怪物下方的三个瓦片来判断掉落碰撞
+		pTileSprite1 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+boundingBox().size.width/2,getPositionY()));
+		pTileSprite2 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+COLLISION_POS_ADJUSTMENT,getPositionY()));
+		pTileSprite3 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+boundingBox().size.width-COLLISION_POS_ADJUSTMENT,getPositionY()));
+		if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
+		{
+			//掉落速度归零
+			m_fDropSpeedPlus = 0;
+		}
+		else
+		{
+			setPositionY(getPositionY()-m_fDropSpeedPlus);
+			//掉落加速度
+			m_fDropSpeedPlus += DROP_SPEED_PLUS;
 		}
 
 		return;

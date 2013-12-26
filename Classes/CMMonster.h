@@ -30,7 +30,8 @@ protected:
 	CMMario				*m_pMario;
 	CMGameMap			*m_pGameMap;
 	enMoveDirection		 m_MoveDirection;		//移动方向
-	bool				 m_bIsActivation;			//是否激活（与Mario到达一定距离则激活移动）
+	bool				 m_bIsActivation;		//是否激活（与Mario到达一定距离则激活移动）
+	float				 m_fDropSpeedPlus;		//掉落加速度
 protected:
 	virtual bool init(CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pMsgRecver);
 

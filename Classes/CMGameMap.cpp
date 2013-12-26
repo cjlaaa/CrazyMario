@@ -52,9 +52,14 @@ bool CMGameMap::Init()
 		pMario->setPosition(TileMapPosToTileMapLayerPos(ccp(2,10)));
 		addChild(pMario,enZOrderFront,enTagMario);
 
+		CCTMXLayer* pTrapLayer = layerNamed("trap");
+		CC_BREAK_IF(pTrapLayer==NULL);
+		pTrapLayer->setVisible(false);
+
 		//初始化显示金币
 		CCTMXLayer* pCoinLayer = layerNamed("coin");
 		CC_BREAK_IF(pCoinLayer==NULL);
+		pCoinLayer->setVisible(false);
 		//获得地图的瓦片数量
 		int nMapHorizontalTileNum = pCoinLayer->boundingBox().size.width/getTileSize().width;
 		int nMapVerticalTileNum = pCoinLayer->boundingBox().size.height/getTileSize().height;
@@ -144,7 +149,6 @@ CCSprite* CMGameMap::TileMapLayerPosToTileSprite( CCPoint HeroPos)
 		CC_BREAK_IF(pObjectLayer==NULL);
 		CCTMXLayer* pCoinLayer = layerNamed("coin");
 		CC_BREAK_IF(pCoinLayer==NULL);
-		pCoinLayer->setVisible(false);
 		CCTMXLayer* pFlagpoleLayer = layerNamed("flagpole");
 		CC_BREAK_IF(pFlagpoleLayer==NULL);
 
@@ -328,12 +332,12 @@ void CMGameMap::OnCallPerFrame(float dt)
 		pTileSprite3 = NULL;
 		//用英雄下方的三个瓦片来判断掉落碰撞
 		pTileSprite1 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width/2,pMario->getPositionY()));
-		pTileSprite2 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+5,pMario->getPositionY()));
-		pTileSprite3 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width-5,pMario->getPositionY()));
+		pTileSprite2 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+COLLISION_POS_ADJUSTMENT,pMario->getPositionY()));
+		pTileSprite3 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width-COLLISION_POS_ADJUSTMENT,pMario->getPositionY()));
 		if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
 		{
 			pMario->setPosition(CurMarioPos);
-			pMario->setPositionY(pMario->getPositionY()+1/*pMario->boundingBox().size.height*0.1*/);
+			pMario->setPositionY(pMario->getPositionY()+1);
 			//掉落速度归零
 			m_fDropSpeedPlus = 0;
 			//跳跃起始速度
@@ -351,8 +355,8 @@ void CMGameMap::OnCallPerFrame(float dt)
 		pTileSprite3 = NULL;
 		//用英雄上方的三个瓦片来判断头顶碰撞
 		pTileSprite1 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width/2,pMario->getPositionY()+pMario->boundingBox().size.height));
-		pTileSprite2 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+5,pMario->getPositionY()+pMario->boundingBox().size.height));
-		pTileSprite3 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width-5,pMario->getPositionY()+pMario->boundingBox().size.height));
+		pTileSprite2 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+COLLISION_POS_ADJUSTMENT,pMario->getPositionY()+pMario->boundingBox().size.height));
+		pTileSprite3 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width-COLLISION_POS_ADJUSTMENT,pMario->getPositionY()+pMario->boundingBox().size.height));
 		if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
 		{
 			pMario->setPosition(CurMarioPos);
@@ -465,6 +469,11 @@ void CMGameMap::OnMsgReceive( int enMsg,void* pData,int nSize )
 			{
 				CCAssert(false,"sizeof(MsgForMonsterDisappear)!=nSize");
 			}
+			m_pArrayMonstersForDelete->addObject(((MsgForMonsterDisappear*)pData)->pMonster);
+		}
+		break;
+	case enMsgStamp:
+		{
 			m_pArrayMonstersForDelete->addObject(((MsgForMonsterDisappear*)pData)->pMonster);
 		}
 		break;

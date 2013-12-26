@@ -5,13 +5,14 @@ USING_NS_CC;
 #define SCREEN_WIDTH CCDirector::sharedDirector()->getWinSize().width
 #define SCREEN_HEIGHT CCDirector::sharedDirector()->getWinSize().height
 
-#define CONTROL_UI_HEIGHT			96		//控制UI高度
-#define TILE_MAP_VERTICAL			13		//地图瓦片竖直块数
-#define JUMP_START_SPEED			8		//跳跃起始速度
-#define JUMP_SPEED_MINUS			0.3		//跳跃递减速度
-#define DROP_SPEED_PLUS				0.098	//掉落加速度
-#define MOVE_SPEED					2		//移动速度
-#define MONSTER_ACTIVE_DISTANCE		20		//怪物激活距离
+#define CONTROL_UI_HEIGHT			96					//控制UI高度
+#define TILE_MAP_VERTICAL			13					//地图瓦片竖直块数
+#define JUMP_START_SPEED			8					//跳跃起始速度
+#define JUMP_SPEED_MINUS			0.3					//跳跃递减速度
+#define DROP_SPEED_PLUS				0.098				//掉落加速度
+#define MOVE_SPEED					2					//移动速度
+#define MONSTER_ACTIVE_DISTANCE		SCREEN_WIDTH-100		//怪物激活距离
+#define COLLISION_POS_ADJUSTMENT	3					//跳跃与坠落的碰撞检测点调整
 
 enum 
 {
@@ -57,6 +58,7 @@ enum
 	enMsgCoinCollision,		//金币碰撞
 	enMsgDead,				//Mario死亡
 	enMsgMonsterDisappear,	//怪物离开地图消失数据
+	enMsgStamp,				//被踩死
 };
 
 //金币碰撞消息数据
