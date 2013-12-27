@@ -36,9 +36,10 @@ enum enumTileType
 //砖块类型
 enum enumBlockType
 {
-	enBlockTypeBox = 1,		//宝箱砖块
-	enBlockTypeNormal,		//普通砖块，可顶碎
-	enBlockTypeAddLife,		//隐藏加人砖块
+	enBlockTypeBox = 1,			//宝箱砖块
+	enBlockTypeNormal,			//普通砖块，可顶碎
+	enBlockTypeAddLife,			//隐藏加人砖块
+	enBlockTypeJustBlock,		//没有任何互动的砖块
 };
 
 //Mario状态

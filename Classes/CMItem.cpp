@@ -57,7 +57,7 @@ CMItemCoin * CMItemCoin::CreateItemIcon( CCPoint ptItemPos,CCSize szItemSize,CMM
 		CC_SAFE_DELETE(pItemCoin);
 		return NULL;
 	} while (false);
-	CCLog("fun CMHero::create() Error!");
+	CCLog("fun CMItemCoin::CreateItemIcon Error!");
 	return NULL;
 }
 
@@ -113,6 +113,107 @@ void CMItemCoin::OnCallPerFrame( float fT )
 		return;
 	} while (false);
 	CCLog("fun CMItemCoin::OnCallPerFrame Error!");
+}
+
+/************************************************************************/
+/* 砖块类                               
+/************************************************************************/
+CMItemBlock * CMItemBlock::CreateItemBlock( CCPoint ptItemPos,CCSize szItemSize,CMMario *pMario,CMReceiver *pMsgRecver ,enumBlockType eBlockType)
+{
+	do 
+	{
+		CMItemBlock *pItemBlock = new CMItemBlock();
+		if (pItemBlock && pItemBlock->init(ptItemPos,szItemSize,pMario,pMsgRecver,eBlockType))
+		{
+			pItemBlock->autorelease();
+			return pItemBlock;
+		}
+		CC_SAFE_DELETE(pItemBlock);
+		return NULL;
+	} while (false);
+	CCLog("fun CMItemBlock::create() Error!");
+	return NULL;
+}
+
+bool CMItemBlock::init( CCPoint ptItemPos,CCSize szItemSize,CMMario *pMario,CMReceiver *pMsgRecver,enumBlockType eBlockType )
+{
+	do 
+	{
+		CC_BREAK_IF(!CMItemBasic::init(ptItemPos,szItemSize,pMario,pMsgRecver));
+
+		CCSprite* pBlock = NULL;
+		switch (eBlockType)
+		{
+		case enBlockTypeNormal:
+			{
+				pBlock = CCSprite::create("singleblock.png",CCRectMake(0,0,16,16));
+			}
+			break;
+		case enBlockTypeBox:
+			{
+				pBlock = CCSprite::create("shanshuodecoin.png",CCRectMake(0,0,16,16));
+			}
+			break;
+		case enBlockTypeAddLife:
+			{
+				pBlock = CCSprite::create("singleblock.png",CCRectMake(0,0,16,16));
+			}
+			break;
+		case enBlockTypeJustBlock:
+			{
+				pBlock = CCSprite::create("blocktype1.png");
+			}
+			break;
+		}
+		pBlock->setAnchorPoint(ccp(0,0));
+		CC_BREAK_IF(pBlock==NULL);
+		addChild(pBlock,enZOrderFront,enTagMainImage);
+
+		m_pReceiver = pMsgRecver;
+
+		setContentSize(szItemSize);
+
+		return true;
+	} while (false);
+	CCLog("fun CMItemBlock::init Error!");
+	return false;
+}
+
+bool CMItemBlock::OnCollisionMario()
+{
+	do 
+	{
+		CCSprite* pBlock = dynamic_cast<CCSprite*>(getChildByTag(enTagMainImage));
+		CC_BREAK_IF(pBlock==NULL);
+
+		//被顶
+		if (m_pMario->boundingBox().intersectsRect(boundingBox()) &&
+			getPositionY()>m_pMario->getPositionY() && 
+			abs(m_pMario->getPositionY()-getPositionY())>m_pMario->boundingBox().size.height*0.8 &&
+			abs(m_pMario->getPositionX()-getPositionX())<m_pMario->boundingBox().size.width*0.7)
+		{
+			stopAllActions();
+			CCActionInterval *pJumpBy = CCJumpBy::create(0.2f, CCPointZero, 
+				16*0.5, 1);
+			runAction(pJumpBy);
+		}
+
+		return true;
+	} while (false);
+	CCLog("fun CMItemBlock::OnCollisionMario Error!");
+	return false;
+}
+
+void CMItemBlock::OnCallPerFrame( float fT )
+{
+	do 
+	{
+		CMItemBasic::OnCallPerFrame(fT);
+
+		OnCollisionMario();
+		return;
+	} while (false);
+	CCLog("fun CMItemBlock::OnCallPerFrame Error!");
 }
 
 /************************************************************************/

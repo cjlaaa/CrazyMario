@@ -45,6 +45,8 @@ bool CMGameMap::Init()
 		m_pArrayMonsters->retain();
 		m_pArrayMonstersForDelete = CCArray::create();
 		m_pArrayMonstersForDelete->retain();
+		m_pArrayBlock = CCArray::create();
+		m_pArrayBlock->retain();
 
 		//初始化Mario
 		CMMario* pMario = CMMario::CreateHero();
@@ -120,6 +122,46 @@ bool CMGameMap::Init()
 				}
 			}
 
+		}
+
+		//初始化砖块显示
+		CCTMXLayer* pBlockLayer = layerNamed("block");
+		CC_BREAK_IF(pBlockLayer==NULL);
+		pBlockLayer->setVisible(false);
+		//获得地图的瓦片数量
+// 		int nMapHorizontalTileNum = pCoinLayer->boundingBox().size.width/getTileSize().width;
+// 		int nMapVerticalTileNum = pCoinLayer->boundingBox().size.height/getTileSize().height;
+		//遍历每片瓦片，寻找瓦片，建立并加入瓦片集合
+		for (int i = 0;i<nMapHorizontalTileNum;i++)
+		{
+			for (int j = 0;j<nMapVerticalTileNum;j++)
+			{
+				if (TileMapPosToTileType(ccp(i,j),m_fMapMove)==enTileTypeBlock)
+				{
+					//解析得到当前砖块的属性
+					int GID = pBlockLayer->tileGIDAt(ccp(i,j));
+					CCDictionary *pDic = propertiesForGID(GID);
+					CC_BREAK_IF(pDic==NULL);
+					CCString *strBlockType = (CCString*)pDic->objectForKey("blockType");
+					if (strBlockType==NULL)
+					{
+						continue;
+					}
+					int nBlockType = strBlockType->intValue();
+
+					//将瓦片地图坐标转换为瓦片地图层坐标
+					CCPoint BlockTileMapLayerPos = TileMapPosToTileMapLayerPos(ccp(i,j));
+					CMItemBlock* pBlock = CMItemBlock::CreateItemBlock(BlockTileMapLayerPos,getTileSize(),pMario,this,(enumBlockType)nBlockType);
+					if (pBlock==NULL)
+					{
+						CCLog("Block init Error!");
+					}
+					pBlock->setPosition(BlockTileMapLayerPos);
+					pBlock->setAnchorPoint(ccp(0,0));
+					m_pArrayCoin->addObject(pBlock);
+					addChild(pBlock);
+				}
+			}
 		}
 
 		return true;
@@ -275,6 +317,8 @@ void CMGameMap::onExit()
 	CC_SAFE_RELEASE(m_pArrayCoinForDelete);
 	m_pArrayMonstersForDelete->removeAllObjects();
 	CC_SAFE_RELEASE(m_pArrayMonstersForDelete);
+	m_pArrayBlock->removeAllObjects();
+	CC_SAFE_RELEASE(m_pArrayBlock);
 	CCTMXTiledMap::onExit();
 }
 
@@ -494,7 +538,7 @@ void CMGameMap::MarioMove()
 			pMario->setPositionY(pMario->getPositionY()-1);
 			//跳跃速度归零
 			m_fJumpSpeed = 0;
-			HitBlock(ccp(pMario->getPositionX()+pMario->boundingBox().size.width/2,pMario->getPositionY()+pMario->boundingBox().size.height));
+			//HitBlock(ccp(pMario->getPositionX()+pMario->boundingBox().size.width/2,pMario->getPositionY()+pMario->boundingBox().size.height));
 		}
 		else
 		{

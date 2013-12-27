@@ -57,7 +57,13 @@
   </tile>
   <tile id="150">
    <properties>
+    <property name="blockType" value="4"/>
     <property name="collisionType" value="1"/>
+   </properties>
+  </tile>
+  <tile id="533">
+   <properties>
+    <property name="blockType" value="4"/>
    </properties>
   </tile>
   <tile id="600">
@@ -84,7 +90,7 @@
  </layer>
  <layer name="mountain" width="228" height="14">
   <data encoding="base64" compression="zlib">
-   eJzt1ztSwgAYReGMFcguEBF2QBkVpFQXIu6D1zrwsQ4FF+Bb1+LJDIVFQsiEJBTnmzkNMHBT/AVBIEmSJEmSJEmStN96B1UvkBS55Bav6NqblCp3wx2O6DblHmtUp0NqlLBr19xfLfenG3ODE5rSjOYJN3lMbTqhDnUz/k6TjqiVY2se7nd/HmXtX3B/d3RPD/SYcI/n1KcBXdBww3e+0wd90tf6tZBO6Szm86/0lrJzG9/0Q78x77m/+P2RpGfIsj9OGJSzP0mR+/974v6eaUkrevE/pCRJW/sD0bc2Zg==
+   eJzt11lOwmAUQOHGJ8Rd4AQ74BFR8VFdCLgPUNbB4DqcFoAjrMXTRJM/pAUahkJyvuS8UOh/03BDiCJJkiRJkiRJkqTtVt3LewJJsWt28YZu3Ukpd032sEV3c/axQPtUpIMNzLVqzp+veP5itNvzr/v5t9nBDt3TA3VTdvKYTuiUylTJeE6JDuloiVmX4fz5zh+eH3+fd23+TT3/HvvXpwEN6TFlH8/pgi6pQVcz7vlBn/RF33+v1eiM6gnvH9H7nDkX8UNjmiRcc/71z98J7tWauhae//8bmUX4+Wmrmn+WLM8/SS1Knz/0xP490wu90pv/ISVJWtgvUiA1zQ==
   </data>
  </layer>
  <layer name="land" width="228" height="14">

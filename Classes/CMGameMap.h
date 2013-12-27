@@ -14,6 +14,7 @@ protected:
 	CCArray *m_pArrayCoinForDelete;		//碰撞后待删除的金币数组
 	CCArray *m_pArrayMonsters;			//怪物数组
 	CCArray *m_pArrayMonstersForDelete;	//待删除的怪物数组
+	CCArray *m_pArrayBlock;				//砖块数组
 
 	float m_fMapMove;					//地图偏移量
 	float m_fDropSpeedPlus;				//掉落速度
