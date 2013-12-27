@@ -73,7 +73,9 @@ void CMGameScene::OnCallPerFrame(float dt)
 {
 	do 
 	{
-		
+		CMGameMap* pMap = dynamic_cast<CMGameMap*>(getChildByTag(enTagMap));
+		CC_BREAK_IF(pMap==NULL);
+		pMap->OnCallPerFrame(dt);
 		
 		//CCLog("TileType = %d",pMap->HeroPosToTileType(pHero->getPosition()));
 		//CCLog("HeroPosX=%f	HeroPosY=%f",pHero->getPositionX(),pHero->getPositionY());

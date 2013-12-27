@@ -11,11 +11,14 @@ public:
 	void SetStatus(enumMarioStatus eMarioStatus);
 	//获得Mario状态
 	enumMarioStatus GetStatus();
+	void OnCallPerFrame(float fT);
 private:
+	CCTexture2D *pTextureBig;
+	CCTexture2D *pTextureSuper;
+	CCTexture2D *pTextureSmall;	
 	bool Init();
 	//Mario状态
 	enumMarioStatus m_eMarioStatus;
-	void OnCallPerFrame(float fT);
 	enum 
 	{
 		enTagMario,

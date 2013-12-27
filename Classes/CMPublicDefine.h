@@ -50,6 +50,13 @@ enum enumMarioStatus
 	enMarioStatusSuper,
 };
 
+//怪物与道具移动方向
+enum enMoveDirection
+{
+	enMoveLeft,
+	enMoveRight,
+};
+
 class CMReceiver
 {
 public:
@@ -73,17 +80,20 @@ public:
 
 enum 
 {
-	enMsgCoinCollision,		//金币碰撞
 	enMsgDead,				//Mario死亡
-	enMsgMonsterDisappear,	//怪物离开地图消失数据
-	enMsgStamp,				//被踩死
+	enMsgMonsterDisappear,	//怪物离开地图消失
+	enMsgStamp,				//将怪物踩死
+	enMsgBeHurt,			//Mario被怪物碰到
+	enMsgBlockBoxHitted,	//宝箱砖块被顶消息
+	enMsgItemDisappear,		//道具消失
+	enMsgLevelUp,				//吃道具变大
 };
 
-//金币碰撞消息数据
+//道具消息数据
 class CMItemBasic;
-struct MsgForCoinCollision
+struct MsgForItem
 {
-	CMItemBasic* pCoin;
+	CMItemBasic* pItem;
 };
 
 //怪物离开地图消失数据
@@ -91,6 +101,13 @@ class CMMonsterBasic;
 struct MsgForMonsterDisappear
 {
 	CMMonsterBasic* pMonster;
+};
+
+//宝箱砖块被顶 出现物品
+class CMItemBlock;
+struct MsgForBlockBoxHitted
+{
+	CMItemBlock* pBlockBox;
 };
 
 #endif

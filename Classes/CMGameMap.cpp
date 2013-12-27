@@ -22,9 +22,6 @@ bool CMGameMap::Init()
 	do 
 	{
 		CCLog("initing Game Map...");
-		
-		//注册Update函数
-		this->schedule(schedule_selector(CMGameMap::OnCallPerFrame));
 
 		//初始化成员变量
 		m_fMapMove = 0;
@@ -37,16 +34,14 @@ bool CMGameMap::Init()
 		m_bIsHeroDead = false;
 
 		//初始化游戏对象数组
-		m_pArrayCoin = CCArray::create();
-		m_pArrayCoin->retain();
-		m_pArrayCoinForDelete = CCArray::create();
-		m_pArrayCoinForDelete->retain();
+		m_pArrayItems = CCArray::create();
+		m_pArrayItems->retain();
+		m_pArrayItemForDelete = CCArray::create();
+		m_pArrayItemForDelete->retain();
 		m_pArrayMonsters = CCArray::create();
 		m_pArrayMonsters->retain();
 		m_pArrayMonstersForDelete = CCArray::create();
 		m_pArrayMonstersForDelete->retain();
-		m_pArrayBlock = CCArray::create();
-		m_pArrayBlock->retain();
 
 		//初始化Mario
 		CMMario* pMario = CMMario::CreateHero();
@@ -83,7 +78,7 @@ bool CMGameMap::Init()
 					}
 					pCoin->setPosition(CoinTileMapLayerPos);
 					pCoin->setAnchorPoint(ccp(0,0));
-					m_pArrayCoin->addObject(pCoin);
+					m_pArrayItems->addObject(pCoin);
 					addChild(pCoin);
 				}
 			}
@@ -158,7 +153,7 @@ bool CMGameMap::Init()
 					}
 					pBlock->setPosition(BlockTileMapLayerPos);
 					pBlock->setAnchorPoint(ccp(0,0));
-					m_pArrayCoin->addObject(pBlock);
+					m_pArrayItems->addObject(pBlock);
 					addChild(pBlock);
 				}
 			}
@@ -222,23 +217,23 @@ void CMGameMap::OnCallPerFrame(float dt)
 {
 	do 
 	{
-		//删除需要被删除的金币
-		m_pArrayCoin->removeObjectsInArray(m_pArrayCoinForDelete);
+		//删除需要被删除的道具
+		m_pArrayItems->removeObjectsInArray(m_pArrayItemForDelete);
 		CCObject *pObj = NULL;
 		//因为集合只是保存指针，还需要在父节点移除，所以需要遍历移除。
-		CCARRAY_FOREACH(m_pArrayCoinForDelete,pObj)
+		CCARRAY_FOREACH(m_pArrayItemForDelete,pObj)
 		{
-			CMItemCoin* pCoin = dynamic_cast<CMItemCoin*>(pObj);
-			if (pCoin==NULL)
+			CMItemBasic* pItem = dynamic_cast<CMItemBasic*>(pObj);
+			if (pItem==NULL)
 			{
 				CCLog("pCoin==NULL!");
 			}
-			pCoin->removeFromParent();
+			pItem->removeFromParent();
 		}
-		m_pArrayCoinForDelete->removeAllObjects();
+		m_pArrayItemForDelete->removeAllObjects();
 
 		//删除需要被删除的怪物
-		m_pArrayCoin->removeObjectsInArray(m_pArrayMonstersForDelete);
+		m_pArrayMonsters->removeObjectsInArray(m_pArrayMonstersForDelete);	//这句的m_pArrayMonsters被写成了m_pArrayItems也不报错，坑死我了！2013-12-27 15:51
 		pObj = NULL;
 		CCARRAY_FOREACH(m_pArrayMonstersForDelete,pObj)
 		{
@@ -250,6 +245,33 @@ void CMGameMap::OnCallPerFrame(float dt)
 			pMonster->removeFromParent();
 		}
 		m_pArrayMonstersForDelete->removeAllObjects();
+
+		//遍历调用子节点的循环函数
+		pObj = NULL;
+		CCARRAY_FOREACH(m_pArrayItems,pObj)
+		{
+			//调用基类的Update实际上调用的是子类重写的Update，若想调用基类的Update需要在子类的Update中调用。
+			CMItemBasic* pItem = dynamic_cast<CMItemBasic*>(pObj);
+			if (pItem==NULL)
+			{
+				CCLog("pMonster==NULL");
+			}
+			pItem->OnCallPerFrame(dt);
+		}
+		CCARRAY_FOREACH(m_pArrayMonsters,pObj)
+		{
+			//调用基类的Update实际上调用的是子类重写的Update，若想调用基类的Update需要在子类的Update中调用。
+			CMMonsterBasic* pMonster = dynamic_cast<CMMonsterBasic*>(pObj);
+			if (pMonster==NULL)
+			{
+				CCLog("pMonster==NULL");
+				return;
+			}
+			pMonster->OnCallPerFrame(dt);
+		}
+		CMMario* pMario = dynamic_cast<CMMario*>(getChildByTag(enTagMario));
+		CC_BREAK_IF(pMario==NULL);
+		pMario->OnCallPerFrame(dt);		
 
 		MarioMove();
 		return;
@@ -309,16 +331,14 @@ enumTileType CMGameMap::TileMapPosToTileType( CCPoint HeroPos,float fMapMove )
 
 void CMGameMap::onExit()
 {
-	m_pArrayCoin->removeAllObjects();
-	CC_SAFE_RELEASE(m_pArrayCoin);
+	m_pArrayItems->removeAllObjects();
+	CC_SAFE_RELEASE(m_pArrayItems);
 	m_pArrayMonsters->removeAllObjects();
 	CC_SAFE_RELEASE(m_pArrayMonsters);
-	m_pArrayCoinForDelete->removeAllObjects();
-	CC_SAFE_RELEASE(m_pArrayCoinForDelete);
+	m_pArrayItemForDelete->removeAllObjects();
+	CC_SAFE_RELEASE(m_pArrayItemForDelete);
 	m_pArrayMonstersForDelete->removeAllObjects();
 	CC_SAFE_RELEASE(m_pArrayMonstersForDelete);
-	m_pArrayBlock->removeAllObjects();
-	CC_SAFE_RELEASE(m_pArrayBlock);
 	CCTMXTiledMap::onExit();
 }
 
@@ -331,15 +351,58 @@ cocos2d::CCPoint CMGameMap::TileMapPosToTileMapLayerPos( CCPoint TilePos )
 
 void CMGameMap::OnMsgReceive( int enMsg,void* pData,int nSize )
 {
+	CMMario* pMario = dynamic_cast<CMMario*>(getChildByTag(enTagMario));
+	if (pMario==NULL)
+	{
+		CCLog("pMario==NULL in fun CMGameMap::OnMsgReceive Error!");
+	}
+
 	switch (enMsg)
 	{
-	case enMsgCoinCollision:
+	case enMsgItemDisappear:
 		{
-			if (sizeof(MsgForCoinCollision)!=nSize)
+			if (sizeof(MsgForItem)!=nSize)
 			{
 				CCAssert(false,"sizeof(MsgForCoinCollision)!=nSize");
 			}
-			CoinDisppear((MsgForCoinCollision*)pData);
+			m_pArrayItemForDelete->addObject(((MsgForItem*)pData)->pItem);
+		}
+		break;
+	case enMsgLevelUp:
+		{
+			if (sizeof(MsgForItem)!=nSize)
+			{
+				CCAssert(false,"sizeof(MsgForCoinCollision)!=nSize");
+			}
+			m_pArrayItemForDelete->addObject(((MsgForItem*)pData)->pItem);
+			
+			//Mario升级
+			if (pMario->GetStatus()==enMarioStatusSmall)
+			{
+				pMario->SetStatus(enMarioStatusBig);
+			}
+			else if (pMario->GetStatus()==enMarioStatusBig)
+			{
+				pMario->SetStatus(enMarioStatusSuper);
+			}
+		}
+		break;
+	case enMsgBeHurt:
+		{
+			if (sizeof(MsgForItem)!=nSize)
+			{
+				CCAssert(false,"sizeof(MsgForCoinCollision)!=nSize");
+			}
+
+			//Mario降级
+			if (pMario->GetStatus()==enMarioStatusBig)
+			{
+				pMario->SetStatus(enMarioStatusSmall);
+			}
+			else if (pMario->GetStatus()==enMarioStatusSuper)
+			{
+				pMario->SetStatus(enMarioStatusBig);
+			}
 		}
 		break;
 	case enMsgMonsterDisappear:
@@ -353,7 +416,29 @@ void CMGameMap::OnMsgReceive( int enMsg,void* pData,int nSize )
 		break;
 	case enMsgStamp:
 		{
+			if (sizeof(MsgForMonsterDisappear)!=nSize)
+			{
+				CCAssert(false,"sizeof(MsgForMonsterDisappear)!=nSize");
+			}
 			m_pArrayMonstersForDelete->addObject(((MsgForMonsterDisappear*)pData)->pMonster);
+		}
+		break;
+	case enMsgBlockBoxHitted:
+		{
+			if (sizeof(MsgForBlockBoxHitted)!=nSize)
+			{
+				CCAssert(false,"sizeof(MsgForBlockBoxHitted)!=nSize");
+			}
+
+			CCPoint pMashroomsPos = ccp(((MsgForBlockBoxHitted*)pData)->pBlockBox->getPosition().x,((MsgForBlockBoxHitted*)pData)->pBlockBox->getPosition().y+getTileSize().height+10);
+			CMItemMashrooms* pMashrooms = CMItemMashrooms::CreateItemCMItemMashrooms(pMashroomsPos,getTileSize(),pMario,this,this);
+			if (pMashrooms==NULL)
+			{
+				CCLog("pMashrooms==NULL!");
+			}
+			pMashrooms->setPosition(pMashroomsPos);
+			addChild(pMashrooms,enZOrderFront);
+			m_pArrayItems->addObject(pMashrooms);
 		}
 		break;
 	}
@@ -364,11 +449,6 @@ cocos2d::CCPoint CMGameMap::TileMapLayerPosToWorldPos( CCPoint TileMapLayerPos,f
 	float fPositionY = TileMapLayerPos.y;
 	float fPositionX = TileMapLayerPos.x - m_fMapMove;
 	return ccp(fPositionX,fPositionY);
-}
-
-void CMGameMap::CoinDisppear(MsgForCoinCollision* pData )
-{
-	m_pArrayCoinForDelete->addObject(pData->pCoin);
 }
 
 float CMGameMap::GetMapMove()
@@ -556,79 +636,79 @@ void CMGameMap::MarioMove()
 	CCLog("fun CMGameMap::MarioMove Error!");
 	return;
 }
-
-void CMGameMap::HitBlock(CCPoint TileMapLayerPos)
-{
-	do 
-	{
-		CMMario* pMario = dynamic_cast<CMMario*>(getChildByTag(enTagMario));
-		CC_BREAK_IF(pMario==NULL);
-
-		//解析得到当前砖块的属性
-		CCTMXLayer* pBlockLayer = layerNamed("block");
-		CC_BREAK_IF(pBlockLayer==NULL);
-		int GID = pBlockLayer->tileGIDAt(TileMapLayerPosToTileMapPos(TileMapLayerPos));
-		CCDictionary *pDic = propertiesForGID(GID);
-		CC_BREAK_IF(pDic==NULL);
-		CCString *strBlockType = (CCString*)pDic->objectForKey("blockType");
-		int nBlockType = strBlockType->intValue();
-
-		//对不同形态的砖块进行不同的反馈
-		CCSprite* pBlockForHit = TileMapLayerPosToTileSprite(TileMapLayerPos);
-		CC_BREAK_IF(pBlockForHit==NULL);
-		switch (nBlockType)
-		{
-		case enBlockTypeNormal:		//普通砖块
-			{
-				switch (pMario->GetStatus())
-				{
-				case enMarioStatusSmall:
-					{
-						pBlockForHit->stopAllActions();
-						CCActionInterval *pJumpBy = CCJumpBy::create(0.2f, CCPointZero, 
-						this->getTileSize().height*0.5, 1);
-						pBlockForHit->runAction(pJumpBy);
-					}
-					break;
-				case enMarioStatusBig:
-				case enMarioStatusSuper:
-					{
-						pBlockLayer->removeTileAt(TileMapLayerPosToTileMapPos(TileMapLayerPos));
-					}
-					break;
-				}
-			}
-			break;
-		case enBlockTypeBox:		//宝箱
-			{
-				pBlockForHit->stopAllActions();
-				CCActionInterval *pJumpBy = CCJumpBy::create(0.2f, CCPointZero, 
-					this->getTileSize().height*0.5, 1);
-				pBlockForHit->runAction(pJumpBy);
-				
-				CCSprite* pTempCoin = CCSprite::create("coin.png");
-				CC_BREAK_IF(pTempCoin==NULL);
-				pTempCoin->setPosition(pBlockForHit->getPosition());
-				pTempCoin->setAnchorPoint(ccp(0,0));
-				addChild(pTempCoin);
-				CCActionInterval *pJumpCoin = CCJumpBy::create(0.16f, ccp(0, this->getTileSize().height),
-					this->getTileSize().height*1.5, 1);
-				pTempCoin->runAction(pJumpCoin);
-			}
-			break;
-		case enBlockTypeAddLife:	//隐藏砖块
-			{
-
-			}
-			break;
-		}
-		
-		//pBlockLayer->removeTileAt(TilePos);
-
-		return;
-	} while (false);
-	CCLog("fun CMGameMap::HitBlock Error!");
-}
+// 
+// void CMGameMap::HitBlock(CCPoint TileMapLayerPos)
+// {
+// 	do 
+// 	{
+// 		CMMario* pMario = dynamic_cast<CMMario*>(getChildByTag(enTagMario));
+// 		CC_BREAK_IF(pMario==NULL);
+// 
+// 		//解析得到当前砖块的属性
+// 		CCTMXLayer* pBlockLayer = layerNamed("block");
+// 		CC_BREAK_IF(pBlockLayer==NULL);
+// 		int GID = pBlockLayer->tileGIDAt(TileMapLayerPosToTileMapPos(TileMapLayerPos));
+// 		CCDictionary *pDic = propertiesForGID(GID);
+// 		CC_BREAK_IF(pDic==NULL);
+// 		CCString *strBlockType = (CCString*)pDic->objectForKey("blockType");
+// 		int nBlockType = strBlockType->intValue();
+// 
+// 		//对不同形态的砖块进行不同的反馈
+// 		CCSprite* pBlockForHit = TileMapLayerPosToTileSprite(TileMapLayerPos);
+// 		CC_BREAK_IF(pBlockForHit==NULL);
+// 		switch (nBlockType)
+// 		{
+// 		case enBlockTypeNormal:		//普通砖块
+// 			{
+// 				switch (pMario->GetStatus())
+// 				{
+// 				case enMarioStatusSmall:
+// 					{
+// 						pBlockForHit->stopAllActions();
+// 						CCActionInterval *pJumpBy = CCJumpBy::create(0.2f, CCPointZero, 
+// 						this->getTileSize().height*0.5, 1);
+// 						pBlockForHit->runAction(pJumpBy);
+// 					}
+// 					break;
+// 				case enMarioStatusBig:
+// 				case enMarioStatusSuper:
+// 					{
+// 						pBlockLayer->removeTileAt(TileMapLayerPosToTileMapPos(TileMapLayerPos));
+// 					}
+// 					break;
+// 				}
+// 			}
+// 			break;
+// 		case enBlockTypeBox:		//宝箱
+// 			{
+// 				pBlockForHit->stopAllActions();
+// 				CCActionInterval *pJumpBy = CCJumpBy::create(0.2f, CCPointZero, 
+// 					this->getTileSize().height*0.5, 1);
+// 				pBlockForHit->runAction(pJumpBy);
+// 				
+// 				CCSprite* pTempCoin = CCSprite::create("coin.png");
+// 				CC_BREAK_IF(pTempCoin==NULL);
+// 				pTempCoin->setPosition(pBlockForHit->getPosition());
+// 				pTempCoin->setAnchorPoint(ccp(0,0));
+// 				addChild(pTempCoin);
+// 				CCActionInterval *pJumpCoin = CCJumpBy::create(0.16f, ccp(0, this->getTileSize().height),
+// 					this->getTileSize().height*1.5, 1);
+// 				pTempCoin->runAction(pJumpCoin);
+// 			}
+// 			break;
+// 		case enBlockTypeAddLife:	//隐藏砖块
+// 			{
+// 
+// 			}
+// 			break;
+// 		}
+// 		
+// 		//pBlockLayer->removeTileAt(TilePos);
+// 
+// 		return;
+// 	} while (false);
+// 	CCLog("fun CMGameMap::HitBlock Error!");
+// }
 
 cocos2d::CCPoint CMGameMap::TileMapLayerPosToTileMapPos( CCPoint TileMapLayerPos )
 {

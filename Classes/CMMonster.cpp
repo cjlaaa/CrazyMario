@@ -16,9 +16,6 @@ bool CMMonsterBasic::init( CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGame
 		m_MoveDirection = enMoveLeft;
 		m_fDropSpeedPlus = 0;
 
-		//注册Update函数
-		this->schedule(schedule_selector(CMMonsterBasic::OnCallPerFrame));
-
 		return true;
 	} while (false);
 	CCLog("fun CMMonsterBasic::init Error!");
@@ -50,8 +47,6 @@ void CMMonsterBasic::OnCallPerFrame(float fT)
 {
 	do 
 	{
-		OnCollisionMario();
-
 		//判断当怪物离开地图则发消息删除自己
 		if (getPositionX()<0 || getPositionY()<0)
 		{
@@ -105,6 +100,7 @@ bool CMMonsterMushrooms::init( CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *p
 		setContentSize(pMushrooms->boundingBox().size);
 
 		m_pReceiver = pReceiver;
+		m_bIsTouched = false;
 
 		return true;
 	} while (false);
@@ -128,6 +124,14 @@ bool CMMonsterMushrooms::OnCollisionMario()
 				MsgForMonsterDisappear* pData = new MsgForMonsterDisappear;
 				pData->pMonster = this;
 				SendMsg(enMsgStamp,pData,sizeof(pData));
+
+				m_bIsTouched = true;
+			}
+			else
+			{
+				MsgForMonsterDisappear* pData = new MsgForMonsterDisappear;
+				pData->pMonster = this;
+				SendMsg(enMsgBeHurt,pData,sizeof(pData));
 			}
 		}
 
@@ -142,7 +146,6 @@ void CMMonsterMushrooms::OnCallPerFrame( float fT )
 	do 
 	{
 		CMMonsterBasic::OnCallPerFrame(fT);
-
 		OnCollisionMario();
 
 		//是否激活

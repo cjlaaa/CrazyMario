@@ -21,18 +21,17 @@ bool CMMario::Init()
 {
 	do 
 	{
-		CCLog("initing Mario...");
 		CCSprite* pMainBody = CCSprite::create("smallWalkRight.png", CCRectMake(0, 0, 14, 16));
 		CC_BREAK_IF(pMainBody==NULL);
 		pMainBody->setAnchorPoint(ccp(0, 0));
 		addChild(pMainBody,enZOrderFront,enTagMario);
 
 		setContentSize(pMainBody->getContentSize());
-
 		m_eMarioStatus = enMarioStatusSmall;
 
-		//注册Update函数
-		this->schedule(schedule_selector(CMMario::OnCallPerFrame));
+		pTextureBig = CCTextureCache::sharedTextureCache()->addImage("walkRight.png");
+		pTextureSuper = CCTextureCache::sharedTextureCache()->addImage("WalkRight_fire.png");
+		pTextureSmall = CCTextureCache::sharedTextureCache()->addImage("smallWalkRight.png");	
 
 		return true;
 	} while (false);
@@ -51,10 +50,6 @@ void CMMario::OnCallPerFrame( float fT )
 	{
 		CCSprite* pMario = dynamic_cast<CCSprite*>(getChildByTag(enTagMario));
 		CC_BREAK_IF(pMario==NULL);
-
-		CCTexture2D *pTextureBig = CCTextureCache::sharedTextureCache()->addImage("walkRight.png");
-		CCTexture2D *pTextureSuper = CCTextureCache::sharedTextureCache()->addImage("WalkRight_fire.png");
-		CCTexture2D *pTextureSmall = CCTextureCache::sharedTextureCache()->addImage("smallWalkRight.png");	
 
 		switch (m_eMarioStatus)
 		{

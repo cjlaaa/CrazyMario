@@ -16,14 +16,6 @@ enum enMonsterDeadType
 	enMonsterDeadTypeStamp,		//踩踏
 	enMonsterDeadTypeFire,		//火球
 };
-
-//怪物移动方向
-enum enMoveDirection
-{
-	enMoveLeft,
-	enMoveRight,
-};
-
 class CMMonsterBasic: public CCNode,public CMSender
 {
 protected:	
@@ -32,6 +24,7 @@ protected:
 	enMoveDirection		 m_MoveDirection;		//移动方向
 	bool				 m_bIsActivation;		//是否激活（与Mario到达一定距离则激活移动）
 	float				 m_fDropSpeedPlus;		//掉落加速度
+	bool				 m_bIsTouched;			//是否被碰触过
 protected:
 	virtual bool init(CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pMsgRecver);
 
@@ -63,8 +56,17 @@ protected:
 };
 /************************************************************************/
 /* 乌龟                                                               */
-/************************************************************************/
-
+/********1****************************************************************/
+// class CMMonsterTortoise:public CMMonsterBasic
+// {
+// public:
+// 	static CMMonsterTortoise *CreateMonsterTortoise(CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pMsgRecver);
+// protected:
+// 	virtual bool init(CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pMsgRecver);
+// 
+// 	virtual bool OnCollisionMario();
+// 	virtual void OnCallPerFrame(float fT);
+// };
 /************************************************************************/
 /* 飞鱼                                                                    */
 /************************************************************************/

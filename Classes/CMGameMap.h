@@ -10,11 +10,10 @@
 class CMGameMap : public cocos2d::CCTMXTiledMap ,public CMReceiver
 {
 protected:
-	CCArray	*m_pArrayCoin;				//金币数组
-	CCArray *m_pArrayCoinForDelete;		//碰撞后待删除的金币数组
+	CCArray	*m_pArrayItems;				//金币数组
+	CCArray *m_pArrayItemForDelete;		//碰撞后待删除的金币数组
 	CCArray *m_pArrayMonsters;			//怪物数组
 	CCArray *m_pArrayMonstersForDelete;	//待删除的怪物数组
-	CCArray *m_pArrayBlock;				//砖块数组
 
 	float m_fMapMove;					//地图偏移量
 	float m_fDropSpeedPlus;				//掉落速度
@@ -40,14 +39,12 @@ public:
 	CCPoint		TileMapLayerPosToTileMapPos(CCPoint TileMapLayerPos);
 	//返回地图偏移量
 	float		GetMapMove();
+	virtual void OnCallPerFrame(float dt);
 protected:
 	virtual bool Init();
-	virtual void OnCallPerFrame(float dt);
 	void		 OnMsgReceive( int enMsg,void* pData,int nSize );
 	void		 onExit();
 
-	//金币消失
-	void	CoinDisppear(MsgForCoinCollision* pData);
 	//Mario碰撞
 	void	MarioMove();
 	//顶砖块
