@@ -25,6 +25,9 @@
     <Filter Include="Classes\物品道具">
       <UniqueIdentifier>{0caa36e9-1b4b-4e7e-9108-1d095e011e73}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\外部UI">
+      <UniqueIdentifier>{5e6a820c-4ab6-4f21-9075-051ad283d9d7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Classes\AppDelegate.cpp">
@@ -47,6 +50,9 @@
     </ClCompile>
     <ClCompile Include="..\Classes\CMItem.cpp">
       <Filter>Classes\物品道具</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\CMMenuScene.cpp">
+      <Filter>Classes\外部UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -73,6 +79,9 @@
     </ClInclude>
     <ClInclude Include="..\Classes\CMItem.h">
       <Filter>Classes\物品道具</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\CMMenuScene.h">
+      <Filter>Classes\外部UI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
