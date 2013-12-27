@@ -115,8 +115,31 @@ bool CMGameMap::Init()
 					m_pArrayMonsters->addObject(pMonster);
 					addChild(pMonster,enZOrderFront);
 				}
+				if (strType->m_sString == "tortoise")
+				{
+					CMMonsterTortoise *pMonster = CMMonsterTortoise::CreateMonsterTortoise(TileXY,pMario,this,this);
+					if (pMonster==NULL)
+					{
+						CCLog("pMonster==NULL!");
+					}
+					pMonster->setPosition(ccp(TileXY.x,TileXY.y));
+					pMonster->setAnchorPoint(ccp(0,0));
+					m_pArrayMonsters->addObject(pMonster);
+					addChild(pMonster,enZOrderFront);
+				}
+				if (strType->m_sString == "flower")
+				{
+					CMMonsterFlower *pMonster = CMMonsterFlower::CreateMonsterFlower(TileXY,pMario,this,this);
+					if (pMonster==NULL)
+					{
+						CCLog("pMonster==NULL!");
+					}
+					pMonster->setPosition(ccp(TileXY.x,TileXY.y));
+					pMonster->setAnchorPoint(ccp(0,0));
+					m_pArrayMonsters->addObject(pMonster);
+					addChild(pMonster,enZOrderFront);
+				}
 			}
-
 		}
 
 		//初始化砖块显示
@@ -124,8 +147,8 @@ bool CMGameMap::Init()
 		CC_BREAK_IF(pBlockLayer==NULL);
 		pBlockLayer->setVisible(false);
 		//获得地图的瓦片数量
-// 		int nMapHorizontalTileNum = pCoinLayer->boundingBox().size.width/getTileSize().width;
-// 		int nMapVerticalTileNum = pCoinLayer->boundingBox().size.height/getTileSize().height;
+		// 		int nMapHorizontalTileNum = pCoinLayer->boundingBox().size.width/getTileSize().width;
+		// 		int nMapVerticalTileNum = pCoinLayer->boundingBox().size.height/getTileSize().height;
 		//遍历每片瓦片，寻找瓦片，建立并加入瓦片集合
 		for (int i = 0;i<nMapHorizontalTileNum;i++)
 		{
@@ -375,7 +398,7 @@ void CMGameMap::OnMsgReceive( int enMsg,void* pData,int nSize )
 				CCAssert(false,"sizeof(MsgForCoinCollision)!=nSize");
 			}
 			m_pArrayItemForDelete->addObject(((MsgForItem*)pData)->pItem);
-			
+
 			//Mario升级
 			if (pMario->GetStatus()==enMarioStatusSmall)
 			{

@@ -26,7 +26,7 @@ protected:
 	float				 m_fDropSpeedPlus;		//掉落加速度
 	bool				 m_bIsTouched;			//是否被碰触过
 protected:
-	virtual bool init(CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pMsgRecver);
+	virtual bool init(CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pReceiver);
 
 	virtual bool OnCollisionMario() = 0;//与Mario碰撞的事件
 
@@ -37,7 +37,7 @@ public:
 protected:
 	enum 
 	{
-		enTagMainImage,
+		enTagMainSprite,
 	};
 };
 
@@ -47,7 +47,7 @@ protected:
 class CMMonsterMushrooms:public CMMonsterBasic
 {
 public:
-	static CMMonsterMushrooms *CreateMonsterMushrooms(CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pMsgRecver);
+	static CMMonsterMushrooms *CreateMonsterMushrooms(CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pReceiver);
 protected:
 	virtual bool init(CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pMsgRecver);
 
@@ -57,16 +57,16 @@ protected:
 /************************************************************************/
 /* 乌龟                                                               */
 /********1****************************************************************/
-// class CMMonsterTortoise:public CMMonsterBasic
-// {
-// public:
-// 	static CMMonsterTortoise *CreateMonsterTortoise(CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pMsgRecver);
-// protected:
-// 	virtual bool init(CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pMsgRecver);
-// 
-// 	virtual bool OnCollisionMario();
-// 	virtual void OnCallPerFrame(float fT);
-// };
+class CMMonsterTortoise:public CMMonsterBasic
+{
+public:
+	static CMMonsterTortoise *CreateMonsterTortoise(CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pReceiver);
+protected:
+	virtual bool init(CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pMsgRecver);
+
+	virtual bool OnCollisionMario();
+	virtual void OnCallPerFrame(float fT);
+};
 /************************************************************************/
 /* 飞鱼                                                                    */
 /************************************************************************/
@@ -74,5 +74,15 @@ protected:
 /************************************************************************/
 /* 花                                                                    */
 /************************************************************************/
+class CMMonsterFlower:public CMMonsterBasic
+{
+public:
+	static CMMonsterFlower *CreateMonsterFlower(CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pReceiver);
+protected:
+	virtual bool init(CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pReceiver);
+
+	virtual bool OnCollisionMario();
+	virtual void OnCallPerFrame(float fT);
+};
 
 #endif

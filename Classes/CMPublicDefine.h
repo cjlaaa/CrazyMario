@@ -70,7 +70,7 @@ protected:
 public:
 	void SetReceiver(CMReceiver* pReceiver)
 	{
-		m_pReceiver=pReceiver;
+		m_pReceiver = pReceiver;
 	}
 	void SendMsg(int enMsg,void* pData = NULL,int nSize = 0)
 	{
@@ -86,7 +86,7 @@ enum
 	enMsgBeHurt,			//Mario被怪物碰到
 	enMsgBlockBoxHitted,	//宝箱砖块被顶消息
 	enMsgItemDisappear,		//道具消失
-	enMsgLevelUp,				//吃道具变大
+	enMsgLevelUp,			//吃道具变大
 };
 
 //道具消息数据
