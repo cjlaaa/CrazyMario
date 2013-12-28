@@ -400,13 +400,13 @@ void CMGameMap::OnMsgReceive( int enMsg,void* pData,int nSize )
 			m_pArrayItemForDelete->addObject(((MsgForItem*)pData)->pItem);
 
 			//Mario升级
-			if (pMario->GetStatus()==enMarioStatusSmall)
+			if (pMario->GetMarioLevel()==enMarioLevelSmall)
 			{
-				pMario->SetStatus(enMarioStatusBig);
+				pMario->SetMarioLevel(enMarioLevelBig);
 			}
-			else if (pMario->GetStatus()==enMarioStatusBig)
+			else if (pMario->GetMarioLevel()==enMarioLevelBig)
 			{
-				pMario->SetStatus(enMarioStatusSuper);
+				pMario->SetMarioLevel(enMarioLevelSuper);
 			}
 		}
 		break;
@@ -418,13 +418,13 @@ void CMGameMap::OnMsgReceive( int enMsg,void* pData,int nSize )
 			}
 
 			//Mario降级
-			if (pMario->GetStatus()==enMarioStatusBig)
+			if (pMario->GetMarioLevel()==enMarioLevelBig)
 			{
-				pMario->SetStatus(enMarioStatusSmall);
+				pMario->SetMarioLevel(enMarioLevelSmall);
 			}
-			else if (pMario->GetStatus()==enMarioStatusSuper)
+			else if (pMario->GetMarioLevel()==enMarioLevelSuper)
 			{
-				pMario->SetStatus(enMarioStatusBig);
+				pMario->SetMarioLevel(enMarioLevelBig);
 			}
 		}
 		break;
@@ -563,14 +563,20 @@ void CMGameMap::MarioMove()
 			if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
 			{
 				pMario->setPosition(CurMarioPos);
+				pMario->SetMarioStatus(enMarioStatusStandLeft);
 			}
 			else
 			{
+				pMario->SetMarioStatus(enMarioStatusRunLeft);
 				if (pMario->getPositionX()>m_fMapMove)
 				{
 					pMario->setPositionX(pMario->getPositionX()-m_fSpeed);
 				}
 			}
+		}
+		else
+		{
+			pMario->SetMarioStatus(enMarioStatusStandLeft);
 		}
 
 		pTileSprite1 = NULL;
@@ -584,10 +590,12 @@ void CMGameMap::MarioMove()
 			pTileSprite3 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width,pMario->getPositionY()));
 			if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
 			{
+				pMario->SetMarioStatus(enMarioStatusStandRight);
 				pMario->setPosition(CurMarioPos);
 			}
 			else
 			{
+				pMario->SetMarioStatus(enMarioStatusRunRight);
 				if (getContentSize().width - m_fMapMove<=SCREEN_WIDTH)
 				{
 					pMario->setPositionX(pMario->getPositionX()+m_fSpeed);
@@ -603,6 +611,10 @@ void CMGameMap::MarioMove()
 					pMario->setPositionX(pMario->getPositionX()+m_fSpeed);
 				}
 			}
+		}
+		else
+		{
+			pMario->SetMarioStatus(enMarioStatusStandRight);
 		}
 
 		pTileSprite1 = NULL;

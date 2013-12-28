@@ -208,9 +208,9 @@ bool CMItemBlock::OnCollisionMario()
 			CCLog("hited");
 			m_bIsTouched = true;
 			stopAllActions();
-			switch (m_pMario->GetStatus())
+			switch (m_pMario->GetMarioLevel())
 			{
-			case enMarioStatusSmall:
+			case enMarioLevelSmall:
 				{
 					//砖块跳动动画
 					CCActionInterval *pJumpBy = CCJumpBy::create(0.2f, CCPointZero, 
@@ -231,8 +231,8 @@ bool CMItemBlock::OnCollisionMario()
 					}
 				}
 				break;
-			case enMarioStatusBig:
-			case enMarioStatusSuper:
+			case enMarioLevelBig:
+			case enMarioLevelSuper:
 				{
 					if (m_eBlockType==enBlockTypeBox)
 					{

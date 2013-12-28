@@ -1,18 +1,23 @@
 ﻿#ifndef _CM_PUBLIC_DEFINE_H_
 #define _CM_PUBLIC_DEFINE_H_
 #include "cocos2d.h"
+#include "cocos-ext.h"
 USING_NS_CC;
+USING_NS_CC_EXT;
 #define SCREEN_WIDTH CCDirector::sharedDirector()->getWinSize().width
 #define SCREEN_HEIGHT CCDirector::sharedDirector()->getWinSize().height
 
-#define CONTROL_UI_HEIGHT			96					//控制UI高度
-#define TILE_MAP_VERTICAL			13					//地图瓦片竖直块数
-#define JUMP_START_SPEED			8					//跳跃起始速度
-#define JUMP_SPEED_MINUS			0.3					//跳跃递减速度
-#define DROP_SPEED_PLUS				0.098				//掉落加速度
-#define MOVE_SPEED					2					//移动速度
-#define MONSTER_ACTIVE_DISTANCE		SCREEN_WIDTH-100		//怪物激活距离
-#define COLLISION_POS_ADJUSTMENT	3					//跳跃与坠落的碰撞检测点调整
+#define CONTROL_UI_HEIGHT				96					//控制UI高度
+#define TILE_MAP_VERTICAL				13					//地图瓦片竖直块数
+#define JUMP_START_SPEED				8					//跳跃起始速度
+#define JUMP_SPEED_MINUS				0.3					//跳跃递减速度
+#define DROP_SPEED_PLUS					0.098				//掉落加速度
+#define MOVE_SPEED						2					//移动速度
+#define MONSTER_ACTIVE_DISTANCE			SCREEN_WIDTH-100		//怪物激活距离
+#define COLLISION_POS_ADJUSTMENT		3					//跳跃与坠落的碰撞检测点调整
+
+#define MARIO_COLLISION_SIZE_SMALL		CCSizeMake(16,16)	//小玛丽的碰撞尺寸
+#define MARIO_COLLISION_SIZE_BIG		CCSizeMake(16,32)	//大玛丽的碰撞尺寸
 
 enum 
 {
@@ -45,9 +50,22 @@ enum enumBlockType
 //Mario状态
 enum enumMarioStatus
 {
-	enMarioStatusSmall,
-	enMarioStatusBig,
-	enMarioStatusSuper,
+	enMarioStatusStandLeft,
+	enMarioStatusStandRight,
+	//--------------------------
+	enMarioStatusRunLeft,
+	enMarioStatusRunRight,
+	//--------------------------
+	enMarioStatusJumpLeft,
+	enMarioStatusJumpRight,
+};
+
+//Mario等级
+enum enumMarioLevel
+{
+	enMarioLevelSmall,
+	enMarioLevelBig,
+	enMarioLevelSuper,
 };
 
 //怪物与道具移动方向
