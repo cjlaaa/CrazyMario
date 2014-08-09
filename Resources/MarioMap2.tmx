@@ -7,6 +7,11 @@
     <property name="blockType" value="2"/>
    </properties>
   </tile>
+  <tile id="150">
+   <properties>
+    <property name="blockType" value="4"/>
+   </properties>
+  </tile>
   <tile id="600">
    <properties>
     <property name="blockType" value="1"/>
@@ -35,7 +40,7 @@
  </layer>
  <layer name="land" width="238" height="14">
   <data encoding="base64" compression="zlib">
-   eJzt1UsKgCAUBVBdYrWRpm27FUSzCDMjy6Bz4A4E/z0pBAAAAAAAAABgb04EakrV2JXcnaPG+Dvnemr8m564v5rrp/qWtkvm/8p3AIBS/mvvmTJZdTGE/iBDbLRpqCRX32c1n3s7LQN/MMbybLV8mwvCHZ4x
+   eJzt1csNhCAUBVAo0ZlG3Nq2FZjZTQwCRhSj5yR3AZGP+gghAAAAAAAAAABrcyLQUqrG9uToHC3GH3mvs8Zf6Yzv13L91LO17Zr57/IfeL5SXdf2A7jXrjNl8jPEED4b+cZOm4ZGcvVdqvnc2ekZeIMx1udfz7O5AOq+prM=
   </data>
  </layer>
  <layer name="flagpole" width="238" height="14">
@@ -50,7 +55,7 @@
  </layer>
  <layer name="block" width="238" height="14">
   <data encoding="base64" compression="zlib">
-   eJzt2UEOhCAMQFHUO3gs956Mw3g5N66MaK0VSvNfMssCGfiZxaQEAACktqH1CQAAAPqyjrq5ZbI9B/Ty8YlG+zYB73KK2y0QUU50C/Tk3Czdxle6Y+6+D1fNerk7y/N8XeOP+TdrWs/X7tbj92+5h3TW4j2XmvXQrfV5PL4buvU1X7Nb7V53zbbu9o/zeHw3dKub1zTosdu3+z01K1lv7ux/FbqVzdKtTuvfuqjoVjZLtzqRu90BnMJWNQ==
+   eJzt0zsSgCAMAFHU+9l7Mg7j5WysHD8QAySZfTOWERQ2JQAAUGqfRu8AAADAl22Wza2L7j4gl88nGundBKzLKW63QEQ50S3gybVZuo3v6Yw5ex/umrVydpr7+fuOFvM179Se792txf+vuUbprMZ9fmrWQrfa+7F4b+jW1nzPbqVrvTU7utsW+7F4b+hWNi9p0GK3tet9Ndv6G0eg27JZupXx1oMXdFs2S7cykbs9AGdcVrQ=
   </data>
  </layer>
  <layer name="trap" width="238" height="14">

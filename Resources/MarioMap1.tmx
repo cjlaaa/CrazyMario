@@ -61,11 +61,6 @@
     <property name="collisionType" value="1"/>
    </properties>
   </tile>
-  <tile id="533">
-   <properties>
-    <property name="blockType" value="4"/>
-   </properties>
-  </tile>
   <tile id="600">
    <properties>
     <property name="blockType" value="1"/>
@@ -90,7 +85,7 @@
  </layer>
  <layer name="mountain" width="228" height="14">
   <data encoding="base64" compression="zlib">
-   eJzt11lOwmAUQOHGJ8Rd4AQ74BFR8VFdCLgPUNbB4DqcFoAjrMXTRJM/pAUahkJyvuS8UOh/03BDiCJJkiRJkiRJkqTtVt3LewJJsWt28YZu3Ukpd032sEV3c/axQPtUpIMNzLVqzp+veP5itNvzr/v5t9nBDt3TA3VTdvKYTuiUylTJeE6JDuloiVmX4fz5zh+eH3+fd23+TT3/HvvXpwEN6TFlH8/pgi6pQVcz7vlBn/RF33+v1eiM6gnvH9H7nDkX8UNjmiRcc/71z98J7tWauhae//8bmUX4+Wmrmn+WLM8/SS1Knz/0xP490wu90pv/ISVJWtgvUiA1zQ==
+   eJzt10tOwlAYQOHiCHXEFnw7YuoQFXWoLgTYh691KLoOHywAX+haPDfBpCGtWIFeTM6XnAmlvX+a/CEkiSRJkiRJkiRJ0nzbWYg9gaTgmF08oVN3UoquxR62qTNmH6u0SEu0XMJc0+b8cYX5a5X/Pf+s3/8ZO3hOF3RJVzk7uU4btElbtF3wnBVapbUJZp2E88edP31+2MnQX++Poaz3f83+3VCXbukuZx/3qUkHdEhHPzzzhV7pjd6HnzVol/Yyvt+n5zFz/saAPugz45rzz37+YDB8Vn1k39Lnf+9jkb1M3z9qmvPnKfL+szSS/PnT7tm/B3qkJ+r5H1IlKfobKUnz6AukaDVJ
   </data>
  </layer>
  <layer name="land" width="228" height="14">
@@ -110,7 +105,7 @@
  </layer>
  <layer name="block" width="228" height="14">
   <data encoding="base64" compression="zlib">
-   eJzt2WsKhCAUhuFTs4dZVv9bmYtpc/NnAhGPly5Hs/cBKcLS5HyQJAIAQJ+2qfUMAACAhXVuPQMbU6Zpfc+sT+292nwkuPaGzzT3bwDackIegR44IY9AD8IsjpzHcC+z7438Y++WT13/K95Nu1fb5/nrrJ2XPL9mzJ1TznPC2j+SA3+/fWS9Y1kcOY8YWyxTJfUcq33rLGhZJI94olSmUjWt1b5lHlJZJI94mpJMxeo6VftWmchl8c6xvy/5zwcAgKUfYSQ5FQ==
+   eJzt12sKhSAQhuGp9tf/VuZizubOnwIRx0uX0ex9QJKwNJkPUgQAgD79ptYrAAAAFra59QpsTJmmjb2yP7XPauuR4N4XftPc3gC05YQ8Aj1wQh6BHoRZHDmP4VnmOBv5196tS934O75Ne1Y75/n7rPVL3l8z58Ep/Zyw9s/kwD9vn9nvWBZHziPGFstUST3Hat86C1oWySPeKJWpVE1rtW+Zh1QWySPepiRTsbpO1b5VJnJZfHpuAABwrz8KAjmU
   </data>
  </layer>
  <layer name="trap" width="228" height="14">

@@ -3,7 +3,7 @@
 /************************************************************************/
 /* 怪物基类
 /************************************************************************/
-bool CMMonsterBasic::init( CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pMsgRecver )
+bool CMMonsterBasic::init( CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGameMap,CMReceiver *pMsgReceiver )
 {
 	do 
 	{
@@ -15,6 +15,8 @@ bool CMMonsterBasic::init( CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGame
 		m_bIsActivation = false;
 		m_MoveDirection = enMoveLeft;
 		m_fDropSpeedPlus = 0;
+		m_pReceiver = pMsgReceiver;
+		m_bHitByFireBall = false;
 
 		return true;
 	} while (false);
@@ -43,17 +45,20 @@ void CMMonsterBasic::Dead( enMonsterDeadType DeadType )
 	CCLog("fun CMMonsterBasic::Dead Error!");
 }
 
-void CMMonsterBasic::OnCallPerFrame(float fT)
+bool CMMonsterBasic::OnCallPerFrame(float fT)
 {
 	do 
 	{
 		//判断当怪物离开地图则发消息删除自己
 		if (getPositionX()<0 || getPositionY()<0)
 		{
-			MsgForMonsterDisappear* pData = new MsgForMonsterDisappear;
+			TCmd_Remove_Monster* pData = new TCmd_Remove_Monster;
 			pData->pMonster = this;
 			SendMsg(enMsgMonsterDisappear,pData,sizeof(pData));
+			return true;//需要删除自己
 		}
+
+		CC_BREAK_IF(m_pMario==NULL);
 
 		//判断马里奥与当前怪物的距离，用以激活。
 		if (abs(m_pMario->getPositionX() - getPositionX())<MONSTER_ACTIVE_DISTANCE)
@@ -61,9 +66,38 @@ void CMMonsterBasic::OnCallPerFrame(float fT)
 			m_bIsActivation = true;
 		}
 
-		return;
+		return false;//不需要删除自己
 	} while (false);
 	CCLog("fun CMMonsterBasic::OnCallPerFrame Error!");
+	return false;
+}
+
+void CMMonsterBasic::MonsterTurn()
+{
+	do 
+	{
+		CCNode *pMonsterRoot = dynamic_cast<CCNode*>(getChildByTag(enTagMainNode));
+		CC_BREAK_IF(pMonsterRoot==NULL);
+		
+		//遍历所有精灵的子节点 使其翻转
+		CCArray *pArrayChild = pMonsterRoot->getChildren();
+		CC_BREAK_IF(pArrayChild==NULL);
+
+		CCObject *pItem=NULL;
+		CCARRAY_FOREACH(pArrayChild,pItem)
+		{
+			CCSprite *pSprite = dynamic_cast<CCSprite*>(pItem);
+			if(pSprite==NULL)continue;
+			pSprite->setFlipX(true);
+		}
+		return;
+	} while (false);
+	CCLOG("CMMario::MarioTurn Run Error!");
+}
+
+void CMMonsterBasic::SetDeadByFireBall()
+{
+	m_bHitByFireBall = true;
 }
 
 /************************************************************************/
@@ -91,15 +125,23 @@ bool CMMonsterMushrooms::init( CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *p
 	do 
 	{
 		CC_BREAK_IF(!CMMonsterBasic::init(ptMonsterPos,pMario,pGameMap,pReceiver));
+		
+		//ccbi读取
+		//构造一个ccbi文件读取器
+		CCNodeLoaderLibrary * ccNodeLoaderLibrary = CCNodeLoaderLibrary::newDefaultCCNodeLoaderLibrary();
+		cocos2d::extension::CCBReader * pCcbReader = new cocos2d::extension::CCBReader(ccNodeLoaderLibrary);
+		//读取动画文件
+		CCNode *pCcbiNode = pCcbReader->readNodeGraphFromFile("ccbResources/monster.ccbi", this);
+		CC_BREAK_IF(pCcbiNode==NULL);
+		pCcbReader->getAnimationManager()->runAnimationsForSequenceNamed("mushroom_run");	
+		//读完之后，立刻释放即可
+		pCcbReader->release();
+		CC_BREAK_IF(pCcbiNode==NULL);
+		pCcbiNode->setAnchorPoint(ccp(0,0));
+		addChild(pCcbiNode,enZOrderBack,enTagMainNode);
+		pCcbiNode->setPosition(ccp(8,8));
+		setContentSize(MONSTER_CCSIZE);
 
-		CCSprite* pMushrooms = CCSprite::create("Mushroom0.png");
-		CC_BREAK_IF(pMushrooms==NULL);
-		pMushrooms->setAnchorPoint(ccp(0,0));
-		addChild(pMushrooms,enZOrderFront,enTagMainSprite);
-
-		setContentSize(pMushrooms->boundingBox().size);
-
-		m_pReceiver = pReceiver;
 		m_bIsTouched = false;
 
 		return true;
@@ -112,103 +154,153 @@ bool CMMonsterMushrooms::OnCollisionMario()
 {
 	do 
 	{
-		CCSprite* pMushrooms = dynamic_cast<CCSprite*>(getChildByTag(enTagMainSprite));
+		CCNode* pMushrooms = dynamic_cast<CCNode*>(getChildByTag(enTagMainNode));
 		CC_BREAK_IF(pMushrooms==NULL);
 
 		//马里奥与蘑菇怪的碰撞
-		if (m_pMario->boundingBox().intersectsRect(boundingBox()))
+		if (m_pMario->boundingBox().intersectsRect(boundingBox()) && m_bIsTouched==false)
 		{
 			//被踩死
 			if (getPositionY()<m_pMario->getPositionY() && abs(m_pMario->getPositionY()-getPositionY())>boundingBox().size.height*0.8)
 			{
-				MsgForMonsterDisappear* pData = new MsgForMonsterDisappear;
-				pData->pMonster = this;
-				SendMsg(enMsgStamp,pData,sizeof(pData));
-
-				m_bIsTouched = true;
+				//移除行走动画
+				removeChildByTag(enTagMainNode);
+				//ccbi读取
+				//构造一个ccbi文件读取器
+				CCNodeLoaderLibrary * ccNodeLoaderLibrary = CCNodeLoaderLibrary::newDefaultCCNodeLoaderLibrary();
+				cocos2d::extension::CCBReader * pCcbReader = new cocos2d::extension::CCBReader(ccNodeLoaderLibrary);
+				//读取动画文件
+				CCNode *pCcbiNode = pCcbReader->readNodeGraphFromFile("ccbResources/monster.ccbi", this);
+				CC_BREAK_IF(pCcbiNode==NULL);
+				pCcbReader->getAnimationManager()->setAnimationCompletedCallback(this,callfunc_selector(CMMonsterMushrooms::OnCallDeadAnimationFinished));
+				pCcbReader->getAnimationManager()->runAnimationsForSequenceNamed("mushroom_die");	
+				//读完之后，立刻释放即可
+				pCcbReader->release();
+				CC_BREAK_IF(pCcbiNode==NULL);
+				addChild(pCcbiNode,enZOrderBack,enTagMainNode);
+				pCcbiNode->setPosition(ccp(8,8));
+				
+				return true;
 			}
 			else
 			{
-				MsgForMonsterDisappear* pData = new MsgForMonsterDisappear;
+				TCmd_Remove_Monster* pData = new TCmd_Remove_Monster;
 				pData->pMonster = this;
 				SendMsg(enMsgBeHurt,pData,sizeof(pData));
+
+				return false;
 			}
+			m_bIsTouched = true;
 		}
 
-		return true;
+		return false;
 	} while (false);
 	CCLog("fun CMMonsterMushrooms::OnCollisionMario Error!");
 	return false;
 }
 
-void CMMonsterMushrooms::OnCallPerFrame( float fT )
+void CMMonsterMushrooms::OnCallDeadAnimationFinished()
+{
+	//发送怪物移除消息
+	TCmd_Remove_Monster* pData = new TCmd_Remove_Monster;
+	pData->pMonster = this;
+	SendMsg(enMsgMushroomsStamp,pData,sizeof(pData));
+}
+
+bool CMMonsterMushrooms::OnCallPerFrame( float fT )
 {
 	do 
 	{
-		CMMonsterBasic::OnCallPerFrame(fT);
-		OnCollisionMario();
+		//被火球打死
+		if (m_bHitByFireBall==true)
+		{
+			m_bHitByFireBall = false;
+			removeChildByTag(enTagMainNode);
+			//ccbi读取
+			//构造一个ccbi文件读取器
+			CCNodeLoaderLibrary * ccNodeLoaderLibrary = CCNodeLoaderLibrary::newDefaultCCNodeLoaderLibrary();
+			cocos2d::extension::CCBReader * pCcbReader = new cocos2d::extension::CCBReader(ccNodeLoaderLibrary);
+			//读取动画文件
+			CCNode *pFireBall = pCcbReader->readNodeGraphFromFile("ccbResources/monster.ccbi", this);
+			CC_BREAK_IF(pFireBall==NULL);
+			pCcbReader->getAnimationManager()->runAnimationsForSequenceNamed("mushroom_die");	
+			pCcbReader->getAnimationManager()->setAnimationCompletedCallback(this,callfunc_selector(CMMonsterMushrooms::OnCallDeadAnimationFinished));
+			//读完之后，立刻释放即可
+			pCcbReader->release();
+			CC_BREAK_IF(pFireBall==NULL);
+			pFireBall->setAnchorPoint(ccp(0,0));
+			addChild(pFireBall,enZOrderFront,enTagMainNode);
+			pFireBall->setPosition(ccp(0,0));
+			return true;
+		}
 
 		//是否激活
-		if (m_bIsActivation==false)
+		if (m_bIsActivation==true)
 		{
-			return;
-		}
-
-		CCSprite* pTileSprite1 = NULL;
-		CCSprite* pTileSprite2 = NULL;
-		CCSprite* pTileSprite3 = NULL;
-		//移动与碰撞
-		if (m_MoveDirection == enMoveLeft)
-		{
-			//用怪物左方的2个瓦片来判断移动碰撞
-			pTileSprite1 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX(),getPositionY()+getContentSize().height));
-			pTileSprite2 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX(),getPositionY()+getContentSize().height/2));
-			if (pTileSprite1!=NULL || pTileSprite2!=NULL)
+			//移动与碰撞
+			if (m_MoveDirection == enMoveLeft)
 			{
-				m_MoveDirection = enMoveRight;
+				//用怪物左方的2个瓦片来判断移动碰撞
+				CCSprite* pTileSpriteLeftTop = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX(),getPositionY()+getContentSize().height));
+				CCSprite* pTileSpriteLeftMid = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX(),getPositionY()+getContentSize().height/2));
+				if (pTileSpriteLeftTop!=NULL || pTileSpriteLeftMid!=NULL)
+				{
+					m_MoveDirection = enMoveRight;
+				}
+				else
+				{
+					setPositionX(getPositionX()-1);
+				}
+			}
+			else if(m_MoveDirection == enMoveRight)
+			{
+				//用怪物右方的2个瓦片来判断移动碰撞
+				CCSprite* pTileSpriteRightTop = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+getContentSize().width,getPositionY()+getContentSize().height));
+				CCSprite* pTileSpriteRightMid = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+getContentSize().width,getPositionY()+getContentSize().height/2));
+				if (pTileSpriteRightTop!=NULL || pTileSpriteRightMid!=NULL)
+				{
+					m_MoveDirection = enMoveLeft;
+				}
+				else
+				{
+					setPositionX(getPositionX()+1);
+				}
+			}
+
+			//用怪物下方的三个瓦片来判断掉落碰撞
+			CCSprite* pTileSpriteBottomMid = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+boundingBox().size.width/2,getPositionY()));
+			CCSprite* pTileSpriteBottomLeft = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+COLLISION_POS_ADJUSTMENT,getPositionY()));
+			CCSprite* pTileSpriteBottomRight = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+boundingBox().size.width-COLLISION_POS_ADJUSTMENT,getPositionY()));
+			if (pTileSpriteBottomLeft!=NULL || pTileSpriteBottomMid!=NULL || pTileSpriteBottomRight!=NULL)
+			{
+				//掉落速度归零
+				m_fDropSpeedPlus = 0;
+
+				//防止下落速度过快导致陷进地里
+				if (pTileSpriteBottomMid!=NULL)
+				{
+					if (getPositionY()<pTileSpriteBottomMid->getPositionY()+pTileSpriteBottomMid->getContentSize().height)
+					{
+						setPositionY(getPositionY()+abs(getPositionY()-(pTileSpriteBottomMid->getPositionY()+pTileSpriteBottomMid->getContentSize().height))-0.1);
+					}
+				}
 			}
 			else
 			{
-				setPositionX(getPositionX()-1);
-			}
-		}
-		else if(m_MoveDirection == enMoveRight)
-		{
-			//用怪物右方的2个瓦片来判断移动碰撞
-			pTileSprite1 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+getContentSize().width,getPositionY()+getContentSize().height));
-			pTileSprite2 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+getContentSize().width,getPositionY()+getContentSize().height/2));
-			if (pTileSprite1!=NULL || pTileSprite2!=NULL)
-			{
-				m_MoveDirection = enMoveLeft;
-			}
-			else
-			{
-				setPositionX(getPositionX()+1);
+				setPositionY(getPositionY()-m_fDropSpeedPlus);
+				//掉落加速度
+				m_fDropSpeedPlus += DROP_SPEED_PLUS;
 			}
 		}
 
-		pTileSprite1 = NULL;
-		pTileSprite2 = NULL;
-		pTileSprite3 = NULL;
-		//用怪物下方的三个瓦片来判断掉落碰撞
-		pTileSprite1 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+boundingBox().size.width/2,getPositionY()));
-		pTileSprite2 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+COLLISION_POS_ADJUSTMENT,getPositionY()));
-		pTileSprite3 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+boundingBox().size.width-COLLISION_POS_ADJUSTMENT,getPositionY()));
-		if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
-		{
-			//掉落速度归零
-			m_fDropSpeedPlus = 0;
-		}
-		else
-		{
-			setPositionY(getPositionY()-m_fDropSpeedPlus);
-			//掉落加速度
-			m_fDropSpeedPlus += DROP_SPEED_PLUS;
-		}
+		
 
-		return;
+		return (CMMonsterBasic::OnCallPerFrame(fT)||OnCollisionMario());
 	} while (false);
+	
 	CCLog("fun CMMonsterMushrooms::OnCallPerFrame Error!");
+
+	return false;
 }
 /************************************************************************/
 /* 乌龟                                                               */
@@ -236,14 +328,22 @@ bool CMMonsterTortoise::init( CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pG
 	{
 		CC_BREAK_IF(!CMMonsterBasic::init(ptMonsterPos,pMario,pGameMap,pReceiver));
 
-		CCSprite* pTortoise = CCSprite::create("tortoise_left.png");
-		CC_BREAK_IF(pTortoise==NULL);
-		pTortoise->setAnchorPoint(ccp(0,0));
-		addChild(pTortoise,enZOrderFront,enTagMainSprite);
+		//ccbi读取
+		//构造一个ccbi文件读取器
+		CCNodeLoaderLibrary * ccNodeLoaderLibrary = CCNodeLoaderLibrary::newDefaultCCNodeLoaderLibrary();
+		cocos2d::extension::CCBReader * pCcbReader = new cocos2d::extension::CCBReader(ccNodeLoaderLibrary);
+		//读取动画文件
+		CCNode *pCcbiNode = pCcbReader->readNodeGraphFromFile("ccbResources/monster.ccbi", this);
+		CC_BREAK_IF(pCcbiNode==NULL);
+		pCcbReader->getAnimationManager()->runAnimationsForSequenceNamed("tortoise_run");	
+		//读完之后，立刻释放即可
+		pCcbReader->release();
+		CC_BREAK_IF(pCcbiNode==NULL);
+		pCcbiNode->setAnchorPoint(ccp(0,0));
+		addChild(pCcbiNode,enZOrderBack,enTagMainNode);
+		pCcbiNode->setPositionY(12);
+		setContentSize(MONSTER_CCSIZE);
 
-		setContentSize(pTortoise->boundingBox().size);
-
-		m_pReceiver = pReceiver;
 		m_bIsTouched = false;
 
 		return true;
@@ -256,7 +356,7 @@ bool CMMonsterTortoise::OnCollisionMario()
 {
 	do 
 	{
-		CCSprite* pTortoise = dynamic_cast<CCSprite*>(getChildByTag(enTagMainSprite));
+		CCNode* pTortoise = dynamic_cast<CCNode*>(getChildByTag(enTagMainNode));
 		CC_BREAK_IF(pTortoise==NULL);
 
 		//马里奥与怪的碰撞
@@ -265,101 +365,146 @@ bool CMMonsterTortoise::OnCollisionMario()
 			//被踩
 			if (getPositionY()<m_pMario->getPositionY() && abs(m_pMario->getPositionY()-getPositionY())>boundingBox().size.height*0.8)
 			{
-// 				MsgForMonsterDisappear* pData = new MsgForMonsterDisappear;
-// 				pData->pMonster = this;
-// 				SendMsg(enMsgStamp,pData,sizeof(pData));
-
-				pTortoise->setTexture(CCTextureCache::sharedTextureCache()->addImage("tortoise0.png"));
+				removeChildByTag(enTagMainNode);
+				//ccbi读取
+				//构造一个ccbi文件读取器
+				CCNodeLoaderLibrary * ccNodeLoaderLibrary = CCNodeLoaderLibrary::newDefaultCCNodeLoaderLibrary();
+				cocos2d::extension::CCBReader * pCcbReader = new cocos2d::extension::CCBReader(ccNodeLoaderLibrary);
+				//读取动画文件
+				CCNode *pFireBall = pCcbReader->readNodeGraphFromFile("ccbResources/monster.ccbi", this);
+				CC_BREAK_IF(pFireBall==NULL);
+				pCcbReader->getAnimationManager()->runAnimationsForSequenceNamed("tortoise_die");	
+				pCcbReader->getAnimationManager()->setAnimationCompletedCallback(this,callfunc_selector(CMMonsterTortoise::OnCallDeadAnimationFinished));
+				//读完之后，立刻释放即可
+				pCcbReader->release();
+				CC_BREAK_IF(pFireBall==NULL);
+				pFireBall->setAnchorPoint(ccp(0,0));
+				addChild(pFireBall,enZOrderFront,enTagMainNode);
+				pFireBall->setPosition(ccp(0,0));
 
 				m_bIsTouched = true;
+
+				return true;
 			}
 			else
 			{
-				MsgForMonsterDisappear* pData = new MsgForMonsterDisappear;
+				TCmd_Remove_Monster* pData = new TCmd_Remove_Monster;
 				pData->pMonster = this;
 				SendMsg(enMsgBeHurt,pData,sizeof(pData));
+
+				return false;
 			}
 		}
 
-		return true;
+		return false;
 	} while (false);
 	CCLog("fun CMMonsterTortoise::OnCollisionMario Error!");
 	return false;
 }
 
-void CMMonsterTortoise::OnCallPerFrame( float fT )
+bool CMMonsterTortoise::OnCallPerFrame( float fT )
 {
 	do 
 	{
-		CCSprite* pTortoise = dynamic_cast<CCSprite*>(getChildByTag(enTagMainSprite));
+		//被火球打死
+		if (m_bHitByFireBall==true)
+		{
+			m_bHitByFireBall = false;
+			removeChildByTag(enTagMainNode);
+			//ccbi读取
+			//构造一个ccbi文件读取器
+			CCNodeLoaderLibrary * ccNodeLoaderLibrary = CCNodeLoaderLibrary::newDefaultCCNodeLoaderLibrary();
+			cocos2d::extension::CCBReader * pCcbReader = new cocos2d::extension::CCBReader(ccNodeLoaderLibrary);
+			//读取动画文件
+			CCNode *pFireBall = pCcbReader->readNodeGraphFromFile("ccbResources/monster.ccbi", this);
+			CC_BREAK_IF(pFireBall==NULL);
+			pCcbReader->getAnimationManager()->runAnimationsForSequenceNamed("tortoise_die");	
+			pCcbReader->getAnimationManager()->setAnimationCompletedCallback(this,callfunc_selector(CMMonsterTortoise::OnCallDeadAnimationFinished));
+			//读完之后，立刻释放即可
+			pCcbReader->release();
+			CC_BREAK_IF(pFireBall==NULL);
+			pFireBall->setAnchorPoint(ccp(0,0));
+			addChild(pFireBall,enZOrderFront,enTagMainNode);
+			pFireBall->setPosition(ccp(0,0));
+			return true;
+		}
+
+		CCNode* pTortoise = dynamic_cast<CCNode*>(getChildByTag(enTagMainNode));
 		CC_BREAK_IF(pTortoise==NULL);
 
-		CMMonsterBasic::OnCallPerFrame(fT);
-		OnCollisionMario();
-
 		//是否激活
-		if (m_bIsActivation==false)
+		if (m_bIsActivation==true)
 		{
-			return;
-		}
-
-		CCSprite* pTileSprite1 = NULL;
-		CCSprite* pTileSprite2 = NULL;
-		CCSprite* pTileSprite3 = NULL;
-		//移动与碰撞
-		if (m_MoveDirection == enMoveLeft)
-		{
-			//用怪物左方的2个瓦片来判断移动碰撞
-			pTileSprite1 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX(),getPositionY()+getContentSize().height));
-			pTileSprite2 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX(),getPositionY()+getContentSize().height/2));
-			if (pTileSprite1!=NULL || pTileSprite2!=NULL)
+			//移动与碰撞
+			if (m_MoveDirection == enMoveLeft)
 			{
-				m_MoveDirection = enMoveRight;
-				pTortoise->setTexture(CCTextureCache::sharedTextureCache()->addImage("tortoise_right.png"));
+				//用怪物左方的2个瓦片来判断移动碰撞
+				CCSprite* pTileSpriteLeftTop = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX(),getPositionY()+getContentSize().height));
+				CCSprite* pTileSpriteLeftMid = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX(),getPositionY()+getContentSize().height/2));
+				if (pTileSpriteLeftTop!=NULL || pTileSpriteLeftMid!=NULL)
+				{
+					m_MoveDirection = enMoveRight;
+					MonsterTurn();
+				}
+				else
+				{
+					setPositionX(getPositionX()-1);
+				}
+			}
+			else if(m_MoveDirection == enMoveRight)
+			{
+				//用怪物右方的2个瓦片来判断移动碰撞
+				CCSprite* pTileSpriteRightTop = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+getContentSize().width,getPositionY()+getContentSize().height));
+				CCSprite* pTileSpriteRightMid = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+getContentSize().width,getPositionY()+getContentSize().height/2));
+				if (pTileSpriteRightTop!=NULL || pTileSpriteRightMid!=NULL)
+				{
+					m_MoveDirection = enMoveLeft;
+					MonsterTurn();
+				}
+				else
+				{
+					setPositionX(getPositionX()+1);
+				}
+			}
+
+			//用怪物下方的三个瓦片来判断掉落碰撞
+			CCSprite* pTileSpriteBottomMid = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+boundingBox().size.width/2,getPositionY()));
+			CCSprite* pTileSpriteBottomLeft = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+COLLISION_POS_ADJUSTMENT,getPositionY()));
+			CCSprite* pTileSpriteBottomRight = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+boundingBox().size.width-COLLISION_POS_ADJUSTMENT,getPositionY()));
+			if (pTileSpriteBottomMid!=NULL || pTileSpriteBottomLeft!=NULL || pTileSpriteBottomRight!=NULL)
+			{
+				//掉落速度归零
+				m_fDropSpeedPlus = 0;
+
+				//防止下落速度过快导致陷进地里
+				if (pTileSpriteBottomMid!=NULL)
+				{
+					if (getPositionY()<pTileSpriteBottomMid->getPositionY()+pTileSpriteBottomMid->getContentSize().height)
+					{
+						setPositionY(getPositionY()+abs(getPositionY()-(pTileSpriteBottomMid->getPositionY()+pTileSpriteBottomMid->getContentSize().height))-0.1);
+					}
+				}
 			}
 			else
 			{
-				setPositionX(getPositionX()-1);
-			}
-		}
-		else if(m_MoveDirection == enMoveRight)
-		{
-			//用怪物右方的2个瓦片来判断移动碰撞
-			pTileSprite1 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+getContentSize().width,getPositionY()+getContentSize().height));
-			pTileSprite2 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+getContentSize().width,getPositionY()+getContentSize().height/2));
-			if (pTileSprite1!=NULL || pTileSprite2!=NULL)
-			{
-				m_MoveDirection = enMoveLeft;
-				pTortoise->setTexture(CCTextureCache::sharedTextureCache()->addImage("tortoise_left.png"));
-			}
-			else
-			{
-				setPositionX(getPositionX()+1);
+				setPositionY(getPositionY()-m_fDropSpeedPlus);
+				//掉落加速度
+				m_fDropSpeedPlus += DROP_SPEED_PLUS;
 			}
 		}
 
-		pTileSprite1 = NULL;
-		pTileSprite2 = NULL;
-		pTileSprite3 = NULL;
-		//用怪物下方的三个瓦片来判断掉落碰撞
-		pTileSprite1 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+boundingBox().size.width/2,getPositionY()));
-		pTileSprite2 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+COLLISION_POS_ADJUSTMENT,getPositionY()));
-		pTileSprite3 = m_pGameMap->TileMapLayerPosToTileSprite(ccp(getPositionX()+boundingBox().size.width-COLLISION_POS_ADJUSTMENT,getPositionY()));
-		if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
-		{
-			//掉落速度归零
-			m_fDropSpeedPlus = 0;
-		}
-		else
-		{
-			setPositionY(getPositionY()-m_fDropSpeedPlus);
-			//掉落加速度
-			m_fDropSpeedPlus += DROP_SPEED_PLUS;
-		}
-
-		return;
+		return (CMMonsterBasic::OnCallPerFrame(fT)||OnCollisionMario());
 	} while (false);
 	CCLog("fun CMMonsterTortoise::OnCallPerFrame Error!");
+	return false;
+}
+
+void CMMonsterTortoise::OnCallDeadAnimationFinished()
+{
+	//发送怪物移除消息
+	TCmd_Remove_Monster* pData = new TCmd_Remove_Monster;
+	pData->pMonster = this;
+	SendMsg(enMsgTortoiseStamp,pData,sizeof(pData));
 }
 
 /************************************************************************/
@@ -388,16 +533,25 @@ bool CMMonsterFlower::init( CCPoint ptMonsterPos,CMMario *pMario,CMGameMap *pGam
 	{
 		CC_BREAK_IF(!CMMonsterBasic::init(ptMonsterPos,pMario,pGameMap,pReceiver));
 
-		CCSprite* pFlower = CCSprite::create("flower0.png");
-		CC_BREAK_IF(pFlower==NULL);
-		pFlower->setAnchorPoint(ccp(0.5,0));
-		addChild(pFlower,enZOrderFront,enTagMainSprite);
+		//ccbi读取
+		//构造一个ccbi文件读取器
+		CCNodeLoaderLibrary * ccNodeLoaderLibrary = CCNodeLoaderLibrary::newDefaultCCNodeLoaderLibrary();
+		cocos2d::extension::CCBReader * pCcbReader = new cocos2d::extension::CCBReader(ccNodeLoaderLibrary);
+		//读取动画文件
+		CCNode *pCcbiNode = pCcbReader->readNodeGraphFromFile("ccbResources/monster.ccbi", this);
+		CC_BREAK_IF(pCcbiNode==NULL);
+		pCcbReader->getAnimationManager()->runAnimationsForSequenceNamed("flower_up");	
+		//读完之后，立刻释放即可
+		pCcbReader->release();
+		CC_BREAK_IF(pCcbiNode==NULL);
+		pCcbiNode->setAnchorPoint(ccp(0,0));
+		addChild(pCcbiNode,enZOrderBack,enTagMainNode);
+		pCcbiNode->setPositionY(8);
+		setContentSize(MONSTER_CCSIZE);
 
-		setContentSize(pFlower->boundingBox().size);
-
-		m_pReceiver = pReceiver;
 		m_bIsTouched = false;
-
+		m_fMoveCount = 40;
+		m_MoveDirection = enMoveLeft;
 		return true;
 	} while (false);
 	CCLog("fun CMMonsterFlower::init Error!");
@@ -408,40 +562,89 @@ bool CMMonsterFlower::OnCollisionMario()
 {
 	do 
 	{
-		CCSprite* pFlower = dynamic_cast<CCSprite*>(getChildByTag(enTagMainSprite));
+		CCNode* pFlower = dynamic_cast<CCNode*>(getChildByTag(enTagMainNode));
 		CC_BREAK_IF(pFlower==NULL);
 
 		//马里奥与怪的碰撞
 		if (m_pMario->boundingBox().intersectsRect(boundingBox()))
 		{
-			MsgForMonsterDisappear* pData = new MsgForMonsterDisappear;
+			TCmd_Remove_Monster* pData = new TCmd_Remove_Monster;
 			pData->pMonster = this;
 			SendMsg(enMsgBeHurt,pData,sizeof(pData));
+
+			return true;
 		}
 
-		return true;
+		return false;
 	} while (false);
 	CCLog("fun CMMonsterFlower::OnCollisionMario Error!");
 	return false;
 }
 
-void CMMonsterFlower::OnCallPerFrame( float fT )
+bool CMMonsterFlower::OnCallPerFrame( float fT )
 {
 	do 
 	{
-		CCSprite* pTortoise = dynamic_cast<CCSprite*>(getChildByTag(enTagMainSprite));
+		//被火球打死
+		if (m_bHitByFireBall==true)
+		{
+			m_bHitByFireBall = false;
+			removeChildByTag(enTagMainNode);
+			//ccbi读取
+			//构造一个ccbi文件读取器
+			CCNodeLoaderLibrary * ccNodeLoaderLibrary = CCNodeLoaderLibrary::newDefaultCCNodeLoaderLibrary();
+			cocos2d::extension::CCBReader * pCcbReader = new cocos2d::extension::CCBReader(ccNodeLoaderLibrary);
+			//读取动画文件
+			CCNode *pFireBall = pCcbReader->readNodeGraphFromFile("ccbResources/monster.ccbi", this);
+			CC_BREAK_IF(pFireBall==NULL);
+			pCcbReader->getAnimationManager()->runAnimationsForSequenceNamed("tortoise_die");	
+			pCcbReader->getAnimationManager()->setAnimationCompletedCallback(this,callfunc_selector(CMMonsterFlower::OnCallDeadAnimationFinished));
+			//读完之后，立刻释放即可
+			pCcbReader->release();
+			CC_BREAK_IF(pFireBall==NULL);
+			pFireBall->setAnchorPoint(ccp(0,0));
+			addChild(pFireBall,enZOrderFront,enTagMainNode);
+			pFireBall->setPosition(ccp(0,0));
+			return true;
+		}
+
+		CCNode* pTortoise = dynamic_cast<CCNode*>(getChildByTag(enTagMainNode));
 		CC_BREAK_IF(pTortoise==NULL);
 
-		CMMonsterBasic::OnCallPerFrame(fT);
-		OnCollisionMario();
+		//判断马里奥与当前怪物的距离，用以激活。
+		if (abs(m_pMario->getPositionX() - getPositionX())<MONSTER_ACTIVE_DISTANCE)
+		{
+			m_bIsActivation = true;
+		}
 
 		//是否激活
 		if (m_bIsActivation==false)
 		{
-			return;
+			return false;
 		}
 
-		return;
+		//花的反复运动
+		if(getActionByTag(enTagActionRepeat)==NULL)
+		{
+			CCMoveBy* pMoveByDown = CCMoveBy::create(1,ccp(0,-30));
+			CCDelayTime* pDelayTime = CCDelayTime::create(1);
+			CCMoveBy* pMoveByUp = CCMoveBy::create(1,ccp(0,30));
+
+			CCRepeatForever* pRepeatForever = CCRepeatForever::create(CCSequence::create(pMoveByDown,pDelayTime,pMoveByUp,pDelayTime, NULL));
+			pRepeatForever->setTag(enTagActionRepeat);
+			runAction(pRepeatForever);
+		}
+
+		return (CMMonsterBasic::OnCallPerFrame(fT)||OnCollisionMario());
 	} while (false);
 	CCLog("fun CMMonsterFlower::OnCallPerFrame Error!");
+	return false;
+}
+
+void CMMonsterFlower::OnCallDeadAnimationFinished()
+{
+	//发送怪物移除消息
+	TCmd_Remove_Monster* pData = new TCmd_Remove_Monster;
+	pData->pMonster = this;
+	SendMsg(enMsgTortoiseStamp,pData,sizeof(pData));
 }

@@ -1,13 +1,13 @@
 ﻿#include "CMGameMap.h"
 
-CMGameMap* CMGameMap::CreateGameMap(const char* pFileName)
+CMGameMap* CMGameMap::CreateGameMap(const char* pFileName,CMReceiver* pReceiver,enumMarioLevel &eMarioLevel)
 {
 	do 
 	{
 		CMGameMap* pPlayer = new CMGameMap;
 		if (pPlayer && pPlayer->initWithTMXFile(pFileName))
 		{
-			pPlayer->Init();
+			pPlayer->Init(pReceiver,eMarioLevel);
 			pPlayer->autorelease();
 			return pPlayer;
 		}
@@ -17,34 +17,33 @@ CMGameMap* CMGameMap::CreateGameMap(const char* pFileName)
 	return NULL;
 }
 
-bool CMGameMap::Init()
+bool CMGameMap::Init(CMReceiver* pReceiver,enumMarioLevel &eMarioLevel)
 {
 	do 
 	{
-		CCLog("initing Game Map...");
-
 		//初始化成员变量
-		m_fMapMove = 0;
 		m_fDropSpeedPlus = 0;
 		m_fJumpSpeed = 0;
-		m_fSpeed = MOVE_SPEED;
 		m_bIsLeftKeyDown = false;
 		m_bIsRightKeyDown = false;
 		m_bIsJumpKeyDown = false;
+		m_bIsFireKeyDown = false;
 		m_bIsHeroDead = false;
+		m_pReceiver = pReceiver;
+		m_bNeedResetStage = false;
 
 		//初始化游戏对象数组
 		m_pArrayItems = CCArray::create();
 		m_pArrayItems->retain();
-		m_pArrayItemForDelete = CCArray::create();
-		m_pArrayItemForDelete->retain();
 		m_pArrayMonsters = CCArray::create();
 		m_pArrayMonsters->retain();
-		m_pArrayMonstersForDelete = CCArray::create();
-		m_pArrayMonstersForDelete->retain();
+		m_pArrayBlocks = CCArray::create();
+		m_pArrayBlocks->retain();
+		m_pArrayFireBall = CCArray::create();
+		m_pArrayFireBall->retain();
 
 		//初始化Mario
-		CMMario* pMario = CMMario::CreateHero();
+		CMMario* pMario = CMMario::CreateHero(this,eMarioLevel);
 		CC_BREAK_IF(pMario==NULL);
 		pMario->setPosition(TileMapPosToTileMapLayerPos(ccp(2,11)));
 		addChild(pMario,enZOrderFront,enTagMario);
@@ -67,7 +66,7 @@ bool CMGameMap::Init()
 		{
 			for (int j = 0;j<nMapVerticalTileNum;j++)
 			{
-				if (TileMapPosToTileType(ccp(i,j),m_fMapMove)==enTileTypeCoin)
+				if (TileMapPosToTileType(ccp(i,j))==enTileTypeCoin)
 				{
 					//将瓦片地图坐标转换为瓦片地图层坐标
 					CCPoint CoinTileMapLayerPos = TileMapPosToTileMapLayerPos(ccp(i,j));
@@ -154,7 +153,7 @@ bool CMGameMap::Init()
 		{
 			for (int j = 0;j<nMapVerticalTileNum;j++)
 			{
-				if (TileMapPosToTileType(ccp(i,j),m_fMapMove)==enTileTypeBlock)
+				if (TileMapPosToTileType(ccp(i,j))==enTileTypeBlock)
 				{
 					//解析得到当前砖块的属性
 					int GID = pBlockLayer->tileGIDAt(ccp(i,j));
@@ -176,7 +175,7 @@ bool CMGameMap::Init()
 					}
 					pBlock->setPosition(BlockTileMapLayerPos);
 					pBlock->setAnchorPoint(ccp(0,0));
-					m_pArrayItems->addObject(pBlock);
+					m_pArrayBlocks->addObject(pBlock);
 					addChild(pBlock);
 				}
 			}
@@ -223,7 +222,23 @@ CCSprite* CMGameMap::TileMapLayerPosToTileSprite( CCPoint TileMapLayerPos)
 		CCSprite* pBlockSprite = pBlockLayer->tileAt(ccp(TileMapPos.x,TileMapPos.y));
 		if (pBlockSprite!=NULL)
 		{
-			return pBlockSprite;
+			//遍历砖块数组，如果砖块数组中未找到，则说明已被顶坏，返回空
+			CCObject *pObj = NULL;
+			CCARRAY_FOREACH(m_pArrayBlocks,pObj)
+			{
+				CMItemBlock* pItem = dynamic_cast<CMItemBlock*>(pObj);
+				CC_BREAK_IF(pItem==NULL);
+				CCPoint CurBlockWorldPos = (pBlockSprite->getPosition());
+				CCPoint TempBlockWorldPos = (pItem->getPosition());
+
+				//找到则返回砖块精灵
+				if (abs(CurBlockWorldPos.x==TempBlockWorldPos.x) && 
+					abs(CurBlockWorldPos.y==TempBlockWorldPos.y))
+				{
+					return pBlockSprite;
+				}
+			}
+			return NULL;
 		}
 		CCSprite* pPipeSprite = pPipeLayer->tileAt(ccp(TileMapPos.x,TileMapPos.y));	
 		if (pPipeSprite!=NULL)
@@ -236,51 +251,69 @@ CCSprite* CMGameMap::TileMapLayerPosToTileSprite( CCPoint TileMapLayerPos)
 	return NULL;
 }
 
-void CMGameMap::OnCallPerFrame(float dt)
+void CMGameMap::OnCallPerFrame(float fT)
 {
 	do 
 	{
-		//删除需要被删除的道具
-		m_pArrayItems->removeObjectsInArray(m_pArrayItemForDelete);
+		//遍历调用子节点的循环函数
 		CCObject *pObj = NULL;
-		//因为集合只是保存指针，还需要在父节点移除，所以需要遍历移除。
-		CCARRAY_FOREACH(m_pArrayItemForDelete,pObj)
+		
+		//在火球数组内删除需要删除的火球
+		CCArray *pFireBallToDistroy = CCArray::create();
+		CCARRAY_FOREACH(m_pArrayFireBall,pObj)
 		{
+			//调用基类的Update实际上调用的是子类重写的Update，若想调用基类的Update需要在子类的Update中调用。
 			CMItemBasic* pItem = dynamic_cast<CMItemBasic*>(pObj);
 			if (pItem==NULL)
 			{
-				CCLog("pCoin==NULL!");
+				CCLog("pItem==NULL");
 			}
-			pItem->removeFromParent();
-		}
-		m_pArrayItemForDelete->removeAllObjects();
-
-		//删除需要被删除的怪物
-		m_pArrayMonsters->removeObjectsInArray(m_pArrayMonstersForDelete);	//这句的m_pArrayMonsters被写成了m_pArrayItems也不报错，坑死我了！2013-12-27 15:51
-		pObj = NULL;
-		CCARRAY_FOREACH(m_pArrayMonstersForDelete,pObj)
-		{
-			CMMonsterBasic* pMonster = dynamic_cast<CMMonsterBasic*>(pObj);
-			if (pMonster==NULL)
+			if(pItem->OnCallPerFrame(fT)==true)//执行逻辑周期 并判断是否可以移除
 			{
-				CCLog("pMonster==NULL");
+				pFireBallToDistroy->addObject(pItem);
 			}
-			pMonster->removeFromParent();
 		}
-		m_pArrayMonstersForDelete->removeAllObjects();
+		//将需要移除的物品从逻辑队列中移除掉
+		m_pArrayFireBall->removeObjectsInArray(pFireBallToDistroy);
 
-		//遍历调用子节点的循环函数
-		pObj = NULL;
+		//判断火球与怪物的碰撞
+		CCObject* pTempMonsterForCollision = NULL;
+		CCARRAY_FOREACH(m_pArrayFireBall,pObj)
+		{
+			CMItemFireBall* pFireBall = dynamic_cast<CMItemFireBall*>(pObj);
+			CC_BREAK_IF(pFireBall==NULL);
+			CCARRAY_FOREACH(m_pArrayMonsters,pTempMonsterForCollision)
+			{
+				CMMonsterBasic* pMonster = dynamic_cast<CMMonsterBasic*>(pTempMonsterForCollision);
+				CC_BREAK_IF(pMonster==NULL);
+				if (pMonster->boundingBox().containsPoint(pFireBall->getPosition()))
+				{
+					pFireBall->SetFireBallBoom();
+					pMonster->SetDeadByFireBall();
+				}
+			}
+		}
+
+		//删除需要删除的道具
+		CCArray *pItemToDistroy = CCArray::create();
 		CCARRAY_FOREACH(m_pArrayItems,pObj)
 		{
 			//调用基类的Update实际上调用的是子类重写的Update，若想调用基类的Update需要在子类的Update中调用。
 			CMItemBasic* pItem = dynamic_cast<CMItemBasic*>(pObj);
 			if (pItem==NULL)
 			{
-				CCLog("pMonster==NULL");
+				CCLog("pItem==NULL");
 			}
-			pItem->OnCallPerFrame(dt);
+			if(pItem->OnCallPerFrame(fT)==true)//执行逻辑周期 并判断是否可以移除
+			{
+				pItemToDistroy->addObject(pItem);
+			}
 		}
+		//将需要移除的物品从逻辑队列中移除掉
+		m_pArrayItems->removeObjectsInArray(pItemToDistroy);
+
+		//删除需要删除的怪物
+		CCArray *pMonsterToDistroy = CCArray::create();
 		CCARRAY_FOREACH(m_pArrayMonsters,pObj)
 		{
 			//调用基类的Update实际上调用的是子类重写的Update，若想调用基类的Update需要在子类的Update中调用。
@@ -290,19 +323,65 @@ void CMGameMap::OnCallPerFrame(float dt)
 				CCLog("pMonster==NULL");
 				return;
 			}
-			pMonster->OnCallPerFrame(dt);
+			if(pMonster->OnCallPerFrame(fT)==true)//执行逻辑周期 并判断是否可以移除
+			{
+				pMonsterToDistroy->addObject(pMonster);
+			}
 		}
+		//将需要移除的怪从逻辑队列中移除掉
+		m_pArrayMonsters->removeObjectsInArray(pMonsterToDistroy);
+
+		//删除需要删除的砖块
+		CCArray *pBlockToDistroy = CCArray::create();
+		CCARRAY_FOREACH(m_pArrayBlocks,pObj)
+		{
+			//调用基类的Update实际上调用的是子类重写的Update，若想调用基类的Update需要在子类的Update中调用。
+			CMItemBasic* pBlock = dynamic_cast<CMItemBasic*>(pObj);
+			if (pBlock==NULL)
+			{
+				CCLog("pBlock==NULL");
+			}
+			if(pBlock->OnCallPerFrame(fT)==true)//执行逻辑周期 并判断是否可以移除 返回真 为何不执行括号内语句？
+			{
+				pBlockToDistroy->addObject(pBlock);
+			}
+		}
+		//将需要移除的砖块从逻辑队列中移除掉
+		m_pArrayBlocks->removeObjectsInArray(pBlockToDistroy);
+
+		//执行Mario的循环
 		CMMario* pMario = dynamic_cast<CMMario*>(getChildByTag(enTagMario));
 		CC_BREAK_IF(pMario==NULL);
-		pMario->OnCallPerFrame(dt);		
+		pMario->OnCallPerFrame(fT);		
 
-		MarioMove();
+		//判断Mario是否到达关底
+		if (pMario->getPositionX()>getContentSize().width-250)
+		{
+			CCMoveBy* pMoveDown = CCMoveBy::create(2,ccp(50,0));
+
+			runAction(CCSequence::create(
+				pMoveDown,
+				CCCallFunc::create(this,callfunc_selector(CMGameMap::PassLevel)),
+				NULL));
+		}
+
+		//控制Mario的移动
+		MarioMove(fT);
+
+		//当Mario死亡需要重置关卡时，如果直接发消息移除当前关卡，会导致循环未完成而成员变量被移除而出错
+		//解决方法就是设置成员变量开关，发消息打开开关，在当前循环结束后检测开关状态来移除、
+		if (m_bNeedResetStage==true)
+		{
+			SendMsg(enMsgMarioDead);
+			m_bNeedResetStage=false;
+		}
+
 		return;
 	} while (false);
 	CCLog("fun CMGameMap::OnCallPerFrame Error!");
 }
 
-enumTileType CMGameMap::TileMapPosToTileType( CCPoint HeroPos,float fMapMove )
+enumTileType CMGameMap::TileMapPosToTileType( CCPoint HeroPos)
 {
 	do 
 	{
@@ -325,7 +404,7 @@ enumTileType CMGameMap::TileMapPosToTileType( CCPoint HeroPos,float fMapMove )
 		CC_BREAK_IF(pCoinLayer==NULL);
 		CCTMXLayer* pFlagpoleLayer = layerNamed("flagpole");
 		CC_BREAK_IF(pFlagpoleLayer==NULL);
-
+		//根据坐标返回瓦片类型
 		CCSprite* pLandSprite = pLandLayer->tileAt(ccp(nHeroTilePosX,nHeroTilePosY));
 		if (pLandSprite!=NULL)
 		{
@@ -358,15 +437,16 @@ void CMGameMap::onExit()
 	CC_SAFE_RELEASE(m_pArrayItems);
 	m_pArrayMonsters->removeAllObjects();
 	CC_SAFE_RELEASE(m_pArrayMonsters);
-	m_pArrayItemForDelete->removeAllObjects();
-	CC_SAFE_RELEASE(m_pArrayItemForDelete);
-	m_pArrayMonstersForDelete->removeAllObjects();
-	CC_SAFE_RELEASE(m_pArrayMonstersForDelete);
+	m_pArrayBlocks->removeAllObjects();
+	CC_SAFE_RELEASE(m_pArrayBlocks);
+	m_pArrayFireBall->removeAllObjects();
+	CC_SAFE_RELEASE(m_pArrayFireBall);
 	CCTMXTiledMap::onExit();
 }
 
 cocos2d::CCPoint CMGameMap::TileMapPosToTileMapLayerPos( CCPoint TilePos )
 {
+	//地图块坐标转换为地图层坐标
 	float fPositionX = TilePos.x * getTileSize().width;
 	float fPositionY = SCREEN_HEIGHT - CONTROL_UI_HEIGHT - (TilePos.y * getTileSize().height + getTileSize().height);
 	return ccp(fPositionX,fPositionY);
@@ -374,112 +454,84 @@ cocos2d::CCPoint CMGameMap::TileMapPosToTileMapLayerPos( CCPoint TilePos )
 
 void CMGameMap::OnMsgReceive( int enMsg,void* pData,int nSize )
 {
-	CMMario* pMario = dynamic_cast<CMMario*>(getChildByTag(enTagMario));
-	if (pMario==NULL)
-	{
-		CCLog("pMario==NULL in fun CMGameMap::OnMsgReceive Error!");
-	}
-
 	switch (enMsg)
 	{
-	case enMsgItemDisappear:
+	case enMsgFire:			//发射火球
 		{
-			if (sizeof(MsgForItem)!=nSize)
-			{
-				CCAssert(false,"sizeof(MsgForCoinCollision)!=nSize");
-			}
-			m_pArrayItemForDelete->addObject(((MsgForItem*)pData)->pItem);
+			OnSubMsgFire();
+			return;
 		}
 		break;
-	case enMsgLevelUp:
+	case enMsgBlockDisappear://砖块移除
 		{
-			if (sizeof(MsgForItem)!=nSize)
-			{
-				CCAssert(false,"sizeof(MsgForCoinCollision)!=nSize");
-			}
-			m_pArrayItemForDelete->addObject(((MsgForItem*)pData)->pItem);
-
-			//Mario升级
-			if (pMario->GetMarioLevel()==enMarioLevelSmall)
-			{
-				pMario->SetMarioLevel(enMarioLevelBig);
-			}
-			else if (pMario->GetMarioLevel()==enMarioLevelBig)
-			{
-				pMario->SetMarioLevel(enMarioLevelSuper);
-			}
+			OnSubMsgBlockRemove(pData,nSize);
+			return;
 		}
 		break;
-	case enMsgBeHurt:
+	case enMsgItemDisappear://道具移除处理
 		{
-			if (sizeof(MsgForItem)!=nSize)
-			{
-				CCAssert(false,"sizeof(MsgForCoinCollision)!=nSize");
-			}
-
-			//Mario降级
-			if (pMario->GetMarioLevel()==enMarioLevelBig)
-			{
-				pMario->SetMarioLevel(enMarioLevelSmall);
-			}
-			else if (pMario->GetMarioLevel()==enMarioLevelSuper)
-			{
-				pMario->SetMarioLevel(enMarioLevelBig);
-			}
+			OnSubMsgItemRemove(pData,nSize);
+			return;
 		}
 		break;
-	case enMsgMonsterDisappear:
+	case enMsgLevelUp:		//升级
 		{
-			if (sizeof(MsgForMonsterDisappear)!=nSize)
-			{
-				CCAssert(false,"sizeof(MsgForMonsterDisappear)!=nSize");
-			}
-			m_pArrayMonstersForDelete->addObject(((MsgForMonsterDisappear*)pData)->pMonster);
+			OnSubMsgMarioLevelUp();
+			return;
 		}
 		break;
-	case enMsgStamp:
+	case enMsgBeHurt:		//受到伤害
 		{
-			if (sizeof(MsgForMonsterDisappear)!=nSize)
-			{
-				CCAssert(false,"sizeof(MsgForMonsterDisappear)!=nSize");
-			}
-			m_pArrayMonstersForDelete->addObject(((MsgForMonsterDisappear*)pData)->pMonster);
+			OnSubMsgMarioBeHurt();
+			return;
 		}
 		break;
-	case enMsgBlockBoxHitted:
+	case enMsgMonsterDisappear:	//怪物移除
 		{
-			if (sizeof(MsgForBlockBoxHitted)!=nSize)
-			{
-				CCAssert(false,"sizeof(MsgForBlockBoxHitted)!=nSize");
-			}
-
-			CCPoint pMashroomsPos = ccp(((MsgForBlockBoxHitted*)pData)->pBlockBox->getPosition().x,((MsgForBlockBoxHitted*)pData)->pBlockBox->getPosition().y+getTileSize().height+10);
-			CMItemMashrooms* pMashrooms = CMItemMashrooms::CreateItemCMItemMashrooms(pMashroomsPos,getTileSize(),pMario,this,this);
-			if (pMashrooms==NULL)
-			{
-				CCLog("pMashrooms==NULL!");
-			}
-			pMashrooms->setPosition(pMashroomsPos);
-			addChild(pMashrooms,enZOrderFront);
-			m_pArrayItems->addObject(pMashrooms);
+			OnSubMsgMonsterDisappear(pData,nSize);
+			return;
+		}
+		break;
+	case enMsgMushroomsStamp:	//蘑菇被踩
+		{
+			OnSubMsgMushroomsStamp(pData,nSize);
+			return;
+		}
+		break;
+	case enMsgTortoiseStamp:	//乌龟被踩
+		{
+			OnSubMsgTortoiseStamp(pData,nSize);
+			return;
+		}
+		break;
+	case enMsgBlockBoxHitted:	//砖块被顶
+		{
+			OnSubMsgBlockBoxHitted(pData,nSize);
+			return;
+		}
+		break;
+	case enMsgMarioDead:		//马里奥死亡
+		{
+			OnSubMsgGameOver();
+			return;
+		}
+		break;
+	case enMsgEatCoin:			//吃金币
+		{
+			OnSubMsgEatCoin();
+			return;
+		}
+		break;
+	case enMsgStopCtrl:		//停止更新
+		{
+			OnSubMsgStopCtrl();
+			return;
 		}
 		break;
 	}
 }
 
-cocos2d::CCPoint CMGameMap::TileMapLayerPosToWorldPos( CCPoint TileMapLayerPos,float m_fMapMove )
-{
-	float fPositionY = TileMapLayerPos.y;
-	float fPositionX = TileMapLayerPos.x - m_fMapMove;
-	return ccp(fPositionX,fPositionY);
-}
-
-float CMGameMap::GetMapMove()
-{
-	return m_fMapMove;
-}
-
-void CMGameMap::MarioMove()
+void CMGameMap::MarioMove(float fT)
 {
 	do 
 	{
@@ -487,7 +539,40 @@ void CMGameMap::MarioMove()
 		CC_BREAK_IF(pMario==NULL);
 		CCPoint CurMarioPos = pMario->getPosition();
 
-#if(CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)    
+		//如果左键按下
+		if(m_bIsLeftKeyDown)
+		{
+			pMario->OnCtrlMove(fT,false);
+		}
+		//如果右键按下
+		if (m_bIsRightKeyDown)
+		{
+			CCPoint CurMarioPos = pMario->getPosition();
+			pMario->OnCtrlMove(fT,true);
+			//如果Mario的位置变化了，则地图才会卷动
+			if (convertToWorldSpace(pMario->getPosition()).x>120 && abs(pMario->getPositionX()-CurMarioPos.x)>1 &&
+				pMario->getPositionX() < (getContentSize().width - SCREEN_WIDTH + 100))
+			{
+				setPositionX(getPositionX()-100*fT);
+			}
+		}
+		//如果跳跃键按下
+		if (m_bIsJumpKeyDown)
+		{
+			pMario->OnCtrlJump();
+		}
+		//如果子弹键按下
+		if (m_bIsFireKeyDown)
+		{
+			pMario->OnCtrlFire();
+		}
+		//如果没有键按下
+		if (m_bIsLeftKeyDown==false && m_bIsRightKeyDown==false && m_bIsJumpKeyDown==false)
+		{
+			pMario->OnCtrlNoAction();
+		}
+
+#if(CC_TARGET_PLATFORM==CC_PLATFORM_WIN32)    
 
 		// 		CCMenu* pMenu = dynamic_cast<CCMenu*>(getChildByTag(enTagMenu));
 		// 		CC_BREAK_IF(pMenu==NULL);
@@ -499,15 +584,6 @@ void CMGameMap::MarioMove()
 		// 		CC_BREAK_IF(pJumpKey==NULL);
 		// 		CCMenuItemImage* pFireKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagLeftKey));
 		// 		CC_BREAK_IF(pFireKey==NULL);
-
-		if(KEY_DOWN(KEY_KEY_K))
-		{
-
-		}
-		if (KEY_DOWN(KEY_KEY_J))
-		{
-
-		}
 
 		if(KEY_DOWN(KEY_KEY_A))
 		{
@@ -525,225 +601,29 @@ void CMGameMap::MarioMove()
 		{
 			m_bIsRightKeyDown = false;
 		}
-		if(KEY_DOWN(KEY_KEY_W))
+		if(KEY_DOWN(KEY_KEY_K))
 		{
 			m_bIsJumpKeyDown = true;
 		}
-		if(KEY_UP(KEY_KEY_W))
+		if(KEY_UP(KEY_KEY_K))
 		{
 			m_bIsJumpKeyDown = false;
 		}
-		if(KEY_DOWN(KEY_KEY_S))
+		if(KEY_DOWN(KEY_KEY_J))
 		{
-
+			m_bIsFireKeyDown = true;
+		}
+		if(KEY_UP(KEY_KEY_J))
+		{
+			m_bIsFireKeyDown = false;
 		}
 #endif
-
-		//判断马里奥是否落坑死亡
-		float temp = pMario->getPositionY();
-		if(pMario->getPositionY()/getTileSize().height<0)
-		{
-			CCDirector* pDirector = CCDirector::sharedDirector();
-			CCScene *pScene = CMGameScene::CreateGameScene();
-			pDirector->replaceScene(pScene);
-			return;
-		}
-
-		//Mario的移动及碰撞
-		CCSprite* pTileSprite1 = NULL;
-		CCSprite* pTileSprite2 = NULL;
-		CCSprite* pTileSprite3 = NULL;
-		//根据变量控制Mario移动及动作
-		if (m_bIsLeftKeyDown)
-		{
-			//用Mario左方的三个瓦片来判断后退碰撞
-			pTileSprite1 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX(),pMario->getPositionY()+pMario->boundingBox().size.height));
-			pTileSprite2 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX(),pMario->getPositionY()+pMario->boundingBox().size.height/2));
-			pTileSprite3 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX(),pMario->getPositionY()));
-			if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
-			{
-				pMario->setPosition(CurMarioPos);
-				pMario->SetMarioStatus(enMarioStatusStandLeft);
-			}
-			else
-			{
-				pMario->SetMarioStatus(enMarioStatusRunLeft);
-				if (pMario->getPositionX()>m_fMapMove)
-				{
-					pMario->setPositionX(pMario->getPositionX()-m_fSpeed);
-				}
-			}
-		}
-		else
-		{
-			pMario->SetMarioStatus(enMarioStatusStandLeft);
-		}
-
-		pTileSprite1 = NULL;
-		pTileSprite2 = NULL;
-		pTileSprite3 = NULL;
-		if (m_bIsRightKeyDown)
-		{
-			//用Mario右方的三个瓦片来判断前进碰撞
-			pTileSprite1 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width,pMario->getPositionY()+pMario->boundingBox().size.height));
-			pTileSprite2 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width,pMario->getPositionY()+pMario->boundingBox().size.height/2));
-			pTileSprite3 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width,pMario->getPositionY()));
-			if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
-			{
-				pMario->SetMarioStatus(enMarioStatusStandRight);
-				pMario->setPosition(CurMarioPos);
-			}
-			else
-			{
-				pMario->SetMarioStatus(enMarioStatusRunRight);
-				if (getContentSize().width - m_fMapMove<=SCREEN_WIDTH)
-				{
-					pMario->setPositionX(pMario->getPositionX()+m_fSpeed);
-				}
-				else if (pMario->getPositionX() - m_fMapMove>100)
-				{
-					setPositionX(getPositionX()-m_fSpeed);
-					pMario->setPositionX(pMario->getPositionX()+m_fSpeed);
-					m_fMapMove += m_fSpeed;
-				}
-				else 
-				{
-					pMario->setPositionX(pMario->getPositionX()+m_fSpeed);
-				}
-			}
-		}
-		else
-		{
-			pMario->SetMarioStatus(enMarioStatusStandRight);
-		}
-
-		pTileSprite1 = NULL;
-		pTileSprite2 = NULL;
-		pTileSprite3 = NULL;
-		//用Mario下方的三个瓦片来判断掉落碰撞
-		pTileSprite1 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width/2,pMario->getPositionY()));
-		pTileSprite2 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+COLLISION_POS_ADJUSTMENT,pMario->getPositionY()));
-		pTileSprite3 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width-COLLISION_POS_ADJUSTMENT,pMario->getPositionY()));
-		if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
-		{
-			pMario->setPosition(CurMarioPos);
-			pMario->setPositionY(pMario->getPositionY()+1);
-			//掉落速度归零
-			m_fDropSpeedPlus = 0;
-			//跳跃起始速度
-			m_fJumpSpeed = JUMP_START_SPEED;
-		}
-		else
-		{
-			pMario->setPositionY(pMario->getPositionY()-m_fDropSpeedPlus);
-			//掉落加速度
-			m_fDropSpeedPlus += DROP_SPEED_PLUS;
-		}
-
-		pTileSprite1 = NULL;
-		pTileSprite2 = NULL;
-		pTileSprite3 = NULL;
-		//用Mario上方的三个瓦片来判断头顶碰撞
-		pTileSprite1 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width/2,pMario->getPositionY()+pMario->boundingBox().size.height));
-		pTileSprite2 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+COLLISION_POS_ADJUSTMENT,pMario->getPositionY()+pMario->boundingBox().size.height));
-		pTileSprite3 = TileMapLayerPosToTileSprite(ccp(pMario->getPositionX()+pMario->boundingBox().size.width-COLLISION_POS_ADJUSTMENT,pMario->getPositionY()+pMario->boundingBox().size.height));
-		if (pTileSprite1!=NULL || pTileSprite2!=NULL || pTileSprite3!=NULL)
-		{
-			pMario->setPosition(CurMarioPos);
-			pMario->setPositionY(pMario->getPositionY()-1);
-			//跳跃速度归零
-			m_fJumpSpeed = 0;
-			//HitBlock(ccp(pMario->getPositionX()+pMario->boundingBox().size.width/2,pMario->getPositionY()+pMario->boundingBox().size.height));
-		}
-		else
-		{
-			//跳跃
-			if (m_bIsJumpKeyDown)
-			{
-				pMario->setPositionY(pMario->getPositionY()+m_fJumpSpeed);
-				//跳跃递减速度
-				m_fJumpSpeed -= JUMP_SPEED_MINUS;
-			}
-		}
-
+		
 		return;
 	} while (false);
 	CCLog("fun CMGameMap::MarioMove Error!");
 	return;
 }
-// 
-// void CMGameMap::HitBlock(CCPoint TileMapLayerPos)
-// {
-// 	do 
-// 	{
-// 		CMMario* pMario = dynamic_cast<CMMario*>(getChildByTag(enTagMario));
-// 		CC_BREAK_IF(pMario==NULL);
-// 
-// 		//解析得到当前砖块的属性
-// 		CCTMXLayer* pBlockLayer = layerNamed("block");
-// 		CC_BREAK_IF(pBlockLayer==NULL);
-// 		int GID = pBlockLayer->tileGIDAt(TileMapLayerPosToTileMapPos(TileMapLayerPos));
-// 		CCDictionary *pDic = propertiesForGID(GID);
-// 		CC_BREAK_IF(pDic==NULL);
-// 		CCString *strBlockType = (CCString*)pDic->objectForKey("blockType");
-// 		int nBlockType = strBlockType->intValue();
-// 
-// 		//对不同形态的砖块进行不同的反馈
-// 		CCSprite* pBlockForHit = TileMapLayerPosToTileSprite(TileMapLayerPos);
-// 		CC_BREAK_IF(pBlockForHit==NULL);
-// 		switch (nBlockType)
-// 		{
-// 		case enBlockTypeNormal:		//普通砖块
-// 			{
-// 				switch (pMario->GetStatus())
-// 				{
-// 				case enMarioStatusSmall:
-// 					{
-// 						pBlockForHit->stopAllActions();
-// 						CCActionInterval *pJumpBy = CCJumpBy::create(0.2f, CCPointZero, 
-// 						this->getTileSize().height*0.5, 1);
-// 						pBlockForHit->runAction(pJumpBy);
-// 					}
-// 					break;
-// 				case enMarioStatusBig:
-// 				case enMarioStatusSuper:
-// 					{
-// 						pBlockLayer->removeTileAt(TileMapLayerPosToTileMapPos(TileMapLayerPos));
-// 					}
-// 					break;
-// 				}
-// 			}
-// 			break;
-// 		case enBlockTypeBox:		//宝箱
-// 			{
-// 				pBlockForHit->stopAllActions();
-// 				CCActionInterval *pJumpBy = CCJumpBy::create(0.2f, CCPointZero, 
-// 					this->getTileSize().height*0.5, 1);
-// 				pBlockForHit->runAction(pJumpBy);
-// 				
-// 				CCSprite* pTempCoin = CCSprite::create("coin.png");
-// 				CC_BREAK_IF(pTempCoin==NULL);
-// 				pTempCoin->setPosition(pBlockForHit->getPosition());
-// 				pTempCoin->setAnchorPoint(ccp(0,0));
-// 				addChild(pTempCoin);
-// 				CCActionInterval *pJumpCoin = CCJumpBy::create(0.16f, ccp(0, this->getTileSize().height),
-// 					this->getTileSize().height*1.5, 1);
-// 				pTempCoin->runAction(pJumpCoin);
-// 			}
-// 			break;
-// 		case enBlockTypeAddLife:	//隐藏砖块
-// 			{
-// 
-// 			}
-// 			break;
-// 		}
-// 		
-// 		//pBlockLayer->removeTileAt(TilePos);
-// 
-// 		return;
-// 	} while (false);
-// 	CCLog("fun CMGameMap::HitBlock Error!");
-// }
 
 cocos2d::CCPoint CMGameMap::TileMapLayerPosToTileMapPos( CCPoint TileMapLayerPos )
 {
@@ -753,3 +633,284 @@ cocos2d::CCPoint CMGameMap::TileMapLayerPosToTileMapPos( CCPoint TileMapLayerPos
 
 	return ccp(nTileMapPosX,nTileMapPosY);
 }
+
+void CMGameMap::OnSubMsgItemRemove( void *pData ,int nSize )
+{
+	do 
+	{
+		TCmd_Remove_Item *pCmd = (TCmd_Remove_Item*)pData;
+		//参数校验
+		CC_BREAK_IF(pCmd!=NULL&&pCmd->pItem==NULL);	
+		CC_BREAK_IF(sizeof(TCmd_Remove_Item)!=nSize);
+		//从画面移除
+		pCmd->pItem->removeFromParent();
+		return;
+	} while (false);
+	CCLOG("Error:  CMGameMap::OnSubMsgItemRemove Run Error!");
+}
+
+void CMGameMap::OnSubMsgMarioLevelUp()
+{
+	do 
+	{
+		//升级
+		CMMario* pMario = dynamic_cast<CMMario*>(getChildByTag(enTagMario));
+		CC_BREAK_IF(pMario==NULL);
+		pMario->MarioLevelUp();
+
+		return;
+	} while (false);
+	CCLOG("Error: CMGameMap::OnSubMsgMarioGrowUp");
+}
+
+void CMGameMap::OnSubMsgMonsterDisappear( void *pData,int nSize )
+{
+	do 
+	{
+		TCmd_Remove_Monster *pCmd = (TCmd_Remove_Monster*)pData;
+		//参数校验
+		CC_BREAK_IF(pCmd!=NULL&&pCmd->pMonster==NULL);	
+		CC_BREAK_IF(sizeof(TCmd_Remove_Monster)!=nSize);
+
+		//从画面移除
+		pCmd->pMonster->removeFromParent();
+
+		return;
+	} while (false);
+	CCLog("fun CMGameMap::OnSubMsgMonsterDisappear Error!");
+}
+
+void CMGameMap::OnSubMsgMushroomsStamp( void *pData,int nSize )
+{
+	do 
+	{
+		TCmd_Remove_Monster *pCmd = (TCmd_Remove_Monster*)pData;
+		//参数校验
+		CC_BREAK_IF(pCmd!=NULL&&pCmd->pMonster==NULL);	
+		CC_BREAK_IF(sizeof(TCmd_Remove_Monster)!=nSize);
+		//从画面移除
+		pCmd->pMonster->removeFromParent();
+
+		return;
+	} while (false);
+	CCLog("fun CMGameMap::OnSubMsgStamp Error!");
+}
+
+void CMGameMap::OnSubMsgBlockBoxHitted( void *pData,int nSize )
+{
+	do 
+	{
+		CMMario* pMario = dynamic_cast<CMMario*>(getChildByTag(enTagMario));
+		CC_BREAK_IF(pMario==NULL);
+
+		TCmd_Block_Box_Hitted *pCmd = (TCmd_Block_Box_Hitted*)pData;
+		//参数校验
+		CC_BREAK_IF(pCmd!=NULL&&pCmd->pBlockBox==NULL);	
+		CC_BREAK_IF(sizeof(TCmd_Remove_Monster)!=nSize);
+
+
+		CCPoint pPos = ccp(pCmd->pBlockBox->getPosition().x,pCmd->pBlockBox->getPosition().y+getTileSize().height);
+		switch (rand()%4)
+		{
+		case 0:
+			{
+				if (GetMarioLevel()==enMarioLevelSmall)
+				{
+					//顶出蘑菇
+					CMItemMashrooms* pMashrooms = CMItemMashrooms::CreateItemMashrooms(pPos,getTileSize(),pMario,this,this);
+					CC_BREAK_IF(pMashrooms==NULL);
+					pMashrooms->setPosition(pPos);
+					addChild(pMashrooms,enZOrderFront);
+					m_pArrayItems->addObject(pMashrooms);
+				}
+				else
+				{
+					//顶出花
+					CMItemFlower* pFlower = CMItemFlower::CreateItemFlower(pPos,getTileSize(),pMario,this,this);
+					CC_BREAK_IF(pFlower==NULL);
+					pFlower->setPosition(pPos);
+					addChild(pFlower,enZOrderFront);
+					m_pArrayItems->addObject(pFlower);
+				}
+			}
+			break;
+		default:
+			{
+				if (getActionByTag(enTagCoinJumpAction)==NULL)
+				{
+					//顶出金币
+					CCSprite* pCoin = CCSprite::create("coin.png");
+					CC_BREAK_IF(pCoin==NULL);
+					pCoin->setPosition(pPos);
+					pCoin->setAnchorPoint(ccp(-0.3,0));
+					addChild(pCoin,enZOrderFront,enTagJumpCoin);
+
+					CCMoveBy* pMoveByUp = CCMoveBy::create(0.2,ccp(0,20));
+					CCFadeOut* pFadeOut = CCFadeOut::create(0.1);
+					CCSequence* pCoinJump = CCSequence::create(pMoveByUp,pFadeOut,CCCallFunc::create(this, callfunc_selector(CMGameMap::OnSubJumpCoinDisappear)),NULL);
+					pCoinJump->setTag(enTagCoinJumpAction);
+					pCoin->runAction(pCoinJump);
+				}
+				SendMsg(enMsgEatCoin);
+			}
+			break;
+		}
+		return;
+	} while (false);
+	CCLog("fun CMGameMap::OnSubMsgBlockBoxHitted Error!");
+}
+
+void CMGameMap::OnSubJumpCoinDisappear()
+{
+	removeChildByTag(enTagJumpCoin);
+}
+
+void CMGameMap::OnSubMsgMarioBeHurt()
+{
+	do 
+	{
+		CMMario* pMario = dynamic_cast<CMMario*>(getChildByTag(enTagMario));
+		CC_BREAK_IF(pMario==NULL);
+
+		pMario->MarioGotHurt();
+
+		return;
+	} while (false);
+	CCLog("fun CMGameMap::OnSubMsgMarioBeHurt error!");
+}
+
+void CMGameMap::OnSubMsgBlockRemove( void *pData ,int nSize )
+{
+	do 
+	{
+		TCmd_Remove_Item *pCmd = (TCmd_Remove_Item*)pData;
+		//参数校验
+		CC_BREAK_IF(pCmd!=NULL&&pCmd->pItem==NULL);	
+		CC_BREAK_IF(sizeof(TCmd_Remove_Item)!=nSize);
+		//从画面移除
+		pCmd->pItem->removeFromParent();
+		return;
+	} while (false);
+	CCLOG("Error:  CMGameMap::OnSubMsgBlockRemove Run Error!");
+}
+
+void CMGameMap::OnSubMsgGameOver()
+{
+	m_bNeedResetStage = true;
+}
+
+void CMGameMap::OnSubMsgTortoiseStamp( void *pData,int nSize )
+{
+	do 
+	{
+		TCmd_Remove_Monster *pCmd = (TCmd_Remove_Monster*)pData;
+		//参数校验
+		CC_BREAK_IF(pCmd!=NULL&&pCmd->pMonster==NULL);	
+		CC_BREAK_IF(sizeof(TCmd_Remove_Monster)!=nSize);
+		//从画面移除
+		pCmd->pMonster->removeFromParent();
+
+		return;
+	} while (false);
+	CCLog("fun CMGameMap::OnSubMsgTortoiseStamp Error!");
+}
+
+void CMGameMap::SetLeftKeyDown(bool bIsKeyDown)
+{
+	m_bIsLeftKeyDown = bIsKeyDown;
+}
+
+void CMGameMap::SetRightKeyDown(bool bIsKeyDown)
+{
+	m_bIsRightKeyDown = bIsKeyDown;
+}
+
+void CMGameMap::SetJumpKeyDown(bool bIsKeyDown)
+{
+	m_bIsJumpKeyDown = bIsKeyDown;
+}
+
+void CMGameMap::SetFireKeyDown(bool bIsKeyDown)
+{
+	m_bIsFireKeyDown = bIsKeyDown;
+}
+
+void CMGameMap::PassLevel()
+{
+	SendMsg(enMsgPassLevel);
+}
+
+void CMGameMap::OnSubMsgFire()
+{
+	do 
+	{
+		CMMario* pMario = dynamic_cast<CMMario*>(getChildByTag(enTagMario));
+		CC_BREAK_IF(pMario==NULL);
+
+		//获得火球移动方向
+		bool bFaceToRight;
+		switch (pMario->GetMarioStatus())
+		{
+		case enMarioStatusStandLeft:
+		case enMarioStatusRunLeft:
+		case enMarioStatusOnAirLeft:
+			bFaceToRight = false;
+			break;
+		case enMarioStatusOnAirRight:
+		case enMarioStatusStandRight:
+		case enMarioStatusRunRight:
+			bFaceToRight = true;
+			break;
+		default:
+			break;
+		}
+		//建立火球对象并加入火球集合
+		CMItemFireBall* pFireBall = CMItemFireBall::CreateItemFireBall(
+			pMario->getPosition(),
+			CCSizeMake(getTileSize().width/2,getTileSize().height/2),
+			pMario,
+			this,
+			this,bFaceToRight);
+		CC_BREAK_IF(pFireBall==NULL);
+		pFireBall->setPosition(ccp(pMario->getPositionX(),pMario->getPositionY()+20));
+		addChild(pFireBall,enZOrderFront);
+
+		m_pArrayFireBall->addObject(pFireBall);
+
+		return;
+	} while (false);
+	CCLog("fun CMGameMap::OnSubMsgFire Error！");
+}
+
+enumMarioLevel CMGameMap::GetMarioLevel()
+{
+	do 
+	{
+		CMMario* pMario = dynamic_cast<CMMario*>(getChildByTag(enTagMario));
+		CC_BREAK_IF(pMario==NULL);
+		//返回Mario的当前等级
+		return pMario->GetMarioLevel();
+	} while (false);
+	CCLog("fun CMGameMap::GetMarioLevel Error!");
+	return enMarioLevelSmall;
+}
+
+void CMGameMap::OnSubMsgEatCoin()
+{
+	SendMsg(enMsgEatCoin);
+}
+
+void CMGameMap::OnSubMsgStopCtrl()
+{
+	do 
+	{
+		CMMario* pMario = dynamic_cast<CMMario*>(getChildByTag(enTagMario));
+		CC_BREAK_IF(pMario==NULL);
+
+		pMario->StopCtrl(true);
+
+		return;
+	} while (false);
+	CCLog("fun CMGameMap::OnSubMsgStopUpdate error!");
+}
+

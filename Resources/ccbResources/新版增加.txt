@@ -1,0 +1,12 @@
+small_to_big    小变大
+big_to_small 	大变小
+big_to_max	大变最大
+max_to_big	最大边大
+
+
+以上是新增timeline   
+头上新增光环 buff    tag：1
+
+timeline   ：1.fire   2.fire_over
+
+*新打包的资源覆盖到原来目录下即可~

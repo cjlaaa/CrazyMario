@@ -7,6 +7,11 @@
     <property name="blockType" value="2"/>
    </properties>
   </tile>
+  <tile id="150">
+   <properties>
+    <property name="blockType" value="4"/>
+   </properties>
+  </tile>
   <tile id="600">
    <properties>
     <property name="blockType" value="1"/>
@@ -35,12 +40,12 @@
  </layer>
  <layer name="mountain" width="165" height="14">
   <data encoding="base64" compression="zlib">
-   eJztlwkOgjAQRWsP6HYOF87hdg5czuF2KodgwxRbiwRpR/9LfkrYUsqDySgFAABgpJUaUyY69kwAKJmTiwvKEk6CBFiRh2vKhrKl7AR6mQ1eA+SSk4N7ykFX29Lo2kl4HZczOXihXHW1LY3UnMQ/ux1FzeZ1m9dvc6xgqO0eaJqgs//upOv5JX4Lpk7nrG6bkdfwmbZ7oCyyk641h5O/4aSp0/mzbvOR1/A+eqBP1jQlJ5vMMUUnfcdju8yddMX8J3kPdKSc4KR1XmiOcLI53LX6yJ3kPdCNcoeT1nmhOXb5jkMuSXeSu1Yfv9V/t11Tn3/vru8DOCmf2E42WXPfPXz7QveAk93zAEcJpKo=
+   eJztlwkOgjAQRWsP6HYOF87hdg5czuF2KodowxSpxaYwlPyX/JQIlKZ5MoxSAAAAJlqpKWWmpVcCwJslubiirOEk6AEb8nBL2VH2lEOCXmaj74B0ycnBI+Wky2MpQp2K7SS8luVKDt4od10eSzEUJ/HODqOo2bxu8/ptzhWMtd0DzVt0Fk7GeV6q/wVTp3NWt83Ia/hC2z1QJvy9WbfncHIYTpo6nX/qNh95De+iB/pnT/vkZJM19tFJ13lpl7mTdTHvSd4DnSkXOGld51tjyFpifLuk6CR3rTpyJ3kP9KA84aR1nW+NvmtC5vU9L1UnuWvVsa3+O3RPXf79ur8L4GT6SDvZZM9dc7h+880BJ+PzAmN/rQ0=
   </data>
  </layer>
  <layer name="land" width="165" height="14">
   <data encoding="base64" compression="zlib">
-   eJzt10EOgDAIRFF6xOppvL37BhJjsYD9L2FPzEBRBAAAwE9vIodSZ4vuDNWN2YrKVE/QA+BJ29tkGzuxbhdmYY0s7zv+reqc9wI9aqx7mTsaQHXsMX9vv2nVNxLfuSYriyczYf1D7b6jZjOQrVBfdIbGugEE6Upz
+   eJzt10EKwDAIRFFzxLSn6e27F4WSSKPJf+BeymisCAAAQJzeRC6j7ra6M1Sns7UqUz1BD0Aka2+TbZzEu12YhX9ked+xt6pz3gv0aPHuZe5oeKpmHbWN7CT2WLzRb8regPZMVhZfZsL7hzp9R81mIFuhvtUZ0vUCxRBMuA==
   </data>
  </layer>
  <layer name="flagpole" width="165" height="14">
@@ -55,7 +60,7 @@
  </layer>
  <layer name="block" width="165" height="14">
   <data encoding="base64" compression="zlib">
-   eJzt1rEJwDAMAEHj7JCx0mcyr5smlUtjLAnuQL2KF6g1AACgiueK3mCP8Q9koUmyGNNk9vboDTihUpMVuJt1c4uaJJomyUaTZLPa5O1fAtjuA2VpFlw=
+   eJzt07ENwCAMRUFE9kufyVg3DRUlQtiW7qTfu3huDQAAqOJ9oi84Y8xBFpoki7Ess69HX8ANlZqswN/sW1vUJNE0STaaJJvdJnULcN4PDjwW2w==
   </data>
  </layer>
  <layer name="coin" width="165" height="14">

@@ -1,4 +1,4 @@
-#ifndef __MENU_SCENE_H__
+﻿#ifndef __MENU_SCENE_H__
 #define __MENU_SCENE_H__
 
 #include "CMPublicDefine.h"
@@ -9,16 +9,15 @@
 #define SCREEN_CENTER		ccp(SCREEN_WIDTH*0.5f,SCREEN_HEIGHT*0.5f)			//屏幕中心
 #define SCREEN_SIZE			CCSizeMake(SCREEN_WIDTH,SCREEN_HEIGHT)				//屏幕尺寸
 #define NAME_LEN			128													//字符串长度
-#define _TR_ABS(x)			(    (x)>=0 ? (x) : -(x)   )						//绝对值
 
 //菜单层
-class CMMenuScene : public cocos2d::CCLayerColor
+class CMMenuScene : public cocos2d::CCLayerColor , public CMSender
 {
 private:
 	bool                    m_bIsBtnClicked;        //是否点击上按钮
 
 public:
-	static CCScene* CreateMenuScene();
+	static CMMenuScene* CreateMenuScene();
 
 	//触摸函数
 	virtual bool ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent);
@@ -27,7 +26,6 @@ public:
 
 protected:
 	virtual bool init(); 
-	CREATE_FUNC(CMMenuScene);
 
 	virtual void onEnter();
 	virtual void onExit();

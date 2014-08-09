@@ -9,15 +9,14 @@ USING_NS_CC_EXT;
 
 #define CONTROL_UI_HEIGHT				96					//控制UI高度
 #define TILE_MAP_VERTICAL				13					//地图瓦片竖直块数
-#define JUMP_START_SPEED				8					//跳跃起始速度
+#define JUMP_START_SPEED				3					//跳跃起始速度
 #define JUMP_SPEED_MINUS				0.3					//跳跃递减速度
-#define DROP_SPEED_PLUS					0.098				//掉落加速度
-#define MOVE_SPEED						2					//移动速度
+#define DROP_SPEED_PLUS					0.15				//掉落加速度
+
 #define MONSTER_ACTIVE_DISTANCE			SCREEN_WIDTH-100		//怪物激活距离
 #define COLLISION_POS_ADJUSTMENT		3					//跳跃与坠落的碰撞检测点调整
 
-#define MARIO_COLLISION_SIZE_SMALL		CCSizeMake(16,16)	//小玛丽的碰撞尺寸
-#define MARIO_COLLISION_SIZE_BIG		CCSizeMake(16,32)	//大玛丽的碰撞尺寸
+
 
 enum 
 {
@@ -47,18 +46,20 @@ enum enumBlockType
 	enBlockTypeJustBlock,		//没有任何互动的砖块
 };
 
+
 //Mario状态
 enum enumMarioStatus
 {
-	enMarioStatusStandLeft,
+	enMarioStatusStandLeft,			//待机
 	enMarioStatusStandRight,
 	//--------------------------
-	enMarioStatusRunLeft,
+	enMarioStatusRunLeft,			//跑动
 	enMarioStatusRunRight,
 	//--------------------------
-	enMarioStatusJumpLeft,
-	enMarioStatusJumpRight,
+	enMarioStatusOnAirLeft,			//悬空
+	enMarioStatusOnAirRight,
 };
+
 
 //Mario等级
 enum enumMarioLevel
@@ -96,34 +97,47 @@ public:
 	}
 };
 
-enum 
+enum enumGameMapMsg			//由CMGameMap处理的消息
 {
 	enMsgDead,				//Mario死亡
 	enMsgMonsterDisappear,	//怪物离开地图消失
-	enMsgStamp,				//将怪物踩死
+	enMsgMushroomsStamp,	//蘑菇被踩消息
+	enMsgTortoiseStamp,		//乌龟被踩消息
 	enMsgBeHurt,			//Mario被怪物碰到
 	enMsgBlockBoxHitted,	//宝箱砖块被顶消息
 	enMsgItemDisappear,		//道具消失
+	enMsgBlockDisappear,	//砖块消失
 	enMsgLevelUp,			//吃道具变大
+	enMsgPassLevel,			//过关消息
+	enMsgMarioDead,			//游戏结束消息
+	enMsgFire,				//打子弹的消息
+	enMsgEatCoin,			//吃金币消息
+	enMsgStartGame,			//开始游戏的消息
+	enMsgStopCtrl,			//Mario碰撞死亡停止循环
 };
 
 //道具消息数据
 class CMItemBasic;
-struct MsgForItem
+struct TCmd_Remove_Item
 {
 	CMItemBasic* pItem;
 };
 
 //怪物离开地图消失数据
 class CMMonsterBasic;
-struct MsgForMonsterDisappear
+struct TCmd_Remove_Monster
 {
 	CMMonsterBasic* pMonster;
 };
 
+//破坏砖块
+struct TCmd_Distroy_Block
+{
+	CCSprite *pTileToDistroy;
+};
 //宝箱砖块被顶 出现物品
 class CMItemBlock;
-struct MsgForBlockBoxHitted
+struct TCmd_Block_Box_Hitted
 {
 	CMItemBlock* pBlockBox;
 };

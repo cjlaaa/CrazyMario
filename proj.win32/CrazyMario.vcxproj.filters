@@ -19,14 +19,14 @@
     <Filter Include="Classes\公共定义">
       <UniqueIdentifier>{99e2b62a-80b6-4337-9303-9273e6beb162}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Classes\怪物与宝箱类">
-      <UniqueIdentifier>{4399b819-2b03-438f-97d7-ec57ff45ebcb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Classes\物品道具">
       <UniqueIdentifier>{0caa36e9-1b4b-4e7e-9108-1d095e011e73}</UniqueIdentifier>
     </Filter>
     <Filter Include="Classes\外部UI">
       <UniqueIdentifier>{5e6a820c-4ab6-4f21-9075-051ad283d9d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\怪物类">
+      <UniqueIdentifier>{4399b819-2b03-438f-97d7-ec57ff45ebcb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -46,7 +46,7 @@
       <Filter>Classes\瓦片地图</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\CMMonster.cpp">
-      <Filter>Classes\怪物与宝箱类</Filter>
+      <Filter>Classes\怪物类</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\CMItem.cpp">
       <Filter>Classes\物品道具</Filter>
@@ -75,7 +75,7 @@
       <Filter>Classes\公共定义</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\CMMonster.h">
-      <Filter>Classes\怪物与宝箱类</Filter>
+      <Filter>Classes\怪物类</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\CMItem.h">
       <Filter>Classes\物品道具</Filter>

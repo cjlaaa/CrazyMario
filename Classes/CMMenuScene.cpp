@@ -1,23 +1,19 @@
-#include "CMMenuScene.h"
+﻿#include "CMMenuScene.h"
 
 
-CCScene* CMMenuScene::CreateMenuScene()
+CMMenuScene* CMMenuScene::CreateMenuScene()
 {
 	do 
 	{
-		//建立场景
-		CCScene* pScene = CCScene::create();
-		CC_BREAK_IF(pScene==NULL);
-
-		//建立层
-		CMMenuScene* pLayer = CMMenuScene::create();
-		CC_BREAK_IF(pLayer==NULL);
-
-		//将层加入场景
-		pScene->addChild(pLayer);
-		return pScene;
+		CMMenuScene* pLayer = new CMMenuScene;
+		if (pLayer && pLayer->init())
+		{
+			pLayer->autorelease();
+			return pLayer;
+		}
+		delete pLayer;
 	} while (false);
-	CCLog("Fun GameScene::CreateScene Error!");
+	CCLog("Fun CMMenuScene::CreateMenuScene Error!");
 	return NULL;
 }
 
@@ -57,7 +53,6 @@ bool CMMenuScene::init()
 		CC_BREAK_IF(pAboutButton==NULL);
 		pAboutButton->setPosition(ccp(SCREEN_WIDTH - 50,20));
 		pMenu->addChild(pAboutButton,enZOrderFront);
-
 
 		return true;
 	} while (false);
@@ -129,9 +124,14 @@ void CMMenuScene::ccTouchEnded( CCTouch *pTouch, CCEvent *pEvent )
 
 void CMMenuScene::OnStartCallBack( CCObject *pSender )
 {
-	CCDirector* pDirector = CCDirector::sharedDirector();
-	CCScene *pScene = CMGameScene::CreateGameScene();
-	pDirector->replaceScene(pScene);
+	//将父节点设置为接受者并发送游戏开始消息
+	CMReceiver* pReceiver = dynamic_cast<CMReceiver*>(getParent());
+	if (pReceiver!=NULL)
+	{
+		SetReceiver(pReceiver);
+		SendMsg(enMsgStartGame);
+	}
+	
 }
 
 void CMMenuScene::OnQuitCallBack( CCObject *pSender )
