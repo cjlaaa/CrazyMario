@@ -1,5 +1,5 @@
 # CrazyMario
-A mario game project using cocos2d-x 2.2.
+A mario game project by cocos2d-x 2.2.
 
 刚转行做程序员时被主程连拉带拽赶着写的项目(因为当时水平根本达不到能独立复刻这个游戏的程度),很烂,而且最终的游戏效果也很不好,大家看了代码不要鄙视我...
 
