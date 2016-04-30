@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{76A39BB2-9B84-4C65-98A5-654D86B86F2A}</ProjectGuid>
+    <ProjectGuid>{FC1B31D3-CC3E-40BF-A02C-ECD6899287F2}</ProjectGuid>
     <RootNamespace>test_win32</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
@@ -65,7 +65,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>D:\cocos2d-x-2.2\cocos2dx;D:\cocos2d-x-2.2\cocos2dx\include;D:\cocos2d-x-2.2\cocos2dx\kazmath\include;D:\cocos2d-x-2.2\cocos2dx\platform\win32;D:\cocos2d-x-2.2\cocos2dx\platform\third_party\win32;D:\cocos2d-x-2.2\cocos2dx\platform\third_party\win32\OGLES;D:\cocos2d-x-2.2\external;D:\cocos2d-x-2.2\external\chipmunk\include\chipmunk;D:\cocos2d-x-2.2\CocosDenshion\include;D:\cocos2d-x-2.2\extensions;..\Classes;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\ccx222\cocos2dx;D:\ccx222\cocos2dx\include;D:\ccx222\cocos2dx\kazmath\include;D:\ccx222\cocos2dx\platform\win32;D:\ccx222\cocos2dx\platform\third_party\win32;D:\ccx222\cocos2dx\platform\third_party\win32\OGLES;D:\ccx222\external;D:\ccx222\external\chipmunk\include\chipmunk;D:\ccx222\CocosDenshion\include;D:\ccx222\extensions;..\Classes;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USE_MATH_DEFINES;GL_GLEXT_PROTOTYPES;CC_ENABLE_CHIPMUNK_INTEGRATION=1;COCOS2D_DEBUG=1;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
