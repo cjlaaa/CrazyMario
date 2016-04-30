@@ -152,29 +152,11 @@ void CMGameScene::OnCallPerFrame(float dt)
 		CCMenuItemImage *pFireKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagFireKey));
 		CC_BREAK_IF(pFireKey==NULL);
 
-		if (pLeftKey->isSelected()==false)
-		{
-			pMap->SetLeftKeyDown(false);
-		}
-		else
-		{
-			pMap->SetLeftKeyDown(true);
-		}
-
-		if (pRightKey->isSelected()==false)
-		{
-			pMap->SetRightKeyDown(false);
-		}
-		else
-		{
-			pMap->SetRightKeyDown(true);
-		}
-
 		if (pJumpKey->isSelected()==false)
 		{
 			pMap->SetJumpKeyDown(false);
 		}
-		else
+		if (pJumpKey->isSelected()==true)
 		{
 			pMap->SetJumpKeyDown(true);
 		}
@@ -183,9 +165,27 @@ void CMGameScene::OnCallPerFrame(float dt)
 		{
 			pMap->SetFireKeyDown(false);
 		}
-		else
+		if (pFireKey->isSelected()==true)
 		{
 			pMap->SetFireKeyDown(true);
+		}
+
+		if (pLeftKey->isSelected()==false)
+		{
+			pMap->SetLeftKeyDown(false);
+		}
+		if (pLeftKey->isSelected()==true)
+		{
+			pMap->SetLeftKeyDown(true);
+		}
+
+		if (pRightKey->isSelected()==false)
+		{
+			pMap->SetRightKeyDown(false);
+		}
+		if (pRightKey->isSelected()==true)
+		{
+			pMap->SetRightKeyDown(true);
 		}
 #endif
 		//更新金币数
@@ -228,29 +228,168 @@ void CMGameScene::OnCallPerFrame(float dt)
 	CCLog("fun CMGameScene::Update Error!");
 }
 
-void CMGameScene::ccTouchesBegan( CCSet *pTouches, CCEvent *pEvent )
-{
-	
-}
 
-void CMGameScene::ccTouchesEnded( CCSet *pTouches, CCEvent *pEvent )
-{
-
-}
-
-void CMGameScene::ccTouchesMoved( CCSet *pTouches, CCEvent *pEvent )
+void CMGameScene::ccTouchesBegan(CCSet *pTouches, CCEvent *pEvent)
 {
 	do 
 	{
+		CMGameMap* pMap = dynamic_cast<CMGameMap*>(getChildByTag(enTagMap));
+		CC_BREAK_IF(pMap==NULL);
+		CCMenu* pMenu = dynamic_cast<CCMenu*>(getChildByTag(enTagUI));
+		CC_BREAK_IF(pMenu==NULL);
+		CCMenuItemImage* pLeftKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagLeftKey));
+		CC_BREAK_IF(pLeftKey==NULL);
+		CCMenuItemImage* pRightKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagRightKey));
+		CC_BREAK_IF(pRightKey==NULL);
+		CCMenuItemImage* pJumpKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagJumpKey));
+		CC_BREAK_IF(pJumpKey==NULL);
+		CCMenuItemImage* pFireKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagFireKey));
+		CC_BREAK_IF(pFireKey==NULL);
+
+		for(CCSetIterator iterTouch = pTouches->begin(); iterTouch != pTouches->end(); iterTouch++)
+		{
+			CCTouch *pCurTouch =  (cocos2d::CCTouch*)(*iterTouch);
+
+			if (pJumpKey->boundingBox().containsPoint(pCurTouch->getLocation()))
+			{
+				pJumpKey->selected();
+			}
+
+			if (pFireKey->boundingBox().containsPoint(pCurTouch->getLocation()))
+			{
+				pFireKey->selected();
+			}
+
+			if (pLeftKey->boundingBox().containsPoint(pCurTouch->getLocation()))
+			{
+				pLeftKey->selected();
+			}
+
+			if (pRightKey->boundingBox().containsPoint(pCurTouch->getLocation()))
+			{
+				pRightKey->selected();
+			}
+
+		}
 
 		return;
 	} while (false);
-	CCLog("CMGameScene::ccTouchesMoved Error!");
+	CCLog("CGameLayer::ccTouchesBegan Error!");
 }
 
-void CMGameScene::ccTouchesCancelled( CCSet *pTouches, CCEvent *pEvent )
+void CMGameScene::ccTouchesMoved(CCSet *pTouches, CCEvent *pEvent)
 {
+	do 
+	{
+		CMGameMap* pMap = dynamic_cast<CMGameMap*>(getChildByTag(enTagMap));
+		CC_BREAK_IF(pMap==NULL);
+		CCMenu* pMenu = dynamic_cast<CCMenu*>(getChildByTag(enTagUI));
+		CC_BREAK_IF(pMenu==NULL);
+		CCMenuItemImage* pLeftKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagLeftKey));
+		CC_BREAK_IF(pLeftKey==NULL);
+		CCMenuItemImage* pRightKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagRightKey));
+		CC_BREAK_IF(pRightKey==NULL);
+		CCMenuItemImage* pJumpKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagJumpKey));
+		CC_BREAK_IF(pJumpKey==NULL);
+		CCMenuItemImage* pFireKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagFireKey));
+		CC_BREAK_IF(pFireKey==NULL);
 
+		for(CCSetIterator iterTouch = pTouches->begin(); iterTouch != pTouches->end(); iterTouch++)
+		{
+			CCTouch *pCurTouch =  (cocos2d::CCTouch*)(*iterTouch);
+
+			if (pLeftKey->boundingBox().containsPoint(pCurTouch->getLocation()))
+			{
+				pLeftKey->selected();
+			}
+			if (pRightKey->boundingBox().containsPoint(pCurTouch->getLocation()))
+			{
+				pRightKey->selected();
+			}
+			if (pJumpKey->boundingBox().containsPoint(pCurTouch->getLocation()))
+			{
+				pJumpKey->selected();
+			}
+			else
+			{
+				pJumpKey->unselected();
+			}
+			if (pFireKey->boundingBox().containsPoint(pCurTouch->getLocation()))
+			{
+				pFireKey->selected();
+			}
+			else
+			{
+				pFireKey->unselected();
+			}
+
+			if (pLeftKey->boundingBox().containsPoint(pCurTouch->getLocation())==false &&
+				pRightKey->boundingBox().containsPoint(pCurTouch->getLocation())==false)
+			{
+				pLeftKey->unselected();
+				pRightKey->unselected();
+			}
+		}
+
+		return;
+	} while (false);
+	CCLog("CGameLayer::ccTouchesMoved Error!");
+}
+
+void CMGameScene::ccTouchesEnded(CCSet *pTouches, CCEvent *pEvent)
+{
+	do 
+	{
+		CMGameMap* pMap = dynamic_cast<CMGameMap*>(getChildByTag(enTagMap));
+		CC_BREAK_IF(pMap==NULL);
+
+		CCMenu* pMenu = dynamic_cast<CCMenu*>(getChildByTag(enTagUI));
+		CC_BREAK_IF(pMenu==NULL);
+		CCMenuItemImage* pLeftKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagLeftKey));
+		CC_BREAK_IF(pLeftKey==NULL);
+		CCMenuItemImage* pRightKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagRightKey));
+		CC_BREAK_IF(pRightKey==NULL);
+		CCMenuItemImage* pJumpKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagJumpKey));
+		CC_BREAK_IF(pJumpKey==NULL);
+		CCMenuItemImage* pFireKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagFireKey));
+		CC_BREAK_IF(pFireKey==NULL);
+
+		pLeftKey->unselected();
+		pRightKey->unselected();
+		pFireKey->unselected();
+		pJumpKey->unselected();
+
+		return;
+	} while (false);
+	CCLog("CGameLayer::ccTouchesEnded Error!");
+}
+
+void CMGameScene::ccTouchesCancelled(CCSet *pTouches, CCEvent *pEvent)
+{
+	do 
+	{
+		CMGameMap* pMap = dynamic_cast<CMGameMap*>(getChildByTag(enTagMap));
+		CC_BREAK_IF(pMap==NULL);
+
+		CCMenu* pMenu = dynamic_cast<CCMenu*>(getChildByTag(enTagUI));
+		CC_BREAK_IF(pMenu==NULL);
+		CCMenuItemImage* pLeftKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagLeftKey));
+		CC_BREAK_IF(pLeftKey==NULL);
+		CCMenuItemImage* pRightKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagRightKey));
+		CC_BREAK_IF(pRightKey==NULL);
+		CCMenuItemImage* pJumpKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagJumpKey));
+		CC_BREAK_IF(pJumpKey==NULL);
+		CCMenuItemImage* pFireKey = dynamic_cast<CCMenuItemImage*>(pMenu->getChildByTag(enTagFireKey));
+		CC_BREAK_IF(pFireKey==NULL);
+
+		pLeftKey->unselected();
+		pRightKey->unselected();
+		pFireKey->unselected();
+		pJumpKey->unselected();
+
+		return;
+	} while (false);
+	CCLog("CGameLayer::ccTouchesCancelled Error!");
 }
 
 void CMGameScene::InitControlUI()
